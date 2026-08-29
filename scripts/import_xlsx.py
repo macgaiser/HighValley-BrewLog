@@ -50,6 +50,18 @@ from app.models import (
 
 IMPORT_MARKER = "Importiert aus Excel-Tab"
 
+# Bekannte Tippfehler/Datenfehler in der Original-Excel, die sich nicht aus
+# der Datei selbst korrigieren lassen (z.B. weil dort versehentlich ein
+# Datum statt einer Messung steht). Key = exakter Blattname, Value = vom
+# Nutzer bestätigte Korrektur.
+KNOWN_CORRECTIONS: dict[str, dict[str, float]] = {
+    "Batch #57 Festbier": {
+        # In der Excel steht in der Zelle für "Stammwürze nach Kochen und
+        # Kühlung" ein Datum statt eines Brix-Werts. Vom Nutzer bestätigt (29.08.2026): 13,6 °Brix.
+        "post_boil_brix": 13.6,
+    },
+}
+
 
 def col_label_rows(ws, column: str, max_row: int = 120) -> dict[str, int]:
     col_idx = openpyxl.utils.column_index_from_string(column)
@@ -130,6 +142,9 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
         if isinstance(raw, (int, float)):
             batch.post_boil_brix = float(raw)
         batch.post_boil_volume_l = as_float(cell(ws, r, 7))
+
+    for field, value in KNOWN_CORRECTIONS.get(ws.title, {}).items():
+        setattr(batch, field, value)
 
     # geplante Stammwürze steht in E6, sofern vorhanden ("geplant:" in D6, °Plato-Einheit in F6)
     batch.target_og_plato = as_float(cell(ws, 6, 5))
@@ -303,6 +318,20 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
             if text:
                 session.add(BatchComment(batch_id=batch.id, position=pos, text=str(text).strip()))
                 pos += 1
+
+    if ws.title in KNOWN_CORRECTIONS:
+        session.add(
+            BatchComment(
+                batch_id=batch.id,
+                position=pos,
+                text=(
+                    "Import-Hinweis: Stammwürze nach Kochen/Kühlung war in der "
+                    "Original-Excel fehlerhaft (Datum statt Messwert) und wurde "
+                    "auf 13,6 °Brix korrigiert."
+                ),
+            )
+        )
+        pos += 1
 
     session.add(
         BatchComment(
