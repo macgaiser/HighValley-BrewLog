@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Einstellungen – HighValley BrewLog{% endblock %}
+{% block content %}
+<h1>Einstellungen</h1>
+<form class="card" method="post" action="/settings">
+  <label>Malz Durchschnittskosten (€ / kg)</label>
+  <input type="number" step="0.01" name="malt_cost_per_kg" value="{{ s.malt_cost_per_kg }}">
+
+  <label>Hopfen Durchschnittskosten (€ / 100 g)</label>
+  <input type="number" step="0.01" name="hop_cost_per_100g" value="{{ s.hop_cost_per_100g }}">
+
+  <label>Hefe Pauschalkosten (€ / Sud)</label>
+  <input type="number" step="0.01" name="yeast_flat_cost" value="{{ s.yeast_flat_cost }}">
+
+  <label>Lohnkosten (€ / Stunde)</label>
+  <input type="number" step="0.5" name="labor_cost_per_hour" value="{{ s.labor_cost_per_hour }}">
+
+  <label>Refraktometer-Korrekturfaktor (Standard: 1,03)</label>
+  <input type="number" step="0.01" name="wort_correction_factor" value="{{ s.wort_correction_factor }}">
+
+  <label>Angenommene Malz-Extraktausbeute für die Sudhausausbeute-Berechnung (%)</label>
+  <input type="number" step="1" name="mash_extract_potential" value="{{ (s.mash_extract_potential * 100)|round(0) }}">
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Speichern</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Sud #{{ batch.batch_number }} – HighValley BrewLog{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Sud #{{ batch.batch_number }} – {{ batch.name }}</h1>
+  <div class="actions">
+    <a class="btn" href="/batches/{{ batch.id }}/edit">Bearbeiten</a>
+    <form method="post" action="/batches/{{ batch.id }}/delete" onsubmit="return confirm('Sud #{{ batch.batch_number }} wirklich löschen? Lagerbuchungen werden zurückgebucht.')">
+      <button class="btn btn-danger" type="submit">Löschen</button>
+    </form>
+  </div>
+</div>
+<p class="subtitle">{{ batch.style }} · {{ batch.fermentation_type }} · {{ batch.brew_date or "kein Datum" }}</p>
+
+<div class="stat-grid">
+  <div class="stat"><span class="stat-label">Stammwürze</span><span class="stat-value">{{ m.og_plato|fmt }} °P</span></div>
+  <div class="stat"><span class="stat-label">Bittere</span><span class="stat-value">{{ m.ibu_total|fmt(0) }} IBU</span></div>
+  <div class="stat"><span class="stat-label">Farbe</span><span class="stat-value">{{ batch.color_ebc|fmt(0) }} EBC</span></div>
+  <div class="stat"><span class="stat-label">Alkohol</span><span class="stat-value">{{ m.abv_percent|fmt }} Vol.-%</span></div>
+  <div class="stat"><span class="stat-label">Vergärungsgrad</span><span class="stat-value">{{ m.attenuation_percent|fmt }} %</span></div>
+  <div class="stat"><span class="stat-label">Sudhausausbeute</span><span class="stat-value">{{ m.mash_efficiency_percent|fmt }} %</span></div>
+  <div class="stat"><span class="stat-label">Kosten / Sud</span><span class="stat-value">{{ m.total_cost|fmt(2) }} €</span></div>
+  <div class="stat"><span class="stat-label">Kosten / 0,5 l</span><span class="stat-value">{{ m.cost_per_0_5l|fmt(2) }} €</span></div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Wasser</h2>
+    <table class="mini-table">
+      <tr><td>Hauptguss</td><td>{{ batch.main_water_l|fmt }} l</td></tr>
+      <tr><td>Nachguss</td><td>{{ batch.sparge_water_l|fmt }} l</td></tr>
+      <tr><td>Milchsäure 80%</td><td>{{ batch.lactic_acid_80_ml|fmt(0) }} ml</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Schüttung ({{ m.total_grain_kg|fmt }} kg)</h2>
+    <table class="mini-table">
+      {% for g in batch.grain_additions %}
+      <tr><td>{{ g.malt_name }}</td><td>{{ g.amount_kg|fmt }} kg</td></tr>
+      {% else %}
+      <tr><td colspan="2">–</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Maischplan</h2>
+  <table class="mini-table">
+    <thead><tr><th>Rast</th><th>Temperatur</th><th>Dauer</th><th>Kommentar</th></tr></thead>
+    {% for s in batch.mash_steps %}
+    <tr><td>{{ s.name }}</td><td>{{ s.temperature_c|fmt(0) }} °C</td><td>{{ s.duration_min|fmt(0) }} min</td><td>{{ s.comment }}</td></tr>
+    {% else %}
+    <tr><td colspan="4">–</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section class="card">
+  <h2>Würzekochen {% if batch.boil_time_min %}({{ batch.boil_time_min|fmt(0) }} min){% endif %}</h2>
+  <table class="mini-table">
+    <thead><tr><th>Hopfen</th><th>Alpha</th><th>Menge</th><th>Zeit</th><th>Typ</th><th>IBU</th></tr></thead>
+    {% for h in batch.hop_additions %}
+    <tr>
+      <td>{{ h.hop_name }}</td>
+      <td>{{ h.alpha_acid_percent|fmt(1) }} %</td>
+      <td>{{ h.amount_g|fmt(0) }} g</td>
+      <td>{{ h.time_min|fmt(0) }} min</td>
+      <td>{{ h.addition_type.value }}</td>
+      <td>{{ m.ibu_per_addition.get(h.id)|fmt(1) if m.ibu_per_addition.get(h.id) is not none else "–" }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">–</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Hefegabe</h2>
+    <table class="mini-table">
+      {% for y in batch.yeast_additions %}
+      <tr><td>{{ y.yeast_name }}</td><td>{{ y.generation_label }}</td><td>{{ y.amount|fmt(0) }} {{ y.unit }}</td><td>{{ y.pitch_temperature_c|fmt(0) }} °C</td></tr>
+      {% else %}
+      <tr><td colspan="4">–</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Stopfhopfen</h2>
+    <table class="mini-table">
+      {% for d in batch.dry_hop_additions %}
+      <tr><td>{{ d.hop_name }}</td><td>{{ d.timing_label }}</td><td>{{ d.amount_g|fmt(0) }} g</td></tr>
+      {% else %}
+      <tr><td colspan="3">–</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Karbonisierung</h2>
+    <table class="mini-table">
+      {% for c in batch.carbonation_entries %}
+      <tr><td>{{ c.label }}</td><td>{{ c.sugar_g|fmt(1) }} g</td><td>je {{ c.bottle_volume_l|fmt(2) }} l Flasche</td></tr>
+      {% else %}
+      <tr><td colspan="3">–</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Brautag-Zeitplan</h2>
+    <table class="mini-table">
+      {% for t in batch.brew_day_tasks %}
+      <tr><td>{{ t.task_name }}</td><td>{{ t.planned_duration_min|fmt(0) }} min</td><td>{{ t.note }}</td></tr>
+      {% else %}
+      <tr><td colspan="3">–</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Gärverlauf</h2>
+  <table class="mini-table">
+    <thead><tr><th>Datum</th><th>Brix</th><th>Kommentar</th></tr></thead>
+    {% for f in batch.fermentation_entries %}
+    <tr>
+      <td>{{ f.entry_date or "–" }}</td>
+      <td>{{ f.brix|fmt(1) }} °Brix</td>
+      <td>{{ f.comment }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3">Noch keine Messungen.</td></tr>
+    {% endfor %}
+  </table>
+  <p class="hint">Vergärungsgrad und Alkohol oben in der Übersicht werden aus der jeweils aktuellsten Messung berechnet (Sean-Terrill-Refraktometerkorrektur).</p>
+  <form class="inline-form" method="post" action="/batches/{{ batch.id }}/fermentation">
+    <input type="date" name="entry_date" value="{{ today }}" required>
+    <input type="number" step="0.1" name="brix" placeholder="°Brix" required>
+    <input type="text" name="comment" placeholder="Kommentar (optional)">
+    <button class="btn" type="submit">Messung hinzufügen</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Kommentare</h2>
+  <ul class="comment-list">
+    {% for c in batch.comments %}
+    <li>{{ c.text }}</li>
+    {% else %}
+    <li>–</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}
