@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ "Artikel bearbeiten" if item else "Neuer Lagerartikel" }} – HighValley BrewLog{% endblock %}
+{% block content %}
+<h1>{{ "Artikel bearbeiten" if item else "Neuer Lagerartikel" }}</h1>
+<form class="card" method="post" action="{{ '/inventory/%d/edit'|format(item.id) if item else '/inventory/new' }}">
+  <label>Kategorie</label>
+  <select name="category">
+    {% for c in categories %}
+    <option value="{{ c.value }}" {% if item and item.category==c %}selected{% endif %}>{{ c.value|capitalize }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Name</label>
+  <input type="text" name="name" value="{{ item.name if item else '' }}" required>
+
+  <label>Marke</label>
+  <input type="text" name="brand" value="{{ item.brand if item else '' }}">
+
+  <label>Spezifikation (z.B. EBC-Bereich, Alphasäure, Emulsifier)</label>
+  <input type="text" name="spec" value="{{ item.spec if item else '' }}">
+
+  <label>Einheit</label>
+  <input type="text" name="unit" value="{{ item.unit if item else 'kg' }}">
+
+  {% if not item %}
+  <label>Anfangsbestand</label>
+  <input type="number" step="0.01" name="initial_amount" value="0">
+  {% endif %}
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Speichern</button>
+    <a class="btn" href="/inventory">Abbrechen</a>
+  </div>
+</form>
+{% endblock %}

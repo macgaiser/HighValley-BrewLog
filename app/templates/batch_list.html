@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Sude – HighValley BrewLog{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Sude</h1>
+  <a class="btn btn-primary" href="/batches/new">+ Neuer Sud</a>
+</div>
+
+<form class="searchbar" method="get" action="/batches">
+  <input type="text" name="q" placeholder="Suche nach Nummer, Name, Stil…" value="{{ q }}">
+  <button class="btn" type="submit">Suchen</button>
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Datum</th>
+      <th>Biertyp</th>
+      <th>Stil</th>
+      <th>Stammwürze</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for b in batches %}
+    <tr onclick="window.location='/batches/{{ b.id }}'" class="clickable-row">
+      <td>#{{ b.batch_number }}</td>
+      <td>{{ b.brew_date or "–" }}</td>
+      <td>{{ b.name }}</td>
+      <td>{{ b.fermentation_type }}</td>
+      <td>{{ b.post_boil_brix and (b.post_boil_brix|fmt) ~ " °Brix" or "–" }}</td>
+      <td><a href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()">Bearbeiten</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">Noch keine Sude erfasst.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

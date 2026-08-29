@@ -1,0 +1,12 @@
+services:
+  brewlog:
+    build: .
+    container_name: highvalley-brewlog
+    restart: unless-stopped
+    ports:
+      - "5050:5000"
+    volumes:
+      - ./data:/data
+    environment:
+      APP_USERNAME: ${APP_USERNAME:-admin}
+      APP_PASSWORD: ${APP_PASSWORD:-changeme}
