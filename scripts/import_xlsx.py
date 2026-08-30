@@ -9,12 +9,23 @@ für den Alkoholgehalt, die in jedem Sud auftritt, und eine vertauschte Zelle
 in "Batch #57 Festbier", die dort die Stammwürze-Berechnung zerstört).
 
 Aufruf:
-    python scripts/import_xlsx.py /pfad/zur/Brauprotokoll.xlsx [--rebuild]
+    python scripts/import_xlsx.py /pfad/zur/Brauprotokoll.xlsx
 
 Der Import ist idempotent bezüglich des Blattnamens: ein bereits
 importiertes Blatt (erkannt an einem Kommentar "Importiert aus Excel-Tab
-'<Blattname>'") wird beim erneuten Aufruf übersprungen, außer --rebuild
-wird übergeben.
+'<Blattname>'") wird beim erneuten Aufruf übersprungen - das Skript kann
+also gefahrlos mehrfach und mit mehreren Dateiversionen aufgerufen werden
+(z.B. einmal für das aktuelle Braubuch, einmal für ein älteres Archiv mit
+weiteren historischen Suden).
+
+Das Braubuch-Layout hat sich über die Jahre verändert (frühe Sude sind
+deutlich knapper dokumentiert als spätere, u.a. ohne Alphasäure-Angabe bei
+Hopfengaben und ohne strukturierten Gärverlauf). Das Skript erkennt das
+jeweilige Layout je Tabellenblatt automatisch und importiert, was jeweils
+vorhanden ist; für ältere Sude bleiben manche berechnete Kennzahlen (IBU,
+Alkohol, Ausbeute) daher leer, weil die dafür nötigen Rohdaten im
+Original fehlen - die damals von Hand eingetragenen Werte werden dafür als
+Kommentar "Original-Aufzeichnung im Braubuch: ..." übernommen.
 """
 
 from __future__ import annotations
@@ -73,11 +84,21 @@ def col_label_rows(ws, column: str, max_row: int = 120) -> dict[str, int]:
     return labels
 
 
+EXCEL_EPOCH = datetime(1899, 12, 30)
+
+
 def as_float(value) -> float | None:
     if value is None:
         return None
     if isinstance(value, (int, float)):
         return float(value)
+    if isinstance(value, datetime) and value.year in (1899, 1900):
+        # In ein paar Zellen wurde eine reine Zahl (z.B. "24,5") eingetippt,
+        # die Excel wegen der Zellformatierung stattdessen als Datum nahe
+        # seiner Epoche interpretiert hat. Über die Seriennummer lässt sich
+        # der ursprünglich gemeinte Zahlenwert zurückrechnen.
+        delta = value - EXCEL_EPOCH
+        return delta.days + delta.seconds / 86400
     if isinstance(value, str):
         match = re.search(r"-?\d+[.,]?\d*", value)
         if match:
@@ -93,8 +114,34 @@ def as_date(value) -> date | None:
     return None
 
 
+def as_sum(value) -> float | None:
+    """Wie as_float, summiert aber mehrere Zahlen in einem Feld (z.B. die
+    ganz frühen Sude tragen die Ausschlagwürze manchmal als "15+2,5" ein,
+    Hauptmenge + separat nachgeschüttetes Wasser)."""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        numbers = re.findall(r"\d+[.,]?\d*", value)
+        if numbers:
+            return sum(float(n.replace(",", ".")) for n in numbers)
+    return None
+
+
 def cell(ws, row: int, col: int):
     return ws.cell(row=row, column=col).value
+
+
+def find_label(a_labels: dict[str, int], *aliases: str) -> int | None:
+    """Das Braubuch-Layout hat sich über die Jahre leicht verändert (z.B.
+    "Wasserausgleich" vs. "Wasserausgleich:", "Brauvorgang Stonstiges:" vs.
+    nur "Stonstiges:" in älteren Suden) - hier werden bekannte
+    Schreibweisen-Varianten eines Abschnitts durchprobiert."""
+    for alias in aliases:
+        if alias in a_labels:
+            return a_labels[alias]
+    return None
 
 
 def import_batch_sheet(ws, session: Session) -> Batch | None:
@@ -106,11 +153,20 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
         return None
     batch_number = int(match.group(1))
 
+    # Ältere Sude (grob #1-#49 im ersten Braubuch) haben im Würzekochen-Block
+    # keine Alphasäure-Spalte - dort wurde IBU nur als geschätzte Summe in
+    # "Bittere:" eingetragen statt je Hopfengabe berechnet. Erkennung anhand
+    # der Kopfzeile direkt in der "Würzekochen"-Zeile (Spalte C: "Alpha"/
+    # "Anpha" bei neuerem Format, "Menge" beim alten).
+    hop_header_row = a_labels.get("Würzekochen")
+    hop_header_text = str(cell(ws, hop_header_row, 3) or "") if hop_header_row else ""
+    legacy_hop_layout = "lpha" not in hop_header_text
+
     batch = Batch(batch_number=batch_number)
     batch.name = cell(ws, 2, 2) or ws.title
     batch.brew_date = as_date(cell(ws, 1, 5))
     batch.fermentation_type = (cell(ws, 3, 5) or "").strip()
-    batch.target_volume_l = as_float(cell(ws, 4, 2))
+    batch.target_volume_l = as_sum(cell(ws, 4, 2))
     batch.color_ebc = as_float(cell(ws, 8, 2))
 
     if "Hauptguss" in a_labels:
@@ -123,8 +179,11 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
         r = a_labels["Milchsäure 80%"]
         batch.lactic_acid_80_ml = as_float(cell(ws, r, 5))
 
+    # Kochzeit steht im alten Layout in Spalte E, im neuen in Spalte F (weil
+    # dort zusätzlich eine Alphasäure-Spalte eingeschoben wurde).
     if "Kochzeit" in a_labels:
-        batch.boil_time_min = as_float(cell(ws, a_labels["Kochzeit"], 6))
+        boil_col = 5 if legacy_hop_layout else 6
+        batch.boil_time_min = as_float(cell(ws, a_labels["Kochzeit"], boil_col))
 
     if "Stammwürze vor Läutern:" in a_labels:
         batch.pre_lauter_brix = as_float(cell(ws, a_labels["Stammwürze vor Läutern:"], 5))
@@ -132,8 +191,9 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
         r = a_labels["Stammwürze nach Läutern:"]
         batch.post_lauter_brix = as_float(cell(ws, r, 5))
         batch.post_lauter_volume_l = as_float(cell(ws, r, 7))
-    if "Wasserausgleich" in a_labels:
-        batch.water_adjustment_l = as_float(cell(ws, a_labels["Wasserausgleich"], 5))
+    wasserausgleich_row = find_label(a_labels, "Wasserausgleich", "Wasserausgleich:")
+    if wasserausgleich_row:
+        batch.water_adjustment_l = as_float(cell(ws, wasserausgleich_row, 5))
     if "Stammwürze nach Kochen und Kühlung" in a_labels:
         r = a_labels["Stammwürze nach Kochen und Kühlung"]
         raw = cell(ws, r, 5)
@@ -146,16 +206,20 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
     for field, value in KNOWN_CORRECTIONS.get(ws.title, {}).items():
         setattr(batch, field, value)
 
-    # geplante Stammwürze steht in E6, sofern vorhanden ("geplant:" in D6, °Plato-Einheit in F6)
-    batch.target_og_plato = as_float(cell(ws, 6, 5))
+    # Neueres Layout: geplante Stammwürze in E6 ("geplant:" in D6). Älteres
+    # Layout kennt kein separates "gemessen nach Kochen" -> B6 ("Stammwürze:")
+    # ist dort der einzige verfügbare Wert und dient als Fallback.
+    batch.target_og_plato = as_float(cell(ws, 6, 5)) or as_float(cell(ws, 6, 2))
 
     session.add(batch)
     session.commit()
     session.refresh(batch)
 
-    # Schüttung
-    if "Schüttung:" in a_labels and "Summe:" in a_labels:
-        start, end = a_labels["Schüttung:"] + 1, a_labels["Summe:"]
+    # Schüttung (ganz frühe Sude haben keine "Summe:"-Zeile -> Ende der
+    # Maischplan-Abschnitt als Fallback-Grenze)
+    grain_end = find_label(a_labels, "Summe:") or a_labels.get("Maischplan")
+    if "Schüttung:" in a_labels and grain_end:
+        start, end = a_labels["Schüttung:"] + 1, grain_end
         pos = 0
         for r in range(start, end):
             name = cell(ws, r, 1)
@@ -183,13 +247,19 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
                 )
                 pos += 1
 
-    # Würzekochen / Hopfengaben
-    if "Kochzeit" in a_labels and "Brauvorgang Stonstiges:" in a_labels:
-        start, end = a_labels["Kochzeit"] + 1, a_labels["Brauvorgang Stonstiges:"]
+    # Würzekochen / Hopfengaben. "Hefegabe" folgt in beiden Layout-Versionen
+    # direkt auf den Hopfenblock und ist eine zuverlässigere Endgrenze als
+    # der "Brauvorgang Stonstiges:"-Abschnitt, der nicht in jedem Sud existiert.
+    if "Kochzeit" in a_labels and "Hefegabe" in a_labels:
+        start, end = a_labels["Kochzeit"] + 1, a_labels["Hefegabe"]
         pos = 0
+        if legacy_hop_layout:
+            amount_col, alpha_col, time_col, temp_col = 3, None, 5, 7
+        else:
+            amount_col, alpha_col, time_col, temp_col = 4, 3, 6, 8
         for r in range(start, end):
             step_label = str(cell(ws, r, 1) or "")
-            amount = as_float(cell(ws, r, 4))
+            amount = as_float(cell(ws, r, amount_col))
             hop_name = cell(ws, r, 2)
             if amount is None or not step_label:
                 continue
@@ -198,7 +268,7 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
                 addition_type = HopAdditionType.whirlpool
             elif "nachisomerisierung" in step_label.lower():
                 addition_type = HopAdditionType.nachisomerisierung
-            alpha = as_float(cell(ws, r, 3))
+            alpha = as_float(cell(ws, r, alpha_col)) if alpha_col else None
             session.add(
                 HopAddition(
                     batch_id=batch.id,
@@ -206,8 +276,8 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
                     hop_name=str(hop_name).strip() if hop_name else step_label,
                     alpha_acid_percent=alpha * 100 if alpha is not None else None,
                     amount_g=amount,
-                    time_min=as_float(cell(ws, r, 6)),
-                    temperature_c=as_float(cell(ws, r, 8)),
+                    time_min=as_float(cell(ws, r, time_col)),
+                    temperature_c=as_float(cell(ws, r, temp_col)),
                     addition_type=addition_type,
                 )
             )
@@ -252,9 +322,22 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
                 )
                 pos += 1
 
-    # Karbonisierung
-    if "Karbonisierung" in a_labels and "Gärung - Datum" in a_labels:
-        start, end = a_labels["Karbonisierung"] + 1, a_labels["Gärung - Datum"]
+    # Karbonisierung. Je nach Braubuch-Version folgt danach der Gärverlauf,
+    # ein "(Brauvorgang) Stonstiges:"-Abschnitt oder direkt die Kommentare.
+    carb_end = min(
+        (
+            r
+            for r in (
+                a_labels.get("Gärung - Datum"),
+                find_label(a_labels, "Brauvorgang Stonstiges:", "Stonstiges:"),
+                a_labels.get("Kommentar:"),
+            )
+            if r and a_labels.get("Karbonisierung") and r > a_labels["Karbonisierung"]
+        ),
+        default=None,
+    )
+    if "Karbonisierung" in a_labels and carb_end:
+        start, end = a_labels["Karbonisierung"] + 1, carb_end
         pos = 0
         for r in range(start, end):
             sugar = as_float(cell(ws, r, 3))
@@ -318,6 +401,31 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
             if text:
                 session.add(BatchComment(batch_id=batch.id, position=pos, text=str(text).strip()))
                 pos += 1
+
+    if legacy_hop_layout:
+        eff, ibu, abv = cell(ws, 5, 2), cell(ws, 7, 2), cell(ws, 9, 2)
+        parts = []
+        if isinstance(eff, (int, float)):
+            parts.append(f"Ausbeute ~{eff:g}%")
+        if isinstance(ibu, (int, float)):
+            parts.append(f"Bittere ~{ibu:g} IBU")
+        if abv is not None:
+            parts.append(f"Alkohol ~{abv}" + (" Vol.-%" if isinstance(abv, (int, float)) else ""))
+        if parts:
+            session.add(
+                BatchComment(
+                    batch_id=batch.id,
+                    position=pos,
+                    text=(
+                        "Original-Aufzeichnung im Braubuch: "
+                        + ", ".join(parts)
+                        + " (historischer Wert, nicht neu berechnet - Alphasäure der "
+                        "Hopfengaben bzw. Gärverlaufsmessungen fehlen im Originalprotokoll "
+                        "für diesen Sud)."
+                    ),
+                )
+            )
+            pos += 1
 
     if ws.title in KNOWN_CORRECTIONS:
         session.add(
@@ -417,7 +525,10 @@ def main() -> None:
                     n = import_inventory_sheet(ws, session)
                     print(f"Lagerbestand: {n} Artikel importiert (0 bedeutet: bereits vorhanden, übersprungen)")
                 continue
-            if not sheet_name.startswith("Batch"):
+            if not re.search(r"#\d+", sheet_name):
+                # z.B. "#31 Cider" statt "Batch #31 Cider" - Titel ohne
+                # "Batch"-Präfix, aber mit Sud-Nummer, kommt im älteren
+                # Braubuch vor.
                 continue
             if already_imported(session, sheet_name):
                 print(f"übersprungen (bereits importiert): {sheet_name}")
