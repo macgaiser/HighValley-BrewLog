@@ -46,7 +46,22 @@ beim erneuten Aufruf übersprungen) und der Lagerbestand wird nur beim
 allerersten Import befüllt, um spätere manuelle Buchungen nicht zu
 überschreiben. Bei mehreren Excel-Dateien (z.B. eine ältere Version mit
 weiteren historischen Suden) einfach das Skript für jede Datei erneut
-aufrufen.
+aufrufen - Sude mit exakt gleichem Tab-Namen in beiden Dateien werden dabei
+nur einmal importiert.
+
+Das Braubuch-Layout hat sich über die Jahre mehrfach verändert (frühe Sude
+sind knapper dokumentiert: keine Alphasäure je Hopfengabe, kein
+strukturierter Gärverlauf, IBU/Ausbeute/Alkohol nur als von Hand
+geschätzter Gesamtwert). Das Skript erkennt das jeweilige Layout pro
+Tabellenblatt automatisch. Für Sude, bei denen die nötigen Rohdaten fehlen,
+bleiben die entsprechenden berechneten Kennzahlen in der App leer (`–`)
+statt einen falschen Wert vorzutäuschen; die damals von Hand eingetragene
+Schätzung wird stattdessen als Kommentar "Original-Aufzeichnung im
+Braubuch: ..." am Sud übernommen.
+
+Getestet mit beiden Braubuch-Dateien (Sude #1-#48 aus dem älteren Archiv,
+#49-#57 aus dem aktuellen Protokoll, insgesamt 58 Sude sowie 52
+Lagerartikel).
 
 ## Lokale Entwicklung
 
