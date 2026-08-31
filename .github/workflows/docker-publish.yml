@@ -1,0 +1,42 @@
+name: Docker-Image bauen und veröffentlichen
+
+# Baut bei jedem Push auf main (also nach jedem gemergten Pull Request) ein
+# neues Container-Image und lädt es zu GitHub Container Registry (ghcr.io)
+# hoch. Watchtower auf der NAS holt sich dieses neue Image dann automatisch
+# (siehe docker-compose.yml).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  # Muss kleingeschrieben sein (GHCR-Vorgabe) - deshalb fest eingetragen
+  # statt aus github.repository abgeleitet (Repo-Name hat Großbuchstaben).
+  IMAGE_NAME: ghcr.io/macgaiser/highvalley-brewlog
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Bei GitHub Container Registry anmelden
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image bauen und veröffentlichen
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}

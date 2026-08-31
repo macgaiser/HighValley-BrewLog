@@ -79,18 +79,54 @@ Die Oberfläche ist danach unter `http://localhost:5000` erreichbar
 
 ## Deployment auf der Synology NAS (Docker / Container Manager)
 
-1. Repository auf die NAS kopieren oder per Git clonen (z.B. via SSH oder
-   File Station)
-2. `.env.example` nach `.env` kopieren und Zugangsdaten anpassen, oder die
-   Werte direkt in `docker-compose.yml` eintragen
-3. Im Verzeichnis mit `docker-compose.yml`:
+`docker-compose.yml` nutzt standardmäßig ein fertiges Image von GitHub
+(`ghcr.io/macgaiser/highvalley-brewlog:latest`) statt lokal aus dem Code zu
+bauen. Auf der NAS wird also nur die `docker-compose.yml` (und `.env`)
+benötigt, kein vollständiges Repository.
+
+1. Nur die Datei `docker-compose.yml` (z.B. per File Station) in einen
+   eigenen Ordner auf die NAS legen, z.B. `/docker/highvalley-brewlog/`
+2. `.env.example` aus dem Repository herunterladen, nach `.env` umbenennen,
+   Zugangsdaten anpassen und in denselben Ordner legen (oder die Werte
+   direkt in `docker-compose.yml` eintragen)
+3. In diesem Ordner:
    ```bash
-   docker compose up -d --build
+   docker compose pull
+   docker compose up -d
    ```
    Alternativ über die Synology **Container Manager**-Oberfläche: Projekt
    anlegen und den `docker-compose.yml`-Inhalt einfügen.
 4. Die App ist danach unter `http://<NAS-IP>:5050` erreichbar (Port ist in
    `docker-compose.yml` frei anpassbar).
+
+### Automatische Updates bei neuem Code
+
+`docker-compose.yml` startet neben der App auch **Watchtower**, das alle 5
+Minuten prüft, ob auf GitHub ein neueres Image liegt, und den Container bei
+Bedarf automatisch neu zieht und neu startet - danach ist auf der NAS
+nichts weiter zu tun.
+
+Der Ablauf dahinter:
+1. Ein Pull Request wird nach `main` gemergt.
+2. GitHub Actions (`.github/workflows/docker-publish.yml`) baut daraufhin
+   automatisch ein neues Container-Image und lädt es zu **GitHub Container
+   Registry** (ghcr.io) hoch.
+3. Watchtower auf der NAS bemerkt das neue Image (spätestens nach 5
+   Minuten) und aktualisiert den `highvalley-brewlog`-Container
+   automatisch. Die Datenbank in `./data` bleibt dabei unangetastet.
+
+**Einmalige Einrichtung, damit die NAS das Image ohne Zugangsdaten laden
+kann:** Nach dem ersten erfolgreichen GitHub-Actions-Lauf unter
+`github.com/macgaiser/HighValley-BrewLog` → Reiter **"Packages"** →
+`highvalley-brewlog` öffnen → **Package settings** → **Change visibility**
+→ **Public**. Das Image enthält nur den App-Code, keine Braudaten (die
+liegen ausschließlich in `./data` auf der NAS) - "public" ist hier also
+unbedenklich. Ohne diesen Schritt bräuchte Watchtower zusätzlich ein
+GitHub-Zugangstoken, um das (dann private) Image herunterzuladen.
+
+Falls du stattdessen direkt aus dem Code bauen willst (z.B. für eigene,
+noch nicht gemergte Änderungen): `docker-compose.yml` um `build: .`
+ergänzen und mit `docker compose up -d --build` statt `pull` starten.
 
 **Historische Daten importieren** (einmalig, nach dem ersten Start):
 ```bash
