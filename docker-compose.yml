@@ -1,6 +1,10 @@
 services:
   brewlog:
-    build: .
+    # Vorgefertigtes Image von GitHub (wird bei jedem Merge nach main neu
+    # gebaut, siehe .github/workflows/docker-publish.yml). Für lokales
+    # Entwickeln direkt aus dem Code kann "image:" durch "build: ." ersetzt
+    # bzw. ergänzt und mit "docker compose up -d --build" gestartet werden.
+    image: ghcr.io/macgaiser/highvalley-brewlog:latest
     container_name: highvalley-brewlog
     restart: unless-stopped
     ports:
@@ -10,3 +14,17 @@ services:
     environment:
       APP_USERNAME: ${APP_USERNAME:-admin}
       APP_PASSWORD: ${APP_PASSWORD:-changeme}
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # Prüft regelmäßig, ob auf ghcr.io ein neueres Image liegt, und aktualisiert
+  # den brewlog-Container dann automatisch (Container neu ziehen + neu
+  # starten). Überwacht wegen "--label-enable" nur Container mit obigem
+  # Label, fasst also keine anderen Container auf der NAS an.
+  watchtower:
+    image: containrrr/watchtower
+    container_name: highvalley-brewlog-watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --label-enable --interval 300 --cleanup
