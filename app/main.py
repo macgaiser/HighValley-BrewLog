@@ -1,5 +1,5 @@
 from fastapi import Depends, FastAPI
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.auth import get_current_user
@@ -18,6 +18,11 @@ def on_startup() -> None:
 @app.get("/healthz", response_class=PlainTextResponse)
 def healthz() -> str:
     return "ok"
+
+
+@app.get("/")
+def root() -> RedirectResponse:
+    return RedirectResponse("/batches")
 
 
 app.include_router(batches.router, dependencies=[Depends(get_current_user)])
