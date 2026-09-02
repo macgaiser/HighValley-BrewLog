@@ -1,12 +1,25 @@
+@font-face {
+  font-family: "Ranchers";
+  src: url("/static/fonts/ranchers.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --amber: #b6752e;
-  --amber-dark: #8a5a22;
-  --bg: #faf6f0;
-  --card-bg: #ffffff;
-  --text: #2b2320;
-  --muted: #7a6d63;
-  --border: #e6ddd0;
+  --brown: #6b3417;
+  --brown-dark: #4a2410;
+  --green: #2f8a3c;
+  --green-hop: #6a9e34;
+  --gold: #f0be33;
+  --blue: #35a4c2;
+  --bg: #f5f3e6;
+  --card-bg: #fffdf8;
+  --text: #2b2015;
+  --muted: #8a7a63;
+  --border: #e3d8bd;
   --danger: #b3392c;
+  --font-display: "Ranchers", "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -18,20 +31,35 @@ body {
   color: var(--text);
 }
 
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.9rem 1.5rem;
-  background: var(--amber-dark);
+  padding: 0.6rem 1.5rem;
+  background: var(--brown);
   color: white;
+  border-bottom: 4px solid var(--gold);
 }
 
 .topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   color: white;
-  font-weight: 700;
-  font-size: 1.1rem;
   text-decoration: none;
+}
+.topbar .brand img { height: 44px; width: auto; display: block; }
+.topbar .brand span {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  line-height: 1;
+  letter-spacing: 0.03em;
 }
 
 .topbar nav a {
@@ -39,6 +67,7 @@ body {
   text-decoration: none;
   margin-left: 1.3rem;
   opacity: 0.9;
+  font-weight: 600;
 }
 .topbar nav a:hover { opacity: 1; text-decoration: underline; }
 
@@ -56,31 +85,32 @@ body {
   flex-wrap: wrap;
 }
 
-.page-header h1 { margin: 0; }
+.page-header h1 { margin: 0; font-size: 2.1rem; color: var(--brown); }
 .subtitle { color: var(--muted); margin-top: -0.5rem; }
 
 .actions { display: flex; gap: 0.5rem; }
 
 .btn {
   display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
   border: 1px solid var(--border);
   background: white;
   color: var(--text);
   text-decoration: none;
   cursor: pointer;
   font-size: 0.95rem;
+  font-weight: 600;
 }
 .btn:hover { background: #f2ece2; }
-.btn-primary { background: var(--amber); color: white; border-color: var(--amber); }
-.btn-primary:hover { background: var(--amber-dark); }
+.btn-primary { background: var(--green); color: white; border-color: var(--green); }
+.btn-primary:hover { background: var(--brown); border-color: var(--brown); }
 .btn-danger { background: white; color: var(--danger); border-color: var(--danger); }
 .btn-danger:hover { background: #fbeceb; }
-.btn-small { padding: 0.25rem 0.6rem; font-size: 0.85rem; }
+.btn-small { padding: 0.25rem 0.7rem; font-size: 0.85rem; border-radius: 999px; }
 
 .searchbar { display: flex; gap: 0.5rem; margin: 1rem 0; }
-.searchbar input { flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; }
+.searchbar input { flex: 1; padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; }
 
 .table, .mini-table {
   width: 100%;
@@ -94,16 +124,28 @@ body {
 }
 .table thead th { color: var(--muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
 .clickable-row { cursor: pointer; }
-.clickable-row:hover { background: #f5efe4; }
+.clickable-row:hover { background: #f2ecd8; }
 
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 1.1rem 1.3rem;
   margin: 1rem 0;
 }
-.card h2 { margin-top: 0; font-size: 1.05rem; color: var(--amber-dark); }
+.card h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: var(--brown);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.card h2 .step-icon {
+  height: 44px;
+  width: auto;
+  flex-shrink: 0;
+}
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
@@ -117,13 +159,14 @@ body {
 .stat {
   background: white;
   border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
   border-radius: 10px;
   padding: 0.8rem 1rem;
   display: flex;
   flex-direction: column;
 }
 .stat-label { font-size: 0.8rem; color: var(--muted); }
-.stat-value { font-size: 1.3rem; font-weight: 700; color: var(--amber-dark); }
+.stat-value { font-family: var(--font-display); font-size: 1.7rem; color: var(--brown); }
 
 .hint { color: var(--muted); font-size: 0.85rem; }
 
@@ -149,8 +192,19 @@ form.card input, form.card select, form.card textarea {
 .form-table th { text-align: left; font-size: 0.8rem; color: var(--muted); padding: 0.3rem; }
 
 .section-title-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+.section-title-row h2 { margin: 0; }
 
 .form-actions { margin-top: 1.5rem; display: flex; gap: 0.6rem; }
 
 .inv-amount { font-weight: 700; }
 .inv-low { color: var(--danger); }
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 0 1.5rem;
+}
+.hero img { height: 96px; width: auto; }
+.hero h1 { margin: 0; font-size: 2.4rem; color: var(--brown); }
+.hero p { margin: 0.2rem 0 0; color: var(--muted); }
