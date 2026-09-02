@@ -46,7 +46,7 @@
   </section>
 
   <section class="card">
-    <h2>Stammwürze-Messungen</h2>
+    <h2><img class="step-icon" src="/static/img/step-laeutern.png" alt="">Stammwürze-Messungen</h2>
     <div class="field-row">
       <div><label>geplant (°Plato)</label><input type="number" step="0.1" name="target_og_plato" value="{{ batch.target_og_plato if batch else '' }}"></div>
       <div><label>vor Läutern (°Brix)</label><input type="number" step="0.1" name="pre_lauter_brix" value="{{ batch.pre_lauter_brix if batch else '' }}"></div>
@@ -60,7 +60,7 @@
   </section>
 
   <section class="card">
-    <div class="section-title-row"><h2>Schüttung</h2><button class="btn btn-small" data-add-row="grain">+ Zeile</button></div>
+    <div class="section-title-row"><h2><img class="step-icon" src="/static/img/step-schroten.png" alt="">Schüttung</h2><button class="btn btn-small" data-add-row="grain">+ Zeile</button></div>
     <table class="form-table">
       <thead><tr><th>Malz</th><th>Menge (kg)</th><th>Lagerartikel</th><th></th></tr></thead>
       <tbody data-rows="grain">
@@ -85,7 +85,7 @@
   </section>
 
   <section class="card">
-    <div class="section-title-row"><h2>Maischplan</h2><button class="btn btn-small" data-add-row="mash">+ Zeile</button></div>
+    <div class="section-title-row"><h2><img class="step-icon" src="/static/img/step-maischen.png" alt="">Maischplan</h2><button class="btn btn-small" data-add-row="mash">+ Zeile</button></div>
     <table class="form-table">
       <thead><tr><th>Rast</th><th>Temp. (°C)</th><th>Dauer (min)</th><th>Kommentar</th><th></th></tr></thead>
       <tbody data-rows="mash">
@@ -112,7 +112,7 @@
   </section>
 
   <section class="card">
-    <div class="section-title-row"><h2>Würzekochen / Hopfengaben</h2><button class="btn btn-small" data-add-row="hop">+ Zeile</button></div>
+    <div class="section-title-row"><h2><img class="step-icon" src="/static/img/step-kochen.png" alt="">Würzekochen / Hopfengaben</h2><button class="btn btn-small" data-add-row="hop">+ Zeile</button></div>
     <table class="form-table">
       <thead><tr><th>Hopfen</th><th>Alpha (%)</th><th>Menge (g)</th><th>Zeit (min)</th><th>Temp. (°C)</th><th>Typ</th><th>Lagerartikel</th><th></th></tr></thead>
       <tbody data-rows="hop">
@@ -153,7 +153,7 @@
   </section>
 
   <section class="card">
-    <div class="section-title-row"><h2>Hefegabe</h2><button class="btn btn-small" data-add-row="yeast">+ Zeile</button></div>
+    <div class="section-title-row"><h2><img class="step-icon" src="/static/img/step-kuehlen.png" alt="">Hefegabe</h2><button class="btn btn-small" data-add-row="yeast">+ Zeile</button></div>
     <table class="form-table">
       <thead><tr><th>Hefe</th><th>Führung</th><th>Menge</th><th>Einheit</th><th>Temp. (°C)</th><th>Lagerartikel</th><th></th></tr></thead>
       <tbody data-rows="yeast">
@@ -211,7 +211,7 @@
   </section>
 
   <section class="card">
-    <div class="section-title-row"><h2>Karbonisierung</h2><button class="btn btn-small" data-add-row="carb">+ Zeile</button></div>
+    <div class="section-title-row"><h2><img class="step-icon" src="/static/img/step-abfuellen.png" alt="">Karbonisierung</h2><button class="btn btn-small" data-add-row="carb">+ Zeile</button></div>
     <table class="form-table">
       <thead><tr><th>Zucker (g)</th><th>je Flaschengröße (l)</th><th></th></tr></thead>
       <tbody data-rows="carb">
