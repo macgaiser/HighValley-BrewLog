@@ -156,11 +156,13 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
     # Ältere Sude (grob #1-#49 im ersten Braubuch) haben im Würzekochen-Block
     # keine Alphasäure-Spalte - dort wurde IBU nur als geschätzte Summe in
     # "Bittere:" eingetragen statt je Hopfengabe berechnet. Erkennung anhand
-    # der Kopfzeile direkt in der "Würzekochen"-Zeile (Spalte C: "Alpha"/
-    # "Anpha" bei neuerem Format, "Menge" beim alten).
+    # der Kopfzeile direkt in der "Würzekochen"-Zeile (Spalte C: "Alpha" beim
+    # neueren Format - im aktuellen Braubuch dort sogar als Tippfehler
+    # "Anpha" geschrieben, daher Prüfung auf "ph" statt auf "Alpha" -
+    # "Menge" beim alten Format, das enthält kein "ph").
     hop_header_row = a_labels.get("Würzekochen")
     hop_header_text = str(cell(ws, hop_header_row, 3) or "") if hop_header_row else ""
-    legacy_hop_layout = "lpha" not in hop_header_text
+    legacy_hop_layout = "ph" not in hop_header_text.lower()
 
     batch = Batch(batch_number=batch_number)
     batch.name = cell(ws, 2, 2) or ws.title
