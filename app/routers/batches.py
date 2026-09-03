@@ -78,9 +78,24 @@ def batch_list(
             return False
 
         batches = [b for b in batches if matches(b)]
+
+    settings = session.get(Settings, 1)
+    og_display: dict[int, float] = {}
+    for b in batches:
+        if b.post_boil_brix:
+            og_display[b.id] = round(b.post_boil_brix / settings.wort_correction_factor, 1)
+        elif b.target_og_plato:
+            og_display[b.id] = round(b.target_og_plato, 1)
+
     return templates.TemplateResponse(
         "batch_list.html",
-        {"request": request, "batches": batches, "q": q, "fermentation_type": fermentation_type},
+        {
+            "request": request,
+            "batches": batches,
+            "q": q,
+            "fermentation_type": fermentation_type,
+            "og_display": og_display,
+        },
     )
 
 
