@@ -36,7 +36,7 @@ class Settings(SQLModel, table=True):
     yeast_flat_cost: float = 3.0
     labor_cost_per_hour: float = 30.0
     wort_correction_factor: float = 1.03
-    mash_extract_potential: float = 0.80
+    mash_efficiency_correction_factor: float = 1.0
 
 
 class Batch(SQLModel, table=True):
@@ -67,6 +67,12 @@ class Batch(SQLModel, table=True):
     water_adjustment_l: Optional[float] = None
     post_boil_brix: Optional[float] = None
     post_boil_volume_l: Optional[float] = None
+
+    # Von Hand im Originalprotokoll eingetragene Werte, als Fallback für
+    # Sude, bei denen die App IBU/Alkohol mangels Rohdaten (Alphasäure,
+    # Gärverlauf) nicht selbst berechnen kann.
+    recorded_ibu: Optional[float] = None
+    recorded_abv_text: Optional[str] = None
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

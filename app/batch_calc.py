@@ -27,6 +27,9 @@ class BatchMetrics:
     latest_fermentation_date: date | None = None
     attenuation_percent: float | None = None
     abv_percent: float | None = None
+    abv_display: str | None = None
+    ibu_is_recorded: bool = False
+    abv_is_recorded: bool = False
     malt_cost: float = 0.0
     hop_cost: float = 0.0
     yeast_cost: float = 0.0
@@ -34,6 +37,7 @@ class BatchMetrics:
     total_cost: float = 0.0
     cost_per_liter: float | None = None
     cost_per_0_5l: float | None = None
+    cost_is_incomplete: bool = False
 
 
 def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
@@ -67,12 +71,16 @@ def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
             m.ibu_total += ibu
         m.ibu_total = round(m.ibu_total, 1)
 
+    if not m.ibu_total and batch.recorded_ibu:
+        m.ibu_total = batch.recorded_ibu
+        m.ibu_is_recorded = True
+
     if m.og_plato and batch.target_volume_l and m.total_grain_kg:
         m.mash_efficiency_percent = formulas.mash_efficiency_percent(
             batch_volume_l=batch.target_volume_l,
             og_plato=m.og_plato,
             total_grain_kg=m.total_grain_kg,
-            assumed_extract_potential=settings.mash_extract_potential,
+            correction_factor=settings.mash_efficiency_correction_factor,
         )
 
     fermentation_readings = [e for e in batch.fermentation_entries if e.brix is not None]
@@ -82,6 +90,11 @@ def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
         m.latest_fermentation_date = latest.entry_date
         m.attenuation_percent = formulas.attenuation_percent(m.og_plato, latest.brix)
         m.abv_percent = formulas.abv_from_brix(m.og_plato, latest.brix)
+        m.abv_display = f"{m.abv_percent:g} Vol.-%"
+
+    if m.abv_display is None and batch.recorded_abv_text:
+        m.abv_display = batch.recorded_abv_text
+        m.abv_is_recorded = True
 
     m.malt_cost = round(m.total_grain_kg * settings.malt_cost_per_kg, 2)
     m.hop_cost = round(m.total_hop_g * settings.hop_cost_per_100g / 100, 2)
@@ -93,5 +106,9 @@ def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
     if batch.target_volume_l:
         m.cost_per_liter = round(m.total_cost / batch.target_volume_l, 2)
         m.cost_per_0_5l = round(m.cost_per_liter / 2, 2)
+
+    # Kein Brautag-Zeitplan hinterlegt -> Lohnkosten fehlen komplett in der
+    # Summe, Kosten sind also eine Untergrenze, kein verlässlicher Wert.
+    m.cost_is_incomplete = not batch.brew_day_tasks
 
     return m

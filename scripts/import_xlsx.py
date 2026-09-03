@@ -167,7 +167,8 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
     batch = Batch(batch_number=batch_number)
     batch.name = cell(ws, 2, 2) or ws.title
     batch.brew_date = as_date(cell(ws, 1, 5))
-    batch.fermentation_type = (cell(ws, 3, 5) or "").strip()
+    # Schreibweise vereinheitlichen ("obergärig"/"Obergärig"/"UNTERGÄRIG" -> "Obergärig"/"Untergärig")
+    batch.fermentation_type = str(cell(ws, 3, 5) or "").strip().capitalize()
     batch.target_volume_l = as_sum(cell(ws, 4, 2))
     batch.color_ebc = as_float(cell(ws, 8, 2))
 
@@ -403,6 +404,18 @@ def import_batch_sheet(ws, session: Session) -> Batch | None:
             if text:
                 session.add(BatchComment(batch_id=batch.id, position=pos, text=str(text).strip()))
                 pos += 1
+
+    # Von Hand eingetragene Bittere/Alkohol-Werte als Fallback speichern -
+    # unabhängig von der erkannten Layout-Version, aber Excel-Fehlerwerte
+    # (z.B. "#NAME?" bei der seit jeher kaputten Alkohol-Formel) ausfiltern.
+    raw_ibu, raw_abv = cell(ws, 7, 2), cell(ws, 9, 2)
+    if isinstance(raw_ibu, (int, float)):
+        batch.recorded_ibu = float(raw_ibu)
+    if isinstance(raw_abv, (int, float)):
+        batch.recorded_abv_text = f"{raw_abv:g} Vol.-%"
+    elif isinstance(raw_abv, str) and raw_abv.strip() and not raw_abv.strip().startswith("#"):
+        batch.recorded_abv_text = raw_abv.strip()
+    session.add(batch)
 
     if legacy_hop_layout:
         eff, ibu, abv = cell(ws, 5, 2), cell(ws, 7, 2), cell(ws, 9, 2)

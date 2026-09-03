@@ -12,10 +12,12 @@ router = APIRouter(prefix="/inventory", tags=["inventory"])
 
 @router.get("")
 def inventory_list(request: Request, session: Session = Depends(get_session)):
-    items = session.exec(select(InventoryItem).order_by(InventoryItem.category, InventoryItem.name)).all()
+    items = session.exec(select(InventoryItem)).all()
     grouped: dict[str, list[InventoryItem]] = {c.value: [] for c in InventoryCategory}
     for item in items:
         grouped[item.category.value].append(item)
+    for group in grouped.values():
+        group.sort(key=lambda i: i.amount, reverse=True)
     return templates.TemplateResponse(
         "inventory_list.html",
         {"request": request, "grouped": grouped, "categories": InventoryCategory},
@@ -97,3 +99,12 @@ def inventory_delete(item_id: int, session: Session = Depends(get_session)):
         session.delete(item)
         session.commit()
     return RedirectResponse("/inventory", status_code=303)
+
+
+@router.get("/{item_id}")
+def inventory_detail(item_id: int, request: Request, session: Session = Depends(get_session)):
+    item = session.get(InventoryItem, item_id)
+    transactions = sorted(item.transactions, key=lambda t: t.created_at, reverse=True)
+    return templates.TemplateResponse(
+        "inventory_detail.html", {"request": request, "item": item, "transactions": transactions}
+    )
