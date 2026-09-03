@@ -34,12 +34,17 @@ body {
 body::before {
   content: "";
   position: fixed;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30vh;
+  min-height: 200px;
+  max-height: 320px;
   background-image: url("/static/img/bg-valley.jpg");
   background-repeat: no-repeat;
-  background-position: top center;
+  background-position: bottom center;
   background-size: cover;
-  opacity: 0.4;
+  opacity: 0.3;
   z-index: 0;
   pointer-events: none;
 }
@@ -55,7 +60,7 @@ h1, h2, h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 1.5rem;
+  padding: 0.4rem 1.5rem;
   background: var(--brown);
   color: white;
   border-bottom: 4px solid var(--gold);
@@ -64,7 +69,7 @@ h1, h2, h3 {
 .topbar .brand {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
+  gap: 1.1rem;
   color: white;
   text-decoration: none;
 }
@@ -72,13 +77,26 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
-  border-radius: 50%;
-  padding: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   flex-shrink: 0;
 }
-.brand-logo img { height: 76px; width: 76px; object-fit: contain; display: block; }
+.brand-logo img {
+  height: 150px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  /* Weißer Rahmen um die Schild-Silhouette selbst (statt eines separaten
+     Plättchens dahinter), damit sich das Logo vom braunen Banner absetzt,
+     egal wie groß es ist. */
+  filter:
+    drop-shadow(2px 0 0 white)
+    drop-shadow(-2px 0 0 white)
+    drop-shadow(0 2px 0 white)
+    drop-shadow(0 -2px 0 white)
+    drop-shadow(1.5px 1.5px 0 white)
+    drop-shadow(-1.5px -1.5px 0 white)
+    drop-shadow(1.5px -1.5px 0 white)
+    drop-shadow(-1.5px 1.5px 0 white);
+}
 .topbar .brand > span {
   font-family: var(--font-display);
   font-size: 1.7rem;
@@ -157,27 +175,25 @@ h1, h2, h3 {
   border-radius: 14px;
   padding: 1.1rem 1.3rem;
   margin: 1rem 0;
-  position: relative;
-  overflow: hidden;
 }
 .card h2 {
   margin-top: 0;
   font-size: 1.3rem;
   color: var(--brown);
-  padding-right: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 .card h2 .step-icon {
-  position: absolute;
-  top: -6px;
-  right: 0.6rem;
-  height: 108px;
+  height: 100px;
   width: auto;
+  flex-shrink: 0;
   opacity: 0.96;
   pointer-events: none;
 }
 @media (max-width: 520px) {
-  .card h2 .step-icon { height: 76px; }
-  .card h2 { padding-right: 68px; }
+  .card h2 .step-icon { height: 64px; }
 }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
