@@ -51,17 +51,37 @@ def _inventory_options(session: Session) -> dict[str, list[InventoryItem]]:
 
 
 @router.get("")
-def batch_list(request: Request, q: str = "", session: Session = Depends(get_session)):
+def batch_list(
+    request: Request,
+    q: str = "",
+    fermentation_type: str = "",
+    session: Session = Depends(get_session),
+):
     stmt = select(Batch).order_by(Batch.batch_number.desc())
     batches = session.exec(stmt).all()
+    if fermentation_type:
+        batches = [b for b in batches if b.fermentation_type == fermentation_type]
     if q:
         ql = q.lower()
-        batches = [
-            b
-            for b in batches
-            if ql in str(b.batch_number) or ql in (b.name or "").lower() or ql in (b.style or "").lower()
-        ]
-    return templates.TemplateResponse("batch_list.html", {"request": request, "batches": batches, "q": q})
+
+        def matches(b: Batch) -> bool:
+            if ql in str(b.batch_number) or ql in (b.name or "").lower() or ql in (b.style or "").lower():
+                return True
+            if any(ql in (g.malt_name or "").lower() for g in b.grain_additions):
+                return True
+            if any(ql in (h.hop_name or "").lower() for h in b.hop_additions):
+                return True
+            if any(ql in (d.hop_name or "").lower() for d in b.dry_hop_additions):
+                return True
+            if any(ql in (y.yeast_name or "").lower() for y in b.yeast_additions):
+                return True
+            return False
+
+        batches = [b for b in batches if matches(b)]
+    return templates.TemplateResponse(
+        "batch_list.html",
+        {"request": request, "batches": batches, "q": q, "fermentation_type": fermentation_type},
+    )
 
 
 @router.get("/new")

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ item.name }} – HighValley BrewLog{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ item.name }}</h1>
+  <div class="actions">
+    <a class="btn" href="/inventory/{{ item.id }}/edit">Bearbeiten</a>
+    <a class="btn" href="/inventory">Zurück</a>
+  </div>
+</div>
+<p class="subtitle">{{ item.category.value|capitalize }}{% if item.brand %} · {{ item.brand }}{% endif %}{% if item.spec %} · {{ item.spec }}{% endif %}</p>
+
+<div class="stat-grid">
+  <div class="stat"><span class="stat-label">Aktueller Bestand</span><span class="stat-value">{{ item.amount|round(2) }} {{ item.unit }}</span></div>
+</div>
+
+<section class="card">
+  <h2>Zubuchen / Korrektur</h2>
+  <form class="inline-form" method="post" action="/inventory/{{ item.id }}/restock">
+    <input type="number" step="0.01" name="amount" placeholder="± Menge" required>
+    <input type="text" name="note" placeholder="Notiz (optional), z.B. 'Neu gekauft' oder 'Inventur-Korrektur'">
+    <button class="btn btn-primary" type="submit">Buchen</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Buchungsverlauf</h2>
+  <table class="mini-table">
+    <thead><tr><th>Datum</th><th>Menge</th><th>Grund</th></tr></thead>
+    {% for t in transactions %}
+    <tr>
+      <td>{{ t.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+      <td>{{ "%+.2f"|format(t.delta) }} {{ item.unit }}</td>
+      <td>
+        {% if t.batch_id %}
+        <a href="/batches/{{ t.batch_id }}">{{ t.note }}</a>
+        {% else %}
+        {{ t.note }}
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3">Noch keine Buchungen.</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}

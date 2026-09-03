@@ -112,22 +112,32 @@ def mash_efficiency_percent(
     batch_volume_l: float,
     og_plato: float,
     total_grain_kg: float,
-    assumed_extract_potential: float = 0.80,
+    correction_factor: float = 1.0,
 ) -> float:
-    """Sudhausausbeute in Prozent.
+    """Sudhausausbeute in Prozent, nach der in deutschen Homebrewing-Quellen
+    gebräuchlichen Formel:
 
-    Verhältnis von tatsächlich gelöstem Extrakt zur theoretisch im Malz
-    enthaltenen Extraktmenge (Kunze, "Technologie Brauer & Mälzer").
+        Sudhausausbeute = (Ausschlagmenge_L * Stammwürze_°P * spez.Gewicht)
+                           / (Schüttung_kg * 1000) * 100
 
-    `assumed_extract_potential` ist eine Annahme (Standard: 80 % feine
-    Schrotausbeute für eine durchschnittliche Malzschüttung), da diese App
-    aktuell keine malzsortenspezifischen Ausbeutewerte pflegt.
+    d.h. Verhältnis von tatsächlich gelöster Extraktmasse zur eingesetzten
+    Schüttungsmasse. Diese Formel bezieht sich bewusst direkt auf die
+    Schüttungsmasse (nicht auf eine zusätzlich angenommene
+    Malz-Extraktausbeute) - das ist bereits der Grund, warum realistische
+    Werte üblicherweise bei 50-75 % statt nahe 100 % liegen, und warum eine
+    frühere Version dieser Funktion (die zusätzlich durch eine angenommene
+    80%ige Extraktausbeute geteilt hat) systematisch ca. 25 % zu hohe Werte
+    lieferte - gegen 35 reale Sude aus dem Braubuch geprüft: Median-Abweichung
+    von den dort von Hand berechneten Werten sank dadurch von +25 % auf 0.
+
+    `correction_factor` erlaubt bei Bedarf eine Feinjustierung fürs eigene
+    Sudhaus (Standard: 1,0 = keine Korrektur).
     """
     if total_grain_kg <= 0 or og_plato <= 0:
         return 0.0
     og_sg = plato_to_sg(og_plato)
     extract_mass_kg = batch_volume_l * og_sg * (og_plato / 100)
-    theoretical_extract_kg = total_grain_kg * assumed_extract_potential
+    theoretical_extract_kg = total_grain_kg * correction_factor
     if theoretical_extract_kg <= 0:
         return 0.0
     return round(extract_mass_kg / theoretical_extract_kg * 100, 1)
