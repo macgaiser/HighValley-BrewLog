@@ -18,8 +18,9 @@
   <label>Refraktometer-Korrekturfaktor (Standard: 1,03)</label>
   <input type="number" step="0.01" name="wort_correction_factor" value="{{ s.wort_correction_factor }}">
 
-  <label>Angenommene Malz-Extraktausbeute für die Sudhausausbeute-Berechnung (%)</label>
-  <input type="number" step="1" name="mash_extract_potential" value="{{ (s.mash_extract_potential * 100)|round(0) }}">
+  <label>Korrekturfaktor für die Sudhausausbeute-Berechnung (%, Standard: 100)</label>
+  <input type="number" step="1" name="mash_efficiency_correction_factor" value="{{ (s.mash_efficiency_correction_factor * 100)|round(0) }}">
+  <p class="hint">Nur anpassen, wenn die berechnete Sudhausausbeute systematisch von deinen eigenen Messungen abweicht.</p>
 
   <div class="form-actions">
     <button class="btn btn-primary" type="submit">Speichern</button>

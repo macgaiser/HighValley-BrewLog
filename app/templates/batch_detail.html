@@ -14,14 +14,20 @@
 
 <div class="stat-grid">
   <div class="stat"><span class="stat-label">Stammwürze</span><span class="stat-value">{{ m.og_plato|fmt }} °P</span></div>
-  <div class="stat"><span class="stat-label">Bittere</span><span class="stat-value">{{ m.ibu_total|fmt(0) }} IBU</span></div>
+  <div class="stat"><span class="stat-label">Bittere{% if m.ibu_is_recorded %}*{% endif %}</span><span class="stat-value">{{ m.ibu_total|fmt(0) }} IBU</span></div>
   <div class="stat"><span class="stat-label">Farbe</span><span class="stat-value">{{ batch.color_ebc|fmt(0) }} EBC</span></div>
-  <div class="stat"><span class="stat-label">Alkohol</span><span class="stat-value">{{ m.abv_percent|fmt }} Vol.-%</span></div>
+  <div class="stat"><span class="stat-label">Alkohol{% if m.abv_is_recorded %}*{% endif %}</span><span class="stat-value">{{ m.abv_display or "–" }}</span></div>
   <div class="stat"><span class="stat-label">Vergärungsgrad</span><span class="stat-value">{{ m.attenuation_percent|fmt }} %</span></div>
   <div class="stat"><span class="stat-label">Sudhausausbeute</span><span class="stat-value">{{ m.mash_efficiency_percent|fmt }} %</span></div>
-  <div class="stat"><span class="stat-label">Kosten / Sud</span><span class="stat-value">{{ m.total_cost|fmt(2) }} €</span></div>
-  <div class="stat"><span class="stat-label">Kosten / 0,5 l</span><span class="stat-value">{{ m.cost_per_0_5l|fmt(2) }} €</span></div>
+  <div class="stat"><span class="stat-label">Kosten / Sud{% if m.cost_is_incomplete %}*{% endif %}</span><span class="stat-value">{{ m.total_cost|fmt(2) }} €</span></div>
+  <div class="stat"><span class="stat-label">Kosten / 0,5 l{% if m.cost_is_incomplete %}*{% endif %}</span><span class="stat-value">{{ m.cost_per_0_5l|fmt(2) }} €</span></div>
 </div>
+{% if m.ibu_is_recorded or m.abv_is_recorded or m.cost_is_incomplete %}
+<p class="hint">
+  {% if m.ibu_is_recorded or m.abv_is_recorded %}* aus dem Originalprotokoll übernommen (keine Rohdaten für eine Neuberechnung vorhanden).{% endif %}
+  {% if m.cost_is_incomplete %}* Kosten ohne Lohnkosten, da kein Brautag-Zeitplan hinterlegt ist – reine Materialkosten-Untergrenze.{% endif %}
+</p>
+{% endif %}
 
 <div class="grid-2">
   <section class="card">

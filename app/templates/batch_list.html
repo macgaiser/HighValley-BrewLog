@@ -7,8 +7,14 @@
 </div>
 
 <form class="searchbar" method="get" action="/batches">
-  <input type="text" name="q" placeholder="Suche nach Nummer, Name, Stil…" value="{{ q }}">
+  <input type="text" name="q" placeholder="Suche nach Nummer, Name, Stil, Malz, Hopfen, Hefe…" value="{{ q }}">
+  <select name="fermentation_type">
+    <option value="">Alle Gärarten</option>
+    <option value="Obergärig" {% if fermentation_type=="Obergärig" %}selected{% endif %}>Obergärig</option>
+    <option value="Untergärig" {% if fermentation_type=="Untergärig" %}selected{% endif %}>Untergärig</option>
+  </select>
   <button class="btn" type="submit">Suchen</button>
+  {% if q or fermentation_type %}<a class="btn" href="/batches">Zurücksetzen</a>{% endif %}
 </form>
 
 <table class="table">
