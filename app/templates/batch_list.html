@@ -24,7 +24,7 @@
       <th>Datum</th>
       <th>Biertyp</th>
       <th>Stil</th>
-      <th>Stammwürze</th>
+      <th>Stammwürze (°P)</th>
       <th></th>
     </tr>
   </thead>
@@ -35,7 +35,7 @@
       <td>{{ b.brew_date or "–" }}</td>
       <td>{{ b.name }}</td>
       <td>{{ b.fermentation_type }}</td>
-      <td>{{ b.post_boil_brix and (b.post_boil_brix|fmt) ~ " °Brix" or "–" }}</td>
+      <td>{{ og_display.get(b.id, "–") }}</td>
       <td><a href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()">Bearbeiten</a></td>
     </tr>
     {% else %}
