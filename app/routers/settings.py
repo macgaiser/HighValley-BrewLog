@@ -24,7 +24,7 @@ async def settings_save(request: Request, session: Session = Depends(get_session
     s.yeast_flat_cost = float(form.get("yeast_flat_cost") or 0)
     s.labor_cost_per_hour = float(form.get("labor_cost_per_hour") or 0)
     s.wort_correction_factor = float(form.get("wort_correction_factor") or 1.03)
-    s.mash_extract_potential = float(form.get("mash_extract_potential") or 80) / 100
+    s.mash_efficiency_correction_factor = float(form.get("mash_efficiency_correction_factor") or 100) / 100
     session.add(s)
     session.commit()
     return RedirectResponse("/settings", status_code=303)

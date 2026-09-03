@@ -15,7 +15,7 @@
     <tbody>
       {% for item in items %}
       <tr>
-        <td>{{ item.name }}</td>
+        <td><a href="/inventory/{{ item.id }}">{{ item.name }}</a></td>
         <td>{{ item.brand }}</td>
         <td>{{ item.spec }}</td>
         <td class="inv-amount {% if item.amount <= 0 %}inv-low{% endif %}">{{ item.amount|round(2) }} {{ item.unit }}</td>

@@ -29,7 +29,21 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
+  position: relative;
 }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("/static/img/bg-valley.jpg");
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: cover;
+  opacity: 0.4;
+  z-index: 0;
+  pointer-events: none;
+}
+.topbar, .container { position: relative; z-index: 1; }
 
 h1, h2, h3 {
   font-family: var(--font-display);
@@ -41,7 +55,7 @@ h1, h2, h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.6rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   background: var(--brown);
   color: white;
   border-bottom: 4px solid var(--gold);
@@ -50,14 +64,24 @@ h1, h2, h3 {
 .topbar .brand {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.9rem;
   color: white;
   text-decoration: none;
 }
-.topbar .brand img { height: 44px; width: auto; display: block; }
-.topbar .brand span {
+.brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border-radius: 50%;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+.brand-logo img { height: 76px; width: 76px; object-fit: contain; display: block; }
+.topbar .brand > span {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.7rem;
   line-height: 1;
   letter-spacing: 0.03em;
 }
@@ -111,6 +135,7 @@ h1, h2, h3 {
 
 .searchbar { display: flex; gap: 0.5rem; margin: 1rem 0; }
 .searchbar input { flex: 1; padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; }
+.searchbar select { padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; background: white; }
 
 .table, .mini-table {
   width: 100%;
@@ -132,19 +157,27 @@ h1, h2, h3 {
   border-radius: 14px;
   padding: 1.1rem 1.3rem;
   margin: 1rem 0;
+  position: relative;
+  overflow: hidden;
 }
 .card h2 {
   margin-top: 0;
   font-size: 1.3rem;
   color: var(--brown);
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+  padding-right: 92px;
 }
 .card h2 .step-icon {
-  height: 44px;
+  position: absolute;
+  top: -6px;
+  right: 0.6rem;
+  height: 108px;
   width: auto;
-  flex-shrink: 0;
+  opacity: 0.96;
+  pointer-events: none;
+}
+@media (max-width: 520px) {
+  .card h2 .step-icon { height: 76px; }
+  .card h2 { padding-right: 68px; }
 }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
