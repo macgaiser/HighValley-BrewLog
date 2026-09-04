@@ -107,7 +107,7 @@ def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
         m.latest_fermentation_date = latest.entry_date
         m.attenuation_percent = formulas.attenuation_percent(m.og_plato, latest.brix)
         m.abv_percent = formulas.abv_from_brix(m.og_plato, latest.brix)
-        m.abv_display = f"{m.abv_percent:g} Vol.-%"
+        m.abv_display = f"{m.abv_percent:.1f} Vol.-%"
 
     if m.abv_display is None and batch.recorded_abv_text:
         m.abv_display = batch.recorded_abv_text
