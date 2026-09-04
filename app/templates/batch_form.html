@@ -34,6 +34,10 @@
       <div><label>Farbe (EBC)</label><input type="number" step="0.1" name="color_ebc" value="{{ batch.color_ebc if batch else '' }}"></div>
       <div><label>Kochzeit (min)</label><input type="number" step="1" name="boil_time_min" value="{{ batch.boil_time_min if batch else '' }}"></div>
     </div>
+    <label class="field-checkbox">
+      <input type="checkbox" name="inventory_deduction_locked" {% if batch and batch.inventory_deduction_locked %}checked{% endif %}>
+      Lagerbuchung für diesen Sud sperren (keine automatische Ab-/Rückbuchung beim Speichern – für historische, bereits abgeschlossene Sude)
+    </label>
   </section>
 
   <section class="card">

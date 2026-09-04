@@ -74,6 +74,13 @@ class Batch(SQLModel, table=True):
     recorded_ibu: Optional[float] = None
     recorded_abv_text: Optional[str] = None
 
+    # Für historische/bereits abgeschlossene Sude (z.B. nachträglich mit dem
+    # Lagerbestand verknüpfte Importe): verhindert, dass das Speichern
+    # dieses Suds automatische Lagerbuchungen auslöst oder verändert - die
+    # Zutaten wurden ja bereits real verbraucht, ohne dass der aktuelle
+    # Bestand rückwirkend etwas damit zu tun haben soll.
+    inventory_deduction_locked: bool = False
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
