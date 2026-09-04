@@ -13,26 +13,36 @@
     <option value="Obergärig" {% if fermentation_type=="Obergärig" %}selected{% endif %}>Obergärig</option>
     <option value="Untergärig" {% if fermentation_type=="Untergärig" %}selected{% endif %}>Untergärig</option>
   </select>
-  <div>
-    <select name="ingredient_ids" multiple size="6">
-      <optgroup label="Malz">
+  <details class="ingredient-filter">
+    <summary>Zutaten{% if ingredient_ids %} ({{ ingredient_ids|length }}){% endif %}</summary>
+    <div class="ingredient-filter-panel">
+      <p class="hint">Zeigt Sude, die <strong>alle</strong> angehakten Zutaten enthalten.</p>
+      {% if inventory.malz %}
+      <fieldset>
+        <legend>Malz</legend>
         {% for i in inventory.malz %}
-        <option value="{{ i.id }}" {% if i.id in ingredient_ids %}selected{% endif %}>{{ i.name }}</option>
+        <label><input type="checkbox" name="ingredient_ids" value="{{ i.id }}" {% if i.id in ingredient_ids %}checked{% endif %}> {{ i.name }}</label>
         {% endfor %}
-      </optgroup>
-      <optgroup label="Hopfen">
+      </fieldset>
+      {% endif %}
+      {% if inventory.hopfen %}
+      <fieldset>
+        <legend>Hopfen</legend>
         {% for i in inventory.hopfen %}
-        <option value="{{ i.id }}" {% if i.id in ingredient_ids %}selected{% endif %}>{{ i.name }}</option>
+        <label><input type="checkbox" name="ingredient_ids" value="{{ i.id }}" {% if i.id in ingredient_ids %}checked{% endif %}> {{ i.name }}</label>
         {% endfor %}
-      </optgroup>
-      <optgroup label="Hefe">
+      </fieldset>
+      {% endif %}
+      {% if inventory.hefe %}
+      <fieldset>
+        <legend>Hefe</legend>
         {% for i in inventory.hefe %}
-        <option value="{{ i.id }}" {% if i.id in ingredient_ids %}selected{% endif %}>{{ i.name }}</option>
+        <label><input type="checkbox" name="ingredient_ids" value="{{ i.id }}" {% if i.id in ingredient_ids %}checked{% endif %}> {{ i.name }}</label>
         {% endfor %}
-      </optgroup>
-    </select>
-    <p class="hint">Zutatenkombination: Mehrfachauswahl mit Strg/Cmd - zeigt Sude, die <strong>alle</strong> ausgewählten Zutaten enthalten.</p>
-  </div>
+      </fieldset>
+      {% endif %}
+    </div>
+  </details>
   <button class="btn" type="submit">Suchen</button>
   {% if q or fermentation_type or ingredient_ids %}<a class="btn" href="/batches">Zurücksetzen</a>{% endif %}
 </form>
