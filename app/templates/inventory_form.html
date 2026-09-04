@@ -19,8 +19,9 @@
   <label>Spezifikation (z.B. Alphasäure, Emulsifier)</label>
   <input type="text" name="spec" value="{{ item.spec if item else '' }}">
 
-  <label>Eigenfarbe des Malzes in °EBC (nur bei Malz; für die automatische Berechnung der Bierfarbe im Sud). Einzelwert oder Bereich wie auf dem Malz-Datenblatt, z.B. "4-6" - der Mittelwert wird automatisch verwendet.</label>
+  <label>Eigenfarbe des Malzes in °EBC (nur bei Malz)</label>
   <input type="text" inputmode="decimal" name="color_ebc" placeholder="z.B. 4-6" value="{{ item.color_ebc if item and item.color_ebc is not none else '' }}">
+  <p class="hint">Wird für die automatische Berechnung der Bierfarbe im Sud verwendet. Einzelwert oder Bereich wie auf dem Malz-Datenblatt (z.B. "4-6") - bei einem Bereich wird automatisch der Mittelwert genutzt.</p>
 
   <label>Einheit</label>
   <input type="text" name="unit" value="{{ item.unit if item else 'kg' }}">
