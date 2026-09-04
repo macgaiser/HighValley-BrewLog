@@ -32,7 +32,7 @@
     {% for b in batches %}
     <tr onclick="window.location='/batches/{{ b.id }}'" class="clickable-row">
       <td>#{{ b.batch_number }}</td>
-      <td>{{ b.brew_date or "–" }}</td>
+      <td>{{ b.brew_date|de_date }}</td>
       <td>{{ b.name }}</td>
       <td>{{ b.fermentation_type }}</td>
       <td>{{ og_display.get(b.id, "–") }}</td>
