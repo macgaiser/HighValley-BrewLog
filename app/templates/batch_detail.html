@@ -10,7 +10,7 @@
     </form>
   </div>
 </div>
-<p class="subtitle">{{ batch.style }} · {{ batch.fermentation_type }} · {{ batch.brew_date or "kein Datum" }}</p>
+<p class="subtitle">{{ batch.style }} · {{ batch.fermentation_type }} · {{ batch.brew_date|de_date if batch.brew_date else "kein Datum" }}</p>
 
 <div class="stat-grid">
   <div class="stat"><span class="stat-label">Stammwürze</span><span class="stat-value">{{ m.og_plato|fmt }} °P</span></div>
@@ -40,7 +40,7 @@
   </section>
 
   <section class="card">
-    <h2><img class="step-icon" src="/static/img/step-schroten.png" alt="">Schüttung ({{ m.total_grain_kg|fmt }} kg)</h2>
+    <h2><span>Schüttung ({{ m.total_grain_kg|fmt }} kg)</span><img class="step-icon" src="/static/img/step-schroten.png" alt=""></h2>
     <table class="mini-table">
       {% for g in batch.grain_additions %}
       <tr><td>{{ g.malt_name }}</td><td>{{ g.amount_kg|fmt }} kg</td></tr>
@@ -52,7 +52,7 @@
 </div>
 
 <section class="card">
-  <h2><img class="step-icon" src="/static/img/step-maischen.png" alt="">Maischplan</h2>
+  <h2><span>Maischplan</span><img class="step-icon" src="/static/img/step-maischen.png" alt=""></h2>
   <table class="mini-table">
     <thead><tr><th>Rast</th><th>Temperatur</th><th>Dauer</th><th>Kommentar</th></tr></thead>
     {% for s in batch.mash_steps %}
@@ -64,7 +64,7 @@
 </section>
 
 <section class="card">
-  <h2><img class="step-icon" src="/static/img/step-kochen.png" alt="">Würzekochen {% if batch.boil_time_min %}({{ batch.boil_time_min|fmt(0) }} min){% endif %}</h2>
+  <h2><span>Würzekochen {% if batch.boil_time_min %}({{ batch.boil_time_min|fmt(0) }} min){% endif %}</span><img class="step-icon" src="/static/img/step-kochen.png" alt=""></h2>
   <table class="mini-table">
     <thead><tr><th>Hopfen</th><th>Alpha</th><th>Menge</th><th>Zeit</th><th>Typ</th><th>IBU</th></tr></thead>
     {% for h in batch.hop_additions %}
@@ -84,7 +84,7 @@
 
 <div class="grid-2">
   <section class="card">
-    <h2><img class="step-icon" src="/static/img/step-kuehlen.png" alt="">Hefegabe</h2>
+    <h2><span>Hefegabe</span><img class="step-icon" src="/static/img/step-kuehlen.png" alt=""></h2>
     <table class="mini-table">
       {% for y in batch.yeast_additions %}
       <tr><td>{{ y.yeast_name }}</td><td>{{ y.generation_label }}</td><td>{{ y.amount|fmt(0) }} {{ y.unit }}</td><td>{{ y.pitch_temperature_c|fmt(0) }} °C</td></tr>
@@ -108,7 +108,7 @@
 
 <div class="grid-2">
   <section class="card">
-    <h2><img class="step-icon" src="/static/img/step-abfuellen.png" alt="">Karbonisierung</h2>
+    <h2><span>Karbonisierung</span><img class="step-icon" src="/static/img/step-abfuellen.png" alt=""></h2>
     <table class="mini-table">
       {% for c in batch.carbonation_entries %}
       <tr><td>{{ c.label }}</td><td>{{ c.sugar_g|fmt(1) }} g</td><td>je {{ c.bottle_volume_l|fmt(2) }} l Flasche</td></tr>
@@ -131,12 +131,12 @@
 </div>
 
 <section class="card">
-  <h2><img class="step-icon" src="/static/img/step-gaeren.png" alt="">Gärverlauf</h2>
+  <h2><span>Gärverlauf</span><img class="step-icon" src="/static/img/step-gaeren.png" alt=""></h2>
   <table class="mini-table">
     <thead><tr><th>Datum</th><th>Brix</th><th>Kommentar</th></tr></thead>
     {% for f in batch.fermentation_entries %}
     <tr>
-      <td>{{ f.entry_date or "–" }}</td>
+      <td>{{ f.entry_date|de_date }}</td>
       <td>{{ f.brix|fmt(1) }} °Brix</td>
       <td>{{ f.comment }}</td>
     </tr>
