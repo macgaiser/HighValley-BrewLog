@@ -34,11 +34,13 @@ def inventory_new_form(request: Request):
 @router.post("/new")
 async def inventory_create(request: Request, session: Session = Depends(get_session)):
     form = await request.form()
+    color_ebc = form.get("color_ebc", "").strip()
     item = InventoryItem(
         category=InventoryCategory(form.get("category")),
         name=form.get("name", "").strip(),
         brand=form.get("brand", "").strip(),
         spec=form.get("spec", "").strip(),
+        color_ebc=float(color_ebc) if color_ebc else None,
         unit=form.get("unit", "kg").strip() or "kg",
         amount=0,
     )
@@ -63,10 +65,12 @@ def inventory_edit_form(item_id: int, request: Request, session: Session = Depen
 async def inventory_update(item_id: int, request: Request, session: Session = Depends(get_session)):
     form = await request.form()
     item = session.get(InventoryItem, item_id)
+    color_ebc = form.get("color_ebc", "").strip()
     item.category = InventoryCategory(form.get("category"))
     item.name = form.get("name", "").strip()
     item.brand = form.get("brand", "").strip()
     item.spec = form.get("spec", "").strip()
+    item.color_ebc = float(color_ebc) if color_ebc else None
     item.unit = form.get("unit", "kg").strip() or "kg"
     session.add(item)
     session.commit()

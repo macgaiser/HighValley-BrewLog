@@ -30,6 +30,8 @@ class BatchMetrics:
     abv_display: str | None = None
     ibu_is_recorded: bool = False
     abv_is_recorded: bool = False
+    color_ebc: float | None = None
+    color_is_recorded: bool = False
     malt_cost: float = 0.0
     hop_cost: float = 0.0
     yeast_cost: float = 0.0
@@ -82,6 +84,21 @@ def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
             total_grain_kg=m.total_grain_kg,
             correction_factor=settings.mash_efficiency_correction_factor,
         )
+
+    # Bierfarbe: nur berechenbar, wenn jede Schüttungsposition mit einem
+    # Malz-Lagerartikel verknüpft ist, an dem eine Eigenfarbe (EBC) hinterlegt
+    # wurde - sonst würde eine fehlende Position die Farbe unterschätzen.
+    if (
+        batch.target_volume_l
+        and batch.grain_additions
+        and all(g.inventory_item and g.inventory_item.color_ebc for g in batch.grain_additions)
+    ):
+        grain_colors = [(g.amount_kg or 0, g.inventory_item.color_ebc) for g in batch.grain_additions]
+        m.color_ebc = formulas.beer_color_ebc(grain_colors, batch.target_volume_l)
+
+    if not m.color_ebc and batch.color_ebc:
+        m.color_ebc = batch.color_ebc
+        m.color_is_recorded = True
 
     fermentation_readings = [e for e in batch.fermentation_entries if e.brix is not None]
     if fermentation_readings and m.og_plato:

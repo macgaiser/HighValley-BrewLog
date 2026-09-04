@@ -13,15 +13,21 @@ erreichbar.
   ein Excel-Tab pro Sud.
 - **Automatisch berechnete Kennzahlen**: Bittere (IBU, Tinseth-Formel),
   Alkoholgehalt und Vergärungsgrad (Refraktometer-Korrektur nach Sean
-  Terrill), Sudhausausbeute, Materialkosten je Sud und je 0,5-l-Flasche.
-  Diese Formeln sind fachlich korrigierte Standardformeln aus der
-  Brauliteratur – die ursprüngliche Excel-Vorlage enthielt u.a. eine
-  Alkohol-Formel, die nie funktioniert hat (`#NAME?` in jedem Sud), siehe
-  `app/formulas.py` für Quellenangaben.
+  Terrill), Bierfarbe (EBC, Morey-Gleichung), Sudhausausbeute,
+  Materialkosten je Sud und je 0,5-l-Flasche. Diese Formeln sind fachlich
+  korrigierte Standardformeln aus der Brauliteratur – die ursprüngliche
+  Excel-Vorlage enthielt u.a. eine Alkohol-Formel, die nie funktioniert hat
+  (`#NAME?` in jedem Sud), siehe `app/formulas.py` für Quellenangaben. Die
+  Bierfarbe wird nur berechnet, wenn jede Schüttungsposition mit einem
+  Malz-Lagerartikel verknüpft ist, an dem die Eigenfarbe des Malzes (in
+  °EBC, wie vom Mälzer angegeben) hinterlegt wurde – ansonsten wird der im
+  Sud-Formular direkt eingetragene EBC-Wert übernommen.
 - **Lagerbestand** für Malz, Hopfen und Hefe: Übersicht je Kategorie,
-  manuelles Zubuchen (Einkauf) bzw. Korrekturen, und **automatische
+  manuelles Zubuchen (Einkauf) bzw. Korrekturen, **automatische
   Abbuchung** anhand der in einem Sud verwendeten Zutaten (sofern eine
-  Zutatzeile im Sud-Formular mit einem Lagerartikel verknüpft ist).
+  Zutatzeile im Sud-Formular mit einem Lagerartikel verknüpft ist), und bei
+  Malz optional eine hinterlegte Eigenfarbe (°EBC) für die automatische
+  Bierfarben-Berechnung.
 - **Einstellungen**: Durchschnittskosten für Malz/Hopfen/Hefe, Lohnkosten,
   Refraktometer-Korrekturfaktor und die für die Sudhausausbeute angenommene
   Malz-Extraktausbeute.
