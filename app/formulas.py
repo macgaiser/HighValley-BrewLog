@@ -14,6 +14,9 @@ Quellen:
   Brewer's Friend u.a. verwendet wird
 - Alkohol aus realem Extrakt: Balling-Formel (ABW), umgerechnet in ABV
 - IBU: Glenn Tinseth, "A Recreation of Ray Daniels' IBU Formula" (1997)
+- Bierfarbe: Morey-Gleichung (Daniels, "Designing Great Beers", 2000),
+  heutiger Quasi-Standard fürs Homebrewing (u.a. auch in Kleiner
+  Brauhelfer/BeerSmith verwendet)
 """
 
 from __future__ import annotations
@@ -141,3 +144,35 @@ def mash_efficiency_percent(
     if theoretical_extract_kg <= 0:
         return 0.0
     return round(extract_mass_kg / theoretical_extract_kg * 100, 1)
+
+
+# (lb/kg) / (gal/L) - wandelt Malzmenge_kg/Volumen_L direkt in
+# Malzmenge_lb/Volumen_gal um, ohne beide Größen einzeln umzurechnen.
+_LB_PER_KG_OVER_GAL_PER_L = 8.3454
+
+
+def beer_color_ebc(grain_kg_and_malt_ebc: list[tuple[float, float]], batch_volume_l: float) -> float:
+    """Bierfarbe in °EBC aus der Schüttung, nach der Morey-Gleichung:
+
+        MCU = Summe(Malzmenge_lb * Malzfarbe_Lovibond) / Ausschlagmenge_gal
+        SRM = 1.4922 * MCU^0.6859
+        EBC = SRM * 1.97
+
+    `grain_kg_and_malt_ebc` sind (Malzmenge_kg, Malzfarbe_EBC)-Paare - die
+    Farbe des einzelnen Malzes selbst, wie sie deutsche Mälzereien angeben
+    (nicht die resultierende Bierfarbe). Da die Morey-Gleichung mit
+    °Lovibond rechnet, wird die Malzfarbe näherungsweise über denselben
+    EBC/SRM-Faktor (1.97) in °Lovibond umgerechnet - diese Vereinfachung
+    ist in Brau-Software (Kleiner Brauhelfer, BeerSmith) verbreitet.
+    """
+    if batch_volume_l <= 0 or not grain_kg_and_malt_ebc:
+        return 0.0
+    mcu = sum(
+        weight_kg * (malt_ebc / 1.97) * _LB_PER_KG_OVER_GAL_PER_L
+        for weight_kg, malt_ebc in grain_kg_and_malt_ebc
+        if weight_kg > 0 and malt_ebc and malt_ebc > 0
+    ) / batch_volume_l
+    if mcu <= 0:
+        return 0.0
+    srm = 1.4922 * (mcu**0.6859)
+    return round(srm * 1.97, 1)
