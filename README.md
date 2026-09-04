@@ -70,6 +70,44 @@ Getestet mit beiden Braubuch-Dateien (Sude #1-#48 aus dem älteren Archiv,
 #49-#57 aus dem aktuellen Protokoll, insgesamt 58 Sude sowie 52
 Lagerartikel).
 
+**Wichtig:** Der Import übernimmt Zutatennamen (Malz/Hopfen/Hefe) nur als
+Text, ohne sie mit einem Lagerartikel zu verknüpfen - das gilt nur für
+Zutatzeilen, die im Sud-Formular über das Dropdown ausgewählt wurden. Ohne
+diese Verknüpfung bleiben sowohl der [Zutaten-Filter in der
+Sudübersicht](#zutaten-filter-in-der-sudübersicht) als auch die
+[automatische Lagerabbuchung](#automatische-lagerabbuchung) für importierte
+Sude wirkungslos. `scripts/link_inventory.py` (siehe unten) holt diese
+Verknüpfung nachträglich per Namensabgleich nach.
+
+## Zutaten-Filter in der Sudübersicht
+
+Die Sudübersicht hat ein Dropdown-Filtermenü ("Filter"), in dem Zutaten aus
+dem Lagerbestand per Checkbox ausgewählt werden können (Mehrfachauswahl).
+Nach Klick auf "Suchen" werden nur Sude angezeigt, die **alle** angehakten
+Zutaten enthalten (Kombinationssuche, keine Oder-Verknüpfung).
+
+Der Filter erkennt eine Zutat in einem Sud nur über die Verknüpfung mit dem
+Lagerartikel (`inventory_item_id`), nicht über den Namenstext. Diese
+Verknüpfung entsteht automatisch, wenn eine Zutatzeile im Sud-Formular über
+das jeweilige Dropdown (statt nur als Freitext) ausgewählt wird. Für Sude
+ohne diese Verknüpfung - v.a. aus dem Excel-Import, siehe oben - liefert
+der Filter auch dann kein Ergebnis, wenn der Name augenscheinlich
+übereinstimmt. Mit `scripts/link_inventory.py` lässt sich das für
+bestehende Sude nachträglich beheben:
+
+```bash
+export DATA_DIR=./data
+python scripts/link_inventory.py            # Vorschau, ändert nichts
+python scripts/link_inventory.py --apply    # verknüpft tatsächlich
+```
+
+Das Skript sucht für jede noch unverknüpfte Zutatzeile einen Lagerartikel
+mit exakt gleichem Namen (Groß-/Kleinschreibung und Leerzeichen am Rand
+werden ignoriert) in der passenden Kategorie und verknüpft ihn. Namen ohne
+eindeutigen Treffer werden am Ende aufgelistet und müssen bei Bedarf manuell
+über "Sud bearbeiten" verknüpft werden (z.B. bei Tippfehlern oder
+abweichender Schreibweise zwischen Braubuch und Lagerbestand).
+
 ## Automatische Lagerabbuchung
 
 Beim Speichern eines Suds (Anlegen **und** Bearbeiten) wird der
@@ -168,6 +206,15 @@ docker compose exec brewlog python scripts/import_xlsx.py /data/Brauprotokoll.xl
 ```
 Dazu die Excel-Datei vorher in den gemounteten `./data`-Ordner legen (dort
 liegt sie dann unter `/data/...` im Container).
+
+**Zutaten nachträglich mit dem Lagerbestand verknüpfen** (siehe
+[Zutaten-Filter in der Sudübersicht](#zutaten-filter-in-der-sudübersicht) -
+nötig, damit Filter und automatische Abbuchung auch für importierte Sude
+funktionieren):
+```bash
+docker compose exec brewlog python scripts/link_inventory.py            # Vorschau
+docker compose exec brewlog python scripts/link_inventory.py --apply    # verknüpft tatsächlich
+```
 
 **Persistenz:** Der Ordner `./data` (gemountet nach `/data`) enthält die
 komplette SQLite-Datenbank. Diesen Ordner bei Backups berücksichtigen.
