@@ -13,10 +13,31 @@
     <option value="Obergärig" {% if fermentation_type=="Obergärig" %}selected{% endif %}>Obergärig</option>
     <option value="Untergärig" {% if fermentation_type=="Untergärig" %}selected{% endif %}>Untergärig</option>
   </select>
+  <div>
+    <select name="ingredient_ids" multiple size="6">
+      <optgroup label="Malz">
+        {% for i in inventory.malz %}
+        <option value="{{ i.id }}" {% if i.id in ingredient_ids %}selected{% endif %}>{{ i.name }}</option>
+        {% endfor %}
+      </optgroup>
+      <optgroup label="Hopfen">
+        {% for i in inventory.hopfen %}
+        <option value="{{ i.id }}" {% if i.id in ingredient_ids %}selected{% endif %}>{{ i.name }}</option>
+        {% endfor %}
+      </optgroup>
+      <optgroup label="Hefe">
+        {% for i in inventory.hefe %}
+        <option value="{{ i.id }}" {% if i.id in ingredient_ids %}selected{% endif %}>{{ i.name }}</option>
+        {% endfor %}
+      </optgroup>
+    </select>
+    <p class="hint">Zutatenkombination: Mehrfachauswahl mit Strg/Cmd - zeigt Sude, die <strong>alle</strong> ausgewählten Zutaten enthalten.</p>
+  </div>
   <button class="btn" type="submit">Suchen</button>
-  {% if q or fermentation_type %}<a class="btn" href="/batches">Zurücksetzen</a>{% endif %}
+  {% if q or fermentation_type or ingredient_ids %}<a class="btn" href="/batches">Zurücksetzen</a>{% endif %}
 </form>
 
+<div class="table-scroll">
 <table class="table">
   <thead>
     <tr>
@@ -36,11 +57,12 @@
       <td>{{ b.name }}</td>
       <td>{{ b.fermentation_type }}</td>
       <td>{{ og_display.get(b.id, "–") }}</td>
-      <td><a href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()">Bearbeiten</a></td>
+      <td><a class="btn btn-small" href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()">Bearbeiten</a></td>
     </tr>
     {% else %}
     <tr><td colspan="6">Noch keine Sude erfasst.</td></tr>
     {% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}
