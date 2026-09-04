@@ -116,13 +116,27 @@ h1, h2, h3 {
   line-height: 1;
   letter-spacing: 0.03em;
 }
+.brand-suffix {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 0.15rem;
+}
 
 .topbar nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  justify-content: flex-end;
+  gap: 0.7rem;
 }
 .nav-btn {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  padding: 0.6rem 1.5rem;
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.4);
   color: white;
@@ -131,6 +145,11 @@ h1, h2, h3 {
   background: white;
   color: var(--brown);
   border-color: white;
+}
+.nav-btn-icon {
+  font-size: 1.4rem;
+  padding: 0.5rem 1rem;
+  line-height: 1;
 }
 
 @media (max-width: 700px) {
@@ -141,7 +160,10 @@ h1, h2, h3 {
   .brand-logo img { height: 76px; }
   .brand-name { font-size: 1.2rem; }
   .brand-number { font-size: 0.4rem; }
-  .nav-btn { padding: 0.35rem 0.8rem; font-size: 0.85rem; }
+  .brand-suffix { font-size: 0.55rem; }
+  .topbar nav { width: 100%; justify-content: flex-end; }
+  .nav-btn { padding: 0.45rem 1rem; font-size: 1rem; }
+  .nav-btn-icon { padding: 0.4rem 0.8rem; font-size: 1.2rem; }
 }
 
 .container {
