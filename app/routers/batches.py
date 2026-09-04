@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
 
@@ -55,6 +55,7 @@ def batch_list(
     request: Request,
     q: str = "",
     fermentation_type: str = "",
+    ingredient_ids: list[int] = Query(default=[]),
     session: Session = Depends(get_session),
 ):
     stmt = select(Batch).order_by(Batch.batch_number.desc())
@@ -79,6 +80,29 @@ def batch_list(
 
         batches = [b for b in batches if matches(b)]
 
+    if ingredient_ids:
+        wanted_ids = set(ingredient_ids)
+
+        def used_ingredient_ids(b: Batch) -> set[int]:
+            used: set[int] = set()
+            for g in b.grain_additions:
+                if g.inventory_item_id:
+                    used.add(g.inventory_item_id)
+            for h in b.hop_additions:
+                if h.inventory_item_id:
+                    used.add(h.inventory_item_id)
+            for d in b.dry_hop_additions:
+                if d.inventory_item_id:
+                    used.add(d.inventory_item_id)
+            for y in b.yeast_additions:
+                if y.inventory_item_id:
+                    used.add(y.inventory_item_id)
+            return used
+
+        # Kombination: der Sud muss ALLE ausgewählten Zutaten enthalten, nicht
+        # nur irgendeine davon.
+        batches = [b for b in batches if wanted_ids.issubset(used_ingredient_ids(b))]
+
     settings = session.get(Settings, 1)
     og_display: dict[int, float] = {}
     for b in batches:
@@ -94,6 +118,8 @@ def batch_list(
             "batches": batches,
             "q": q,
             "fermentation_type": fermentation_type,
+            "ingredient_ids": ingredient_ids,
+            "inventory": _inventory_options(session),
             "og_display": og_display,
         },
     )

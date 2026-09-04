@@ -10,24 +10,25 @@
 {% for cat, items in grouped.items() %}
 <section class="card">
   <h2>{{ labels[cat] }}</h2>
+  <div class="table-scroll">
   <table class="table">
     <thead><tr><th>Name</th><th>Marke</th><th>Spezifikation</th><th>Bestand</th><th>Zubuchen / Korrektur</th><th></th></tr></thead>
     <tbody>
       {% for item in items %}
-      <tr>
-        <td><a href="/inventory/{{ item.id }}">{{ item.name }}</a></td>
+      <tr onclick="window.location='/inventory/{{ item.id }}'" class="clickable-row">
+        <td>{{ item.name }}</td>
         <td>{{ item.brand }}</td>
         <td>{{ item.spec }}{% if item.color_ebc %} · {{ item.color_ebc|fmt(1) }} EBC{% endif %}</td>
         <td class="inv-amount {% if item.amount <= 0 %}inv-low{% endif %}">{{ item.amount|round(2) }} {{ item.unit }}</td>
         <td>
-          <form class="inline-form" method="post" action="/inventory/{{ item.id }}/restock">
+          <form class="inline-form" method="post" action="/inventory/{{ item.id }}/restock" onclick="event.stopPropagation()">
             <input type="number" step="0.01" name="amount" placeholder="± Menge" style="width:100px" required>
             <input type="text" name="note" placeholder="Notiz (optional)" style="width:160px">
             <button class="btn btn-small" type="submit">Buchen</button>
           </form>
         </td>
         <td>
-          <a href="/inventory/{{ item.id }}/edit">Bearbeiten</a>
+          <a class="btn btn-small" href="/inventory/{{ item.id }}/edit" onclick="event.stopPropagation()">Bearbeiten</a>
         </td>
       </tr>
       {% else %}
@@ -35,6 +36,7 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </section>
 {% endfor %}
 {% endblock %}

@@ -99,7 +99,7 @@ h1, h2, h3 {
 }
 .topbar .brand > span {
   font-family: var(--font-display);
-  font-size: 2.6rem;
+  font-size: 3.9rem;
   line-height: 1;
   letter-spacing: 0.03em;
 }
@@ -161,10 +161,19 @@ h1, h2, h3 {
 .btn-danger:hover { background: #fbeceb; }
 .btn-small { padding: 0.25rem 0.7rem; font-size: 0.85rem; border-radius: 999px; }
 
-.searchbar { display: flex; gap: 0.5rem; margin: 1rem 0; }
-.searchbar input { flex: 1; padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; }
-.searchbar select { padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; background: white; }
+.searchbar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.5rem; margin: 1rem 0; }
+.searchbar input { flex: 1; min-width: 200px; padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; }
+.searchbar select:not([multiple]) { padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; background: white; }
+.searchbar select[multiple] {
+  min-width: 220px;
+  padding: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+}
+.searchbar .hint { margin: 0.3rem 0 0; max-width: 260px; }
 
+.table-scroll { overflow-x: auto; }
 .table, .mini-table {
   width: 100%;
   border-collapse: collapse;
