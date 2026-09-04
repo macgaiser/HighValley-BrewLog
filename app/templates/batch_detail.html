@@ -11,13 +11,16 @@
   </div>
 </div>
 <p class="subtitle">{{ batch.style }} · {{ batch.fermentation_type }} · {{ batch.brew_date|de_date if batch.brew_date else "kein Datum" }}</p>
+{% if batch.inventory_deduction_locked %}
+<p class="badge-locked">🔒 Lagerbuchung gesperrt – dieser Sud verändert beim Speichern keinen Lagerbestand</p>
+{% endif %}
 
 <div class="stat-grid">
   <div class="stat"><span class="stat-label">Stammwürze</span><span class="stat-value">{{ m.og_plato|fmt }} °P</span></div>
   <div class="stat"><span class="stat-label">Bittere{% if m.ibu_is_recorded %}*{% endif %}</span><span class="stat-value">{{ m.ibu_total|fmt(0) }} IBU</span></div>
   <div class="stat"><span class="stat-label">Farbe{% if m.color_is_recorded %}*{% endif %}</span><span class="stat-value">{{ m.color_ebc|fmt(0) }} EBC</span></div>
   <div class="stat"><span class="stat-label">Alkohol{% if m.abv_is_recorded %}*{% endif %}</span><span class="stat-value">{{ m.abv_display or "–" }}</span></div>
-  <div class="stat"><span class="stat-label">Vergärungsgrad</span><span class="stat-value">{{ m.attenuation_percent|fmt }} %</span></div>
+  <div class="stat"><span class="stat-label">Endvergärungsgrad (EVG)</span><span class="stat-value">{{ m.attenuation_percent|fmt }} %</span></div>
   <div class="stat"><span class="stat-label">Sudhausausbeute</span><span class="stat-value">{{ m.mash_efficiency_percent|fmt }} %</span></div>
   <div class="stat"><span class="stat-label">Kosten / Sud{% if m.cost_is_incomplete %}*{% endif %}</span><span class="stat-value">{{ m.total_cost|fmt(2) }} €</span></div>
   <div class="stat"><span class="stat-label">Kosten / 0,5 l{% if m.cost_is_incomplete %}*{% endif %}</span><span class="stat-value">{{ m.cost_per_0_5l|fmt(2) }} €</span></div>
@@ -135,8 +138,9 @@
   <h2><span>Gärverlauf</span><img class="step-icon" src="/static/img/step-gaeren.png" alt=""></h2>
   <table class="mini-table">
     <thead><tr><th>Datum</th><th>Brix</th><th>Kommentar</th></tr></thead>
+    <tbody>
     {% for f in batch.fermentation_entries %}
-    <tr>
+    <tr onclick="window.location='/batches/{{ batch.id }}/fermentation/{{ f.id }}/edit'" class="clickable-row">
       <td>{{ f.entry_date|de_date }}</td>
       <td>{{ f.brix|fmt(1) }} °Brix</td>
       <td>{{ f.comment }}</td>
@@ -144,8 +148,9 @@
     {% else %}
     <tr><td colspan="3">Noch keine Messungen.</td></tr>
     {% endfor %}
+    </tbody>
   </table>
-  <p class="hint">Vergärungsgrad und Alkohol oben in der Übersicht werden aus der jeweils aktuellsten Messung berechnet (Sean-Terrill-Refraktometerkorrektur).</p>
+  <p class="hint">Vergärungsgrad und Alkohol oben in der Übersicht werden aus der jeweils aktuellsten Messung berechnet (Sean-Terrill-Refraktometerkorrektur). Auf eine Zeile klicken, um sie zu bearbeiten.</p>
   <form class="inline-form" method="post" action="/batches/{{ batch.id }}/fermentation">
     <input type="date" name="entry_date" value="{{ today }}" required>
     <input type="number" step="0.1" name="brix" placeholder="°Brix" required>
@@ -156,12 +161,24 @@
 
 <section class="card">
   <h2>Kommentare</h2>
-  <ul class="comment-list">
+  <table class="mini-table">
+    <thead><tr><th>Datum</th><th>Kommentar</th></tr></thead>
+    <tbody>
     {% for c in batch.comments %}
-    <li>{{ c.text }}</li>
+    <tr onclick="window.location='/batches/{{ batch.id }}/comments/{{ c.id }}/edit'" class="clickable-row">
+      <td>{{ c.entry_date|de_date if c.entry_date else "–" }}</td>
+      <td>{{ c.text }}</td>
+    </tr>
     {% else %}
-    <li>–</li>
+    <tr><td colspan="2">Noch keine Kommentare.</td></tr>
     {% endfor %}
-  </ul>
+    </tbody>
+  </table>
+  <p class="hint">Auf eine Zeile klicken, um sie zu bearbeiten.</p>
+  <form class="comment-add-form" method="post" action="/batches/{{ batch.id }}/comments">
+    <input type="date" name="entry_date" value="{{ today }}" required>
+    <textarea name="text" rows="3" placeholder="Kommentar" required></textarea>
+    <button class="btn btn-primary" type="submit">Kommentar hinzufügen</button>
+  </form>
 </section>
 {% endblock %}

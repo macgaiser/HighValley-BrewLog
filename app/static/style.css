@@ -40,7 +40,7 @@ body::before {
   height: 36vh;
   min-height: 240px;
   max-height: 440px;
-  background-image: url("/static/img/bg-valley.jpg");
+  background-image: url("/static/img/bg-valley.png");
   background-repeat: no-repeat;
   background-position: top center;
   background-size: cover;
@@ -314,11 +314,34 @@ h1, h2, h3 {
 
 .hint { color: var(--muted); font-size: 0.85rem; }
 
+.badge-locked {
+  display: inline-block;
+  margin: 0.4rem 0 0;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  background: #f2ece2;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .comment-list { padding-left: 1.2rem; }
 .comment-list li { margin-bottom: 0.3rem; }
 
 .inline-form { display: flex; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
 .inline-form input { padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; }
+
+.comment-add-form { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; align-items: flex-start; }
+.comment-add-form input[type="date"] { padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; }
+.comment-add-form textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+}
 
 form.card label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.2rem; margin-top: 0.7rem; }
 form.card input, form.card select, form.card textarea {
@@ -330,6 +353,19 @@ form.card input, form.card select, form.card textarea {
   font-family: inherit;
 }
 .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.8rem; }
+
+form.card label.field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-top: 1rem;
+}
+form.card label.field-checkbox input[type="checkbox"] {
+  width: auto;
+  flex-shrink: 0;
+}
 
 .form-table input, .form-table select { padding: 0.35rem; border: 1px solid var(--border); border-radius: 5px; width: 100%; }
 .form-table td { padding: 0.3rem; }
