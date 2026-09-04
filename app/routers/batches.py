@@ -180,8 +180,6 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
         session.delete(existing)
     for existing in list(batch.brew_day_tasks):
         session.delete(existing)
-    for existing in list(batch.comments):
-        session.delete(existing)
     session.flush()
 
     names = form.getlist("grain_malt_name")
@@ -312,10 +310,6 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
             )
         )
 
-    comments_text = form.get("comments_text", "") or ""
-    for i, line in enumerate(l for l in comments_text.splitlines() if l.strip()):
-        session.add(BatchComment(batch_id=batch.id, position=i, text=line.strip()))
-
     session.commit()
     session.refresh(batch)
     sync_batch_deductions(session, batch)
@@ -343,13 +337,11 @@ def batch_detail(batch_id: int, request: Request, session: Session = Depends(get
 @router.get("/{batch_id}/edit")
 def batch_edit_form(batch_id: int, request: Request, session: Session = Depends(get_session)):
     batch = session.get(Batch, batch_id)
-    comments_text = "\n".join(c.text for c in batch.comments)
     return templates.TemplateResponse(
         "batch_form.html",
         {
             "request": request,
             "batch": batch,
-            "comments_text": comments_text,
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
         },
@@ -395,5 +387,67 @@ async def add_fermentation_entry(batch_id: int, request: Request, session: Sessi
             comment=form.get("comment", "").strip(),
         )
     )
+    session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
+
+
+@router.get("/{batch_id}/fermentation/{entry_id}/edit")
+def fermentation_entry_edit_form(batch_id: int, entry_id: int, request: Request, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    entry = session.get(FermentationLogEntry, entry_id)
+    return templates.TemplateResponse(
+        "fermentation_entry_form.html",
+        {"request": request, "batch": batch, "entry": entry, "today": date.today().isoformat()},
+    )
+
+
+@router.post("/{batch_id}/fermentation/{entry_id}/edit")
+async def fermentation_entry_update(batch_id: int, entry_id: int, request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    entry = session.get(FermentationLogEntry, entry_id)
+    entry.entry_date = _d(form.get("entry_date")) or date.today()
+    entry.brix = _f(form.get("brix"))
+    entry.comment = form.get("comment", "").strip()
+    session.add(entry)
+    session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
+
+
+@router.post("/{batch_id}/comments")
+async def add_comment(batch_id: int, request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    batch = session.get(Batch, batch_id)
+    text = form.get("text", "").strip()
+    if text:
+        position = len(batch.comments)
+        session.add(
+            BatchComment(
+                batch_id=batch_id,
+                position=position,
+                entry_date=_d(form.get("entry_date")) or date.today(),
+                text=text,
+            )
+        )
+        session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
+
+
+@router.get("/{batch_id}/comments/{comment_id}/edit")
+def comment_edit_form(batch_id: int, comment_id: int, request: Request, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    comment = session.get(BatchComment, comment_id)
+    return templates.TemplateResponse(
+        "comment_form.html",
+        {"request": request, "batch": batch, "comment": comment, "today": date.today().isoformat()},
+    )
+
+
+@router.post("/{batch_id}/comments/{comment_id}/edit")
+async def comment_update(batch_id: int, comment_id: int, request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    comment = session.get(BatchComment, comment_id)
+    comment.entry_date = _d(form.get("entry_date")) or date.today()
+    comment.text = form.get("text", "").strip()
+    session.add(comment)
     session.commit()
     return RedirectResponse(f"/batches/{batch_id}", status_code=303)

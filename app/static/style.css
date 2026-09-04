@@ -331,6 +331,18 @@ h1, h2, h3 {
 .inline-form { display: flex; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
 .inline-form input { padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; }
 
+.comment-add-form { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; align-items: flex-start; }
+.comment-add-form input[type="date"] { padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; }
+.comment-add-form textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
 form.card label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.2rem; margin-top: 0.7rem; }
 form.card input, form.card select, form.card textarea {
   width: 100%;
