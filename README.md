@@ -21,7 +21,8 @@ erreichbar.
 - **Lagerbestand** für Malz, Hopfen und Hefe: Übersicht je Kategorie,
   manuelles Zubuchen (Einkauf) bzw. Korrekturen, und **automatische
   Abbuchung** anhand der in einem Sud verwendeten Zutaten (sofern eine
-  Zutatzeile im Sud-Formular mit einem Lagerartikel verknüpft ist).
+  Zutatzeile im Sud-Formular mit einem Lagerartikel verknüpft ist). Details
+  dazu im Abschnitt [Automatische Lagerabbuchung](#automatische-lagerabbuchung).
 - **Einstellungen**: Durchschnittskosten für Malz/Hopfen/Hefe, Lohnkosten,
   Refraktometer-Korrekturfaktor und die für die Sudhausausbeute angenommene
   Malz-Extraktausbeute.
@@ -62,6 +63,33 @@ Braubuch: ..." am Sud übernommen.
 Getestet mit beiden Braubuch-Dateien (Sude #1-#48 aus dem älteren Archiv,
 #49-#57 aus dem aktuellen Protokoll, insgesamt 58 Sude sowie 52
 Lagerartikel).
+
+## Automatische Lagerabbuchung
+
+Beim Speichern eines Suds (Anlegen **und** Bearbeiten) wird der
+Lagerbestand automatisch angepasst, ohne dass dafür ein separater Schritt
+nötig ist:
+
+- **Voraussetzung ist die Verknüpfung**: Nur wenn eine Zutatzeile im
+  Sud-Formular (Schüttung, Würzekochen/Hopfengaben, Stopfhopfen, Hefegabe)
+  über das jeweilige Dropdown mit einem konkreten Lagerartikel verknüpft
+  ist, wird davon auch etwas abgebucht. Ein reiner Freitext-Name ohne
+  Verknüpfung bucht nichts ab.
+- **Abbuchung beim Speichern**: Malz in kg, Hopfen/Stopfhopfen in g und
+  Hefe in der jeweils hinterlegten Einheit werden vom Bestand des
+  verknüpften Lagerartikels abgezogen.
+- **Idempotent beim Bearbeiten**: Beim erneuten Speichern eines bereits
+  bestehenden Suds werden zunächst alle bisherigen Buchungen dieses Suds
+  vollständig zurückgebucht und danach anhand der aktuellen Zutatenliste
+  neu gebucht (`app/inventory.py`, `sync_batch_deductions`). Ein Sud lässt
+  sich also beliebig oft bearbeiten, ohne dass der Lagerbestand
+  "wegdriftet".
+- **Rückbuchung beim Löschen**: Wird ein Sud gelöscht, werden alle seine
+  Abbuchungen ebenfalls automatisch rückgängig gemacht.
+- **Nachvollziehbarkeit**: Jede Buchung (manuelle Zubuchung wie auch
+  automatische Abbuchung durch einen Sud) landet im Buchungsverlauf des
+  jeweiligen Lagerartikels (`/inventory/{id}`), inklusive Verweis auf den
+  betroffenen Sud.
 
 ## Lokale Entwicklung
 
