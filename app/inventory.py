@@ -5,6 +5,12 @@ Die Abbuchung ist idempotent: beim Speichern eines Sud werden zunächst alle
 bisherigen Buchungen dieses Suds rückgängig gemacht (Bestand wird
 zurückgebucht) und dann anhand des aktuellen Zutatenstands neu gebucht. So
 bleibt der Bestand auch bei mehrfachem Bearbeiten eines Suds korrekt.
+
+Ist `Batch.inventory_deduction_locked` gesetzt, wird nach dem Zurückbuchen
+bestehender Buchungen keine neue Abbuchung mehr vorgenommen - gedacht für
+historische Sude, deren Zutaten längst real verbraucht wurden und die man
+gefahrlos nachträglich bearbeiten (z.B. mit dem Lagerbestand verknüpfen)
+können soll, ohne den aktuellen Bestand rückwirkend zu verändern.
 """
 
 from __future__ import annotations
@@ -40,6 +46,15 @@ def sync_batch_deductions(session: Session, batch: Batch) -> None:
             session.add(item)
         session.delete(tx)
     session.flush()
+
+    # Für gesperrte Sude (z.B. historische/bereits abgeschlossene Importe)
+    # werden bestehende Buchungen zwar oben zurückgebucht (falls vorhanden -
+    # etwa wenn ein Sud nachträglich gesperrt wird), es entstehen aber keine
+    # neuen. Der Bestand bleibt dadurch unangetastet, ganz gleich wie oft
+    # dieser Sud gespeichert wird.
+    if batch.inventory_deduction_locked:
+        session.commit()
+        return
 
     consumption: dict[int, float] = {}
 
