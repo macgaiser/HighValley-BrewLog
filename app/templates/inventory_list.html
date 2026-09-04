@@ -17,7 +17,7 @@
       <tr>
         <td><a href="/inventory/{{ item.id }}">{{ item.name }}</a></td>
         <td>{{ item.brand }}</td>
-        <td>{{ item.spec }}</td>
+        <td>{{ item.spec }}{% if item.color_ebc %} · {{ item.color_ebc|fmt(1) }} EBC{% endif %}</td>
         <td class="inv-amount {% if item.amount <= 0 %}inv-low{% endif %}">{{ item.amount|round(2) }} {{ item.unit }}</td>
         <td>
           <form class="inline-form" method="post" action="/inventory/{{ item.id }}/restock">

@@ -118,6 +118,7 @@ class GrainAddition(SQLModel, table=True):
     inventory_item_id: Optional[int] = Field(default=None, foreign_key="inventoryitem.id")
 
     batch: Batch = Relationship(back_populates="grain_additions")
+    inventory_item: Optional["InventoryItem"] = Relationship()
 
 
 class MashStep(SQLModel, table=True):
@@ -240,7 +241,8 @@ class InventoryItem(SQLModel, table=True):
     category: InventoryCategory
     name: str
     brand: str = ""
-    spec: str = ""  # z.B. EBC-Bereich, Alphasäure, Emulsifier
+    spec: str = ""  # z.B. Alphasäure, Emulsifier
+    color_ebc: Optional[float] = None  # Eigenfarbe des Malzes selbst (nur Kategorie Malz)
     amount: float = 0
     unit: str = "kg"
     updated_at: datetime = Field(default_factory=datetime.utcnow)

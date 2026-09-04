@@ -16,8 +16,11 @@
   <label>Marke</label>
   <input type="text" name="brand" value="{{ item.brand if item else '' }}">
 
-  <label>Spezifikation (z.B. EBC-Bereich, Alphasäure, Emulsifier)</label>
+  <label>Spezifikation (z.B. Alphasäure, Emulsifier)</label>
   <input type="text" name="spec" value="{{ item.spec if item else '' }}">
+
+  <label>Eigenfarbe des Malzes in °EBC (nur bei Malz; für die automatische Berechnung der Bierfarbe im Sud)</label>
+  <input type="number" step="0.1" name="color_ebc" value="{{ item.color_ebc if item and item.color_ebc is not none else '' }}">
 
   <label>Einheit</label>
   <input type="text" name="unit" value="{{ item.unit if item else 'kg' }}">
