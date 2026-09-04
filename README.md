@@ -134,6 +134,17 @@ nötig ist:
   automatische Abbuchung durch einen Sud) landet im Buchungsverlauf des
   jeweiligen Lagerartikels (`/inventory/{id}`), inklusive Verweis auf den
   betroffenen Sud.
+- **Lagerbuchung sperren**: Ein Sud lässt sich im Formular über die
+  Checkbox "Lagerbuchung für diesen Sud sperren" von der automatischen
+  Ab-/Rückbuchung ausnehmen (🔒-Kennzeichen auf der Sud-Detailseite).
+  Gedacht für historische, bereits abgeschlossene Sude - z.B. nachdem
+  `scripts/link_inventory.py` sie nachträglich mit dem Lagerbestand
+  verknüpft hat: ohne diese Sperre würde ein späteres Bearbeiten (und sei
+  es nur eine Kleinigkeit) den aktuellen Bestand rückwirkend um die damals
+  verwendete Menge reduzieren, obwohl die Zutaten längst real verbraucht
+  wurden. Bereits vorhandene Buchungen des Suds werden beim Setzen der
+  Sperre zurückgebucht; beim Entfernen der Sperre greift die automatische
+  Abbuchung beim nächsten Speichern wieder normal.
 
 ## Lokale Entwicklung
 
