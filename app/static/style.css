@@ -163,7 +163,6 @@ h1, h2, h3 {
 
 .searchbar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.5rem; margin: 1rem 0; }
 .searchbar > input[type="text"] { flex: 1; min-width: 200px; padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; }
-.searchbar select { padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; background: white; }
 
 .ingredient-filter { position: relative; }
 .ingredient-filter summary {
@@ -199,7 +198,7 @@ h1, h2, h3 {
 .ingredient-filter-panel fieldset:last-child { margin-bottom: 0; }
 .ingredient-filter-panel legend { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; font-weight: 600; padding: 0; margin-bottom: 0.2rem; }
 .ingredient-filter-panel label { display: block; font-size: 0.9rem; padding: 0.2rem 0; cursor: pointer; white-space: nowrap; }
-.ingredient-filter-panel input[type="checkbox"] { width: auto; margin-right: 0.4rem; vertical-align: middle; }
+.ingredient-filter-panel input[type="checkbox"], .ingredient-filter-panel input[type="radio"] { width: auto; margin-right: 0.4rem; vertical-align: middle; }
 
 .table-scroll { overflow-x: auto; }
 .table, .mini-table {
