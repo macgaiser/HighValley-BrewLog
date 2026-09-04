@@ -236,6 +236,7 @@ class BatchComment(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     batch_id: int = Field(foreign_key="batch.id")
     position: int = 0
+    entry_date: Optional[date] = None
     text: str
 
     batch: Batch = Relationship(back_populates="comments")

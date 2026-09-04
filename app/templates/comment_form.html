@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Kommentar bearbeiten – HighValley BrewLog{% endblock %}
+{% block content %}
+<h1>Kommentar bearbeiten</h1>
+<p class="subtitle">Sud #{{ batch.batch_number }} – {{ batch.name }}</p>
+<form class="card" method="post" action="/batches/{{ batch.id }}/comments/{{ comment.id }}/edit">
+  <label>Datum</label>
+  <input type="date" name="entry_date" value="{{ comment.entry_date or today }}">
+
+  <label>Kommentar</label>
+  <textarea name="text" rows="6" required>{{ comment.text }}</textarea>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Speichern</button>
+    <a class="btn" href="/batches/{{ batch.id }}">Abbrechen</a>
+  </div>
+</form>
+{% endblock %}
