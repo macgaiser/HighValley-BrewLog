@@ -8,15 +8,17 @@
 
 <form class="searchbar" method="get" action="/batches">
   <input type="text" name="q" placeholder="Suche nach Nummer, Name, Stil, Malz, Hopfen, Hefe…" value="{{ q }}">
-  <select name="fermentation_type">
-    <option value="">Alle Gärarten</option>
-    <option value="Obergärig" {% if fermentation_type=="Obergärig" %}selected{% endif %}>Obergärig</option>
-    <option value="Untergärig" {% if fermentation_type=="Untergärig" %}selected{% endif %}>Untergärig</option>
-  </select>
+  {% set active_filters = ingredient_ids|length + (1 if fermentation_type else 0) %}
   <details class="ingredient-filter">
-    <summary>Zutaten{% if ingredient_ids %} ({{ ingredient_ids|length }}){% endif %}</summary>
+    <summary>Filter{% if active_filters %} ({{ active_filters }}){% endif %}</summary>
     <div class="ingredient-filter-panel">
-      <p class="hint">Zeigt Sude, die <strong>alle</strong> angehakten Zutaten enthalten.</p>
+      <fieldset>
+        <legend>Gärart</legend>
+        <label><input type="radio" name="fermentation_type" value="" {% if not fermentation_type %}checked{% endif %}> Alle</label>
+        <label><input type="radio" name="fermentation_type" value="Obergärig" {% if fermentation_type=="Obergärig" %}checked{% endif %}> Obergärig</label>
+        <label><input type="radio" name="fermentation_type" value="Untergärig" {% if fermentation_type=="Untergärig" %}checked{% endif %}> Untergärig</label>
+      </fieldset>
+      <p class="hint">Zutatenkombination: zeigt Sude, die <strong>alle</strong> angehakten Zutaten enthalten.</p>
       {% if inventory.malz %}
       <fieldset>
         <legend>Malz</legend>
