@@ -8,7 +8,7 @@
     <a class="btn" href="/inventory">Zurück</a>
   </div>
 </div>
-<p class="subtitle">{{ item.category.value|capitalize }}{% if item.brand %} · {{ item.brand }}{% endif %}{% if item.spec %} · {{ item.spec }}{% endif %}</p>
+<p class="subtitle">{{ item.category.value|capitalize }}{% if item.brand %} · {{ item.brand }}{% endif %}{% if item.spec %} · {{ item.spec }}{% endif %}{% if item.color_ebc %} · {{ item.color_ebc|fmt(1) }} EBC{% endif %}</p>
 
 <div class="stat-grid">
   <div class="stat"><span class="stat-label">Aktueller Bestand</span><span class="stat-value">{{ item.amount|round(2) }} {{ item.unit }}</span></div>

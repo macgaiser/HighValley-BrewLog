@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
@@ -8,6 +10,23 @@ from app.models import InventoryCategory, InventoryItem
 from app.templating import templates
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
+
+
+def _parse_ebc(raw: str) -> float | None:
+    """Parst eine EBC-Eingabe: eine einzelne Zahl ('4', '4,5') oder einen auf
+    Malz-Datenblättern üblichen Bereich ('4-6') - dann wird der Mittelwert
+    verwendet, statt einen Fehler zu werfen."""
+    raw = (raw or "").strip().replace(",", ".")
+    if not raw:
+        return None
+    parts = [p for p in re.split(r"\s*[-–—]\s*", raw) if p]
+    try:
+        values = [float(p) for p in parts]
+    except ValueError:
+        return None
+    if not values:
+        return None
+    return round(sum(values) / len(values), 2)
 
 
 @router.get("")
@@ -39,6 +58,7 @@ async def inventory_create(request: Request, session: Session = Depends(get_sess
         name=form.get("name", "").strip(),
         brand=form.get("brand", "").strip(),
         spec=form.get("spec", "").strip(),
+        color_ebc=_parse_ebc(form.get("color_ebc", "")),
         unit=form.get("unit", "kg").strip() or "kg",
         amount=0,
     )
@@ -67,6 +87,7 @@ async def inventory_update(item_id: int, request: Request, session: Session = De
     item.name = form.get("name", "").strip()
     item.brand = form.get("brand", "").strip()
     item.spec = form.get("spec", "").strip()
+    item.color_ebc = _parse_ebc(form.get("color_ebc", ""))
     item.unit = form.get("unit", "kg").strip() or "kg"
     session.add(item)
     session.commit()

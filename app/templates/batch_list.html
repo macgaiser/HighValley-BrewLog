@@ -8,15 +8,48 @@
 
 <form class="searchbar" method="get" action="/batches">
   <input type="text" name="q" placeholder="Suche nach Nummer, Name, Stil, Malz, Hopfen, Hefe…" value="{{ q }}">
-  <select name="fermentation_type">
-    <option value="">Alle Gärarten</option>
-    <option value="Obergärig" {% if fermentation_type=="Obergärig" %}selected{% endif %}>Obergärig</option>
-    <option value="Untergärig" {% if fermentation_type=="Untergärig" %}selected{% endif %}>Untergärig</option>
-  </select>
+  {% set active_filters = ingredient_ids|length + (1 if fermentation_type else 0) %}
+  <details class="ingredient-filter">
+    <summary>Filter{% if active_filters %} ({{ active_filters }}){% endif %}</summary>
+    <div class="ingredient-filter-panel">
+      <fieldset>
+        <legend>Gärart</legend>
+        <label><input type="radio" name="fermentation_type" value="" {% if not fermentation_type %}checked{% endif %}> Alle</label>
+        <label><input type="radio" name="fermentation_type" value="Obergärig" {% if fermentation_type=="Obergärig" %}checked{% endif %}> Obergärig</label>
+        <label><input type="radio" name="fermentation_type" value="Untergärig" {% if fermentation_type=="Untergärig" %}checked{% endif %}> Untergärig</label>
+      </fieldset>
+      <p class="hint">Zutatenkombination: zeigt Sude, die <strong>alle</strong> angehakten Zutaten enthalten.</p>
+      {% if inventory.malz %}
+      <fieldset>
+        <legend>Malz</legend>
+        {% for i in inventory.malz %}
+        <label><input type="checkbox" name="ingredient_ids" value="{{ i.id }}" {% if i.id in ingredient_ids %}checked{% endif %}> {{ i.name }}</label>
+        {% endfor %}
+      </fieldset>
+      {% endif %}
+      {% if inventory.hopfen %}
+      <fieldset>
+        <legend>Hopfen</legend>
+        {% for i in inventory.hopfen %}
+        <label><input type="checkbox" name="ingredient_ids" value="{{ i.id }}" {% if i.id in ingredient_ids %}checked{% endif %}> {{ i.name }}</label>
+        {% endfor %}
+      </fieldset>
+      {% endif %}
+      {% if inventory.hefe %}
+      <fieldset>
+        <legend>Hefe</legend>
+        {% for i in inventory.hefe %}
+        <label><input type="checkbox" name="ingredient_ids" value="{{ i.id }}" {% if i.id in ingredient_ids %}checked{% endif %}> {{ i.name }}</label>
+        {% endfor %}
+      </fieldset>
+      {% endif %}
+    </div>
+  </details>
   <button class="btn" type="submit">Suchen</button>
-  {% if q or fermentation_type %}<a class="btn" href="/batches">Zurücksetzen</a>{% endif %}
+  {% if q or fermentation_type or ingredient_ids %}<a class="btn" href="/batches">Zurücksetzen</a>{% endif %}
 </form>
 
+<div class="table-scroll">
 <table class="table">
   <thead>
     <tr>
@@ -36,11 +69,12 @@
       <td>{{ b.name }}</td>
       <td>{{ b.fermentation_type }}</td>
       <td>{{ og_display.get(b.id, "–") }}</td>
-      <td><a href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()">Bearbeiten</a></td>
+      <td><a class="btn btn-small" href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()">Bearbeiten</a></td>
     </tr>
     {% else %}
     <tr><td colspan="6">Noch keine Sude erfasst.</td></tr>
     {% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}
