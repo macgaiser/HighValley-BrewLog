@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from sqlalchemy import inspect, text
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine, select
 
 import app.models  # noqa: F401 - muss vor create_all()/_add_missing_columns()
 # importiert sein, damit SQLModel.metadata die Tabellen überhaupt kennt.
@@ -57,14 +57,38 @@ def _add_missing_columns() -> None:
                 conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{column.name}" {col_type}{default_sql}'))
 
 
+_DEFAULT_BREW_DAY_TASKS = [
+    ("Vorbereiten + Schroten", 20, ""),
+    ("Eingemeischt", 25, ""),
+    ("Läutern + Hopfen vorbereiten", 40, ""),
+    ("Malzrohr putzen", None, ""),
+    ("Hopfengaben", 10, ""),
+    ("Kühlung aufbauen", None, ""),
+    ("Whirlpool und abkühlen", 20, ""),
+    ("Abfüllen, putzen", 40, ""),
+    ("Schläuche aufräumen, putzen", 15, ""),
+    ("Keg reinigen", 15, ""),
+    ("In Keg abfüllen", 55, ""),
+    ("Flaschen abfüllen", 40, ""),
+    ("Rezept vorbereiten", 20, ""),
+]
+
+
 def init_db() -> None:
     SQLModel.metadata.create_all(engine)
     _add_missing_columns()
     with Session(engine) as session:
-        from app.models import Settings
+        from app.models import DefaultBrewDayTask, Settings
 
         if session.get(Settings, 1) is None:
             session.add(Settings(id=1))
+            session.commit()
+
+        if session.exec(select(DefaultBrewDayTask)).first() is None:
+            for i, (name, duration, note) in enumerate(_DEFAULT_BREW_DAY_TASKS):
+                session.add(
+                    DefaultBrewDayTask(position=i, task_name=name, planned_duration_min=duration, note=note)
+                )
             session.commit()
 
 

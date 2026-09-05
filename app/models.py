@@ -39,6 +39,17 @@ class Settings(SQLModel, table=True):
     mash_efficiency_correction_factor: float = 1.0
 
 
+class DefaultBrewDayTask(SQLModel, table=True):
+    """Vorlage-Position für den Brautag-Zeitplan, die bei einem neuen Sud
+    automatisch vorbelegt wird (editierbar unter Einstellungen)."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    position: int = 0
+    task_name: str
+    planned_duration_min: Optional[float] = None
+    note: str = ""
+
+
 class Batch(SQLModel, table=True):
     """Ein Sud (entspricht einem Tab in der Excel-Vorlage)."""
 
