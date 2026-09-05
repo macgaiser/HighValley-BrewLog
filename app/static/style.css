@@ -352,7 +352,7 @@ h1, h2, h3 {
 .inline-form input { padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; }
 
 .comment-add-form { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; align-items: flex-start; }
-.comment-add-form input[type="date"] { padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; }
+.comment-add-form input { padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; }
 .comment-add-form textarea {
   width: 100%;
   padding: 0.6rem;
@@ -408,3 +408,32 @@ form.card label.field-checkbox input[type="checkbox"] {
 .hero img { height: 96px; width: auto; }
 .hero h1 { margin: 0; font-size: 2.4rem; color: var(--brown); }
 .hero p { margin: 0.2rem 0 0; color: var(--muted); }
+
+/* Flatpickr an die App-Farben angleichen (Standard ist blau). */
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay {
+  background: var(--brown);
+  border-color: var(--brown);
+}
+.flatpickr-day.today {
+  border-color: var(--gold);
+}
+.flatpickr-day.today:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.flatpickr-day:hover {
+  background: var(--bg);
+}
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+span.flatpickr-weekday {
+  color: var(--brown);
+  fill: var(--brown);
+}
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+  fill: var(--brown);
+}

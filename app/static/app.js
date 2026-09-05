@@ -22,3 +22,18 @@ document.addEventListener("click", (event) => {
     removeBtn.closest("tr").remove();
   }
 });
+
+// Datumsfelder zeigen ihr Format sonst je nach Browser-/Systemsprache an
+// (z.B. mm/dd/yyyy) statt einheitlich dd.mm.yyyy - flatpickr übernimmt die
+// Anzeige, das eigentliche Feld sendet weiterhin ISO-Format (yyyy-mm-dd).
+if (window.flatpickr) {
+  document.querySelectorAll('input[type="date"]').forEach((el) => {
+    flatpickr(el, {
+      altInput: true,
+      altFormat: "d.m.Y",
+      dateFormat: "Y-m-d",
+      locale: "de",
+      allowInput: true,
+    });
+  });
+}
