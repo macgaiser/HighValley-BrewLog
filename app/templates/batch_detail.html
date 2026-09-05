@@ -5,6 +5,9 @@
   <h1>Sud #{{ batch.batch_number }} – {{ batch.name }}</h1>
   <div class="actions">
     <a class="btn" href="/batches/{{ batch.id }}/edit">Bearbeiten</a>
+    <form method="post" action="/batches/{{ batch.id }}/copy">
+      <button class="btn" type="submit">Sud kopieren</button>
+    </form>
     <form method="post" action="/batches/{{ batch.id }}/delete" onsubmit="return confirm('Sud #{{ batch.batch_number }} wirklich löschen? Lagerbuchungen werden zurückgebucht.')">
       <button class="btn btn-danger" type="submit">Löschen</button>
     </form>
