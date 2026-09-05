@@ -23,7 +23,7 @@
       <tbody>
         <tr>
           <td><input type="number" name="batch_number" value="{{ batch.batch_number if batch else next_number }}" required></td>
-          <td><input type="date" name="brew_date" value="{{ batch.brew_date if batch else '' }}"></td>
+          <td><input type="date" name="brew_date" value="{{ batch.brew_date if batch and batch.brew_date else '' }}"></td>
           <td><input type="text" name="name" value="{{ batch.name if batch else '' }}"></td>
           <td>
             <select name="fermentation_type">
@@ -101,13 +101,13 @@
     <div class="section-title-row"><h2><span>Schüttung</span><img class="step-icon" src="/static/img/step-schroten.png" alt=""></h2><button class="btn btn-small" data-add-row="grain">+ Zeile</button></div>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Malz</th><th>Menge (kg)</th><th>Lagerartikel</th><th></th></tr></thead>
+      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Menge (kg)</th><th></th></tr></thead>
       <tbody data-rows="grain">
         {% for g in (batch.grain_additions if batch else []) %}
         <tr>
+          <td>{{ inv_select('malz', inventory.malz, g.inventory_item_id, 'grain_inventory_id') }}</td>
           <td><input type="text" name="grain_malt_name" value="{{ g.malt_name }}"></td>
           <td><input type="number" step="0.01" name="grain_amount_kg" value="{{ g.amount_kg }}"></td>
-          <td>{{ inv_select('malz', inventory.malz, g.inventory_item_id, 'grain_inventory_id') }}</td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
         </tr>
         {% endfor %}
@@ -116,9 +116,9 @@
     </div>
     <template data-row-template="grain">
       <tr>
+        <td>{{ inv_select('malz', inventory.malz, None, 'grain_inventory_id') }}</td>
         <td><input type="text" name="grain_malt_name"></td>
         <td><input type="number" step="0.01" name="grain_amount_kg"></td>
-        <td>{{ inv_select('malz', inventory.malz, None, 'grain_inventory_id') }}</td>
         <td><button class="btn btn-small" data-remove-row>✕</button></td>
       </tr>
     </template>
@@ -128,14 +128,18 @@
     <div class="section-title-row"><h2><span>Maischplan</span><img class="step-icon" src="/static/img/step-maischen.png" alt=""></h2><button class="btn btn-small" data-add-row="mash">+ Zeile</button></div>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Rast</th><th>Temp. (°C)</th><th>Dauer (min)</th><th>Kommentar</th><th></th></tr></thead>
+      <thead><tr><th>Rast</th><th>Temp. (°C)</th><th>Dauer (min)</th><th></th></tr></thead>
       <tbody data-rows="mash">
         {% for s in (batch.mash_steps if batch else []) %}
         <tr>
-          <td><input type="text" name="mash_name" value="{{ s.name }}"></td>
+          <td>
+            <select name="mash_name">
+              <option value="">–</option>
+              {% for opt in mash_step_names %}<option value="{{ opt }}" {% if s.name==opt %}selected{% endif %}>{{ opt }}</option>{% endfor %}
+            </select>
+          </td>
           <td><input type="number" step="0.5" name="mash_temperature_c" value="{{ s.temperature_c }}"></td>
           <td><input type="number" step="1" name="mash_duration_min" value="{{ s.duration_min }}"></td>
-          <td><input type="text" name="mash_comment" value="{{ s.comment }}"></td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
         </tr>
         {% endfor %}
@@ -144,10 +148,14 @@
     </div>
     <template data-row-template="mash">
       <tr>
-        <td><input type="text" name="mash_name"></td>
+        <td>
+          <select name="mash_name">
+            <option value="">–</option>
+            {% for opt in mash_step_names %}<option value="{{ opt }}">{{ opt }}</option>{% endfor %}
+          </select>
+        </td>
         <td><input type="number" step="0.5" name="mash_temperature_c"></td>
         <td><input type="number" step="1" name="mash_duration_min"></td>
-        <td><input type="text" name="mash_comment"></td>
         <td><button class="btn btn-small" data-remove-row>✕</button></td>
       </tr>
     </template>
@@ -157,21 +165,21 @@
     <div class="section-title-row"><h2><span>Würzekochen / Hopfengaben</span><img class="step-icon" src="/static/img/step-kochen.png" alt=""></h2><button class="btn btn-small" data-add-row="hop">+ Zeile</button></div>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Hopfen</th><th>Alpha (%)</th><th>Menge (g)</th><th>Zeit (min)</th><th>Temp. (°C)</th><th>Typ</th><th>Lagerartikel</th><th></th></tr></thead>
+      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Alpha (%)</th><th>Menge (g)</th><th>Zeit (min)</th><th>Temp. (°C)</th><th>Typ</th><th></th></tr></thead>
       <tbody data-rows="hop">
         {% for h in (batch.hop_additions if batch else []) %}
         <tr>
+          <td>{{ inv_select('hopfen', inventory.hopfen, h.inventory_item_id, 'hop_inventory_id') }}</td>
           <td><input type="text" name="hop_name" value="{{ h.hop_name }}"></td>
-          <td><input type="number" step="0.1" name="hop_alpha" value="{{ h.alpha_acid_percent }}"></td>
+          <td><input type="number" step="0.1" name="hop_alpha" value="{{ h.alpha_acid_percent|round(1) if h.alpha_acid_percent is not none else '' }}"></td>
           <td><input type="number" step="0.1" name="hop_amount_g" value="{{ h.amount_g }}"></td>
           <td><input type="number" step="1" name="hop_time_min" value="{{ h.time_min }}"></td>
           <td><input type="number" step="1" name="hop_temperature_c" value="{{ h.temperature_c }}"></td>
           <td>
             <select name="hop_type">
-              {% for t in hop_types %}<option value="{{ t.value }}" {% if h.addition_type==t %}selected{% endif %}>{{ t.value }}</option>{% endfor %}
+              {% for t in hop_types %}<option value="{{ t.value }}" {% if h.addition_type==t %}selected{% endif %}>{{ t.value|capitalize }}</option>{% endfor %}
             </select>
           </td>
-          <td>{{ inv_select('hopfen', inventory.hopfen, h.inventory_item_id, 'hop_inventory_id') }}</td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
         </tr>
         {% endfor %}
@@ -180,6 +188,7 @@
     </div>
     <template data-row-template="hop">
       <tr>
+        <td>{{ inv_select('hopfen', inventory.hopfen, None, 'hop_inventory_id') }}</td>
         <td><input type="text" name="hop_name"></td>
         <td><input type="number" step="0.1" name="hop_alpha"></td>
         <td><input type="number" step="0.1" name="hop_amount_g"></td>
@@ -187,10 +196,9 @@
         <td><input type="number" step="1" name="hop_temperature_c"></td>
         <td>
           <select name="hop_type">
-            {% for t in hop_types %}<option value="{{ t.value }}">{{ t.value }}</option>{% endfor %}
+            {% for t in hop_types %}<option value="{{ t.value }}">{{ t.value|capitalize }}</option>{% endfor %}
           </select>
         </td>
-        <td>{{ inv_select('hopfen', inventory.hopfen, None, 'hop_inventory_id') }}</td>
         <td><button class="btn btn-small" data-remove-row>✕</button></td>
       </tr>
     </template>
@@ -200,16 +208,22 @@
     <div class="section-title-row"><h2><span>Hefegabe</span><img class="step-icon" src="/static/img/step-kuehlen.png" alt=""></h2><button class="btn btn-small" data-add-row="yeast">+ Zeile</button></div>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Hefe</th><th>Führung</th><th>Menge</th><th>Einheit</th><th>Temp. (°C)</th><th>Lagerartikel</th><th></th></tr></thead>
+      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Führung</th><th>Menge</th><th>Einheit</th><th>Temp. (°C)</th><th>Kommentar</th><th></th></tr></thead>
       <tbody data-rows="yeast">
         {% for y in (batch.yeast_additions if batch else []) %}
         <tr>
+          <td>{{ inv_select('hefe', inventory.hefe, y.inventory_item_id, 'yeast_inventory_id') }}</td>
           <td><input type="text" name="yeast_name" value="{{ y.yeast_name }}"></td>
-          <td><input type="text" name="yeast_generation" value="{{ y.generation_label }}"></td>
+          <td>
+            <select name="yeast_generation">
+              <option value="">–</option>
+              {% for n in range(1, 11) %}<option value="{{ n }}" {% if y.generation_label==n|string %}selected{% endif %}>{{ n }}</option>{% endfor %}
+            </select>
+          </td>
           <td><input type="number" step="0.1" name="yeast_amount" value="{{ y.amount }}"></td>
           <td><input type="text" name="yeast_unit" value="{{ y.unit }}"></td>
           <td><input type="number" step="1" name="yeast_temperature_c" value="{{ y.pitch_temperature_c }}"></td>
-          <td>{{ inv_select('hefe', inventory.hefe, y.inventory_item_id, 'yeast_inventory_id') }}</td>
+          <td><input type="text" name="yeast_comment" value="{{ y.comment }}"></td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
         </tr>
         {% endfor %}
@@ -218,12 +232,18 @@
     </div>
     <template data-row-template="yeast">
       <tr>
+        <td>{{ inv_select('hefe', inventory.hefe, None, 'yeast_inventory_id') }}</td>
         <td><input type="text" name="yeast_name"></td>
-        <td><input type="text" name="yeast_generation"></td>
+        <td>
+          <select name="yeast_generation">
+            <option value="">–</option>
+            {% for n in range(1, 11) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+          </select>
+        </td>
         <td><input type="number" step="0.1" name="yeast_amount"></td>
         <td><input type="text" name="yeast_unit" value="g"></td>
         <td><input type="number" step="1" name="yeast_temperature_c"></td>
-        <td>{{ inv_select('hefe', inventory.hefe, None, 'yeast_inventory_id') }}</td>
+        <td><input type="text" name="yeast_comment"></td>
         <td><button class="btn btn-small" data-remove-row>✕</button></td>
       </tr>
     </template>
@@ -287,10 +307,11 @@
     <div class="section-title-row"><h2>Brautag-Zeitplan</h2><button class="btn btn-small" data-add-row="task">+ Zeile</button></div>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Tätigkeit</th><th>Dauer (min)</th><th>Notiz</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Tätigkeit</th><th>Dauer (min)</th><th>Notiz</th><th></th></tr></thead>
       <tbody data-rows="task">
         {% for t in (batch.brew_day_tasks if batch else default_tasks) %}
         <tr>
+          <td class="row-move"><button class="btn btn-small" type="button" data-move-up title="Nach oben">▲</button><button class="btn btn-small" type="button" data-move-down title="Nach unten">▼</button></td>
           <td><input type="text" name="task_name" value="{{ t.task_name }}"></td>
           <td><input type="number" step="1" name="task_duration_min" value="{{ t.planned_duration_min }}"></td>
           <td><input type="text" name="task_note" value="{{ t.note }}"></td>
@@ -302,6 +323,7 @@
     </div>
     <template data-row-template="task">
       <tr>
+        <td class="row-move"><button class="btn btn-small" type="button" data-move-up title="Nach oben">▲</button><button class="btn btn-small" type="button" data-move-down title="Nach unten">▼</button></td>
         <td><input type="text" name="task_name"></td>
         <td><input type="number" step="1" name="task_duration_min"></td>
         <td><input type="text" name="task_note"></td>
