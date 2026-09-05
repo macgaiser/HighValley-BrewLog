@@ -57,9 +57,14 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 36vh;
+  /* Breitenbasiert statt hoehenbasiert: die Baeume am Bildrand reichen fast
+     bis zum oberen Bildrand (kein Himmel-Puffer), daher wuerde jede feste
+     Hoehe auf breiten Bildschirmen den harten Kamm hart abschneiden. 36vw
+     entspricht in etwa dem Seitenverhaeltnis des Bildes, sodass es
+     (innerhalb der Grenzen) nahezu vollstaendig sichtbar bleibt. */
+  height: 36vw;
   min-height: 240px;
-  max-height: 440px;
+  max-height: 820px;
   background-image: url("/static/img/bg-valley.png");
   background-repeat: no-repeat;
   background-position: bottom center;
@@ -80,7 +85,7 @@ h1, h2, h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.4rem 1.5rem;
+  padding: 0.9rem 1.5rem;
   background: var(--brown);
   color: white;
   border-bottom: 4px solid var(--gold);
@@ -148,7 +153,7 @@ h1, h2, h3 {
   justify-content: flex-end;
   align-self: flex-end;
   gap: 0.6rem;
-  margin-bottom: -0.4rem; /* hebt das Bottom-Padding von .topbar auf, damit die Tabs direkt an der goldenen Linie anliegen */
+  margin-bottom: -0.9rem; /* hebt das Bottom-Padding von .topbar auf, damit die Tabs direkt an der goldenen Linie anliegen */
 }
 
 /* Hängeschild-Tabs: direkt im Banner, ohne zusaetzliche Kopfzeilen-Hoehe */
@@ -168,6 +173,7 @@ h1, h2, h3 {
 }
 .tab-nav .tab-nav-icon { --icon-1: var(--brown); --icon-2: var(--gold); }
 .tab-nav:hover { background: var(--gold); }
+.tab-nav:hover .tab-nav-icon { --icon-1: var(--brown-dark); --icon-2: var(--brown-dark); }
 .tab-nav.active { background: var(--brown-dark); color: white; border-color: var(--gold); }
 .tab-nav.active .tab-nav-icon { --icon-1: white; --icon-2: var(--gold); }
 
@@ -225,6 +231,8 @@ h1, h2, h3 {
 .btn-danger { background: white; color: var(--danger); border-color: var(--danger); }
 .btn-danger:hover { background: #fbeceb; }
 .btn-small { padding: 0.25rem 0.7rem; font-size: 0.85rem; border-radius: 999px; }
+.row-move { display: flex; gap: 0.2rem; white-space: nowrap; }
+.row-move .btn-small { padding: 0.25rem 0.5rem; line-height: 1; }
 
 .searchbar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.5rem; margin: 1rem 0; }
 .searchbar > input[type="text"] { flex: 1; min-width: 200px; padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; }

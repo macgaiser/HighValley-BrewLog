@@ -33,10 +33,11 @@
     <p class="hint">Diese Positionen werden bei einem neuen Sud automatisch als Vorschlag in den Brautag-Zeitplan übernommen (dort weiterhin frei anpassbar).</p>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Tätigkeit</th><th>Dauer (min)</th><th>Notiz</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Tätigkeit</th><th>Dauer (min)</th><th>Notiz</th><th></th></tr></thead>
       <tbody data-rows="task">
         {% for t in default_tasks %}
         <tr>
+          <td class="row-move"><button class="btn btn-small" type="button" data-move-up title="Nach oben">▲</button><button class="btn btn-small" type="button" data-move-down title="Nach unten">▼</button></td>
           <td><input type="text" name="task_name" value="{{ t.task_name }}"></td>
           <td><input type="number" step="1" name="task_duration_min" value="{{ t.planned_duration_min }}"></td>
           <td><input type="text" name="task_note" value="{{ t.note }}"></td>
@@ -48,6 +49,7 @@
     </div>
     <template data-row-template="task">
       <tr>
+        <td class="row-move"><button class="btn btn-small" type="button" data-move-up title="Nach oben">▲</button><button class="btn btn-small" type="button" data-move-down title="Nach unten">▼</button></td>
         <td><input type="text" name="task_name"></td>
         <td><input type="number" step="1" name="task_duration_min"></td>
         <td><input type="text" name="task_note"></td>

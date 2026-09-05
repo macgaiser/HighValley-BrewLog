@@ -182,6 +182,7 @@ class YeastAddition(SQLModel, table=True):
     amount: Optional[float] = None
     unit: str = "g"
     pitch_temperature_c: Optional[float] = None
+    comment: str = ""
     inventory_item_id: Optional[int] = Field(default=None, foreign_key="inventoryitem.id")
 
     batch: Batch = Relationship(back_populates="yeast_additions")

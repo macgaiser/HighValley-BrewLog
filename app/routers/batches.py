@@ -29,6 +29,17 @@ from app.templating import templates
 
 router = APIRouter(prefix="/batches", tags=["batches"])
 
+MASH_STEP_NAMES = [
+    "Einmaischen",
+    "1. Rast",
+    "2. Rast",
+    "3. Rast",
+    "4. Rast",
+    "5. Rast",
+    "6. Rast",
+    "Abmaischen",
+]
+
 
 def _f(value: str | None) -> float | None:
     if value is None or value.strip() == "":
@@ -49,6 +60,20 @@ def _inventory_options(session: Session) -> dict[str, list[InventoryItem]]:
         "hopfen": [i for i in items if i.category == InventoryCategory.hopfen],
         "hefe": [i for i in items if i.category == InventoryCategory.hefe],
     }
+
+
+def _resolve_ingredient_name(session: Session, manual_name: str, inventory_item_id: int | None) -> str:
+    """Der Lagerartikel ist der Normalfall (Auswahl links) - ist einer
+    ausgewaehlt, bestimmt dessen Name die Zutat, auch wenn im "Alternative"-
+    Feld noch Text von einer frueheren Auswahl steht (sonst wuerde ein
+    Wechsel des Lagerartikels ohne manuelles Leeren dieses Felds stillschweigend
+    ignoriert). Die manuelle Eingabe zaehlt nur, wenn kein Lagerartikel
+    ausgewaehlt ist - fuer Zutaten, die nicht im Lager sind."""
+    if inventory_item_id:
+        item = session.get(InventoryItem, inventory_item_id)
+        if item:
+            return item.name
+    return manual_name.strip()
 
 
 @router.get("")
@@ -137,6 +162,7 @@ def batch_new_form(request: Request, session: Session = Depends(get_session)):
             "batch": None,
             "next_number": next_number,
             "default_tasks": default_tasks,
+            "mash_step_names": MASH_STEP_NAMES,
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
         },
@@ -168,6 +194,12 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     session.commit()
     session.refresh(batch)
 
+    # Maischplan-Kommentare werden in der Sud-Ansicht gepflegt (nicht hier im
+    # Formular), muessen das Loeschen+Neuanlegen der Zeilen unten also
+    # ueberleben - nur ueber die Position zuordenbar, da die Zeilen dabei
+    # ihre ID verlieren.
+    old_mash_comments = [s.comment for s in sorted(batch.mash_steps, key=lambda s: s.position)]
+
     # Bestehende Unterlisten ersetzen (einfacher & robuster als Diffs)
     for existing in list(batch.grain_additions):
         session.delete(existing)
@@ -188,23 +220,23 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     names = form.getlist("grain_malt_name")
     amounts = form.getlist("grain_amount_kg")
     inv_ids = form.getlist("grain_inventory_id")
-    for i, name in enumerate(names):
-        if not name.strip():
+    for i in range(len(names)):
+        inv_id = int(inv_ids[i]) if i < len(inv_ids) and inv_ids[i] else None
+        if not names[i].strip() and not inv_id:
             continue
         session.add(
             GrainAddition(
                 batch_id=batch.id,
                 position=i,
-                malt_name=name.strip(),
+                malt_name=_resolve_ingredient_name(session, names[i], inv_id),
                 amount_kg=_f(amounts[i]) or 0,
-                inventory_item_id=int(inv_ids[i]) if i < len(inv_ids) and inv_ids[i] else None,
+                inventory_item_id=inv_id,
             )
         )
 
     names = form.getlist("mash_name")
     temps = form.getlist("mash_temperature_c")
     durations = form.getlist("mash_duration_min")
-    comments = form.getlist("mash_comment")
     for i, name in enumerate(names):
         if not name.strip():
             continue
@@ -215,7 +247,7 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
                 name=name.strip(),
                 temperature_c=_f(temps[i]) if i < len(temps) else None,
                 duration_min=_f(durations[i]) if i < len(durations) else None,
-                comment=comments[i].strip() if i < len(comments) else "",
+                comment=old_mash_comments[i] if i < len(old_mash_comments) else "",
             )
         )
 
@@ -226,20 +258,22 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     hop_temps = form.getlist("hop_temperature_c")
     types = form.getlist("hop_type")
     hop_inv_ids = form.getlist("hop_inventory_id")
-    for i, name in enumerate(names):
-        if not name.strip():
+    for i in range(len(names)):
+        hop_inv_id = int(hop_inv_ids[i]) if i < len(hop_inv_ids) and hop_inv_ids[i] else None
+        if not names[i].strip() and not hop_inv_id:
             continue
+        alpha = _f(alphas[i]) if i < len(alphas) else None
         session.add(
             HopAddition(
                 batch_id=batch.id,
                 position=i,
-                hop_name=name.strip(),
-                alpha_acid_percent=_f(alphas[i]) if i < len(alphas) else None,
+                hop_name=_resolve_ingredient_name(session, names[i], hop_inv_id),
+                alpha_acid_percent=round(alpha, 1) if alpha is not None else None,
                 amount_g=_f(hop_amounts[i]) or 0,
                 time_min=_f(times[i]) if i < len(times) else None,
                 temperature_c=_f(hop_temps[i]) if i < len(hop_temps) else None,
                 addition_type=HopAdditionType(types[i]) if i < len(types) and types[i] else HopAdditionType.kochen,
-                inventory_item_id=int(hop_inv_ids[i]) if i < len(hop_inv_ids) and hop_inv_ids[i] else None,
+                inventory_item_id=hop_inv_id,
             )
         )
 
@@ -248,20 +282,23 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     yeast_amounts = form.getlist("yeast_amount")
     yeast_units = form.getlist("yeast_unit")
     yeast_temps = form.getlist("yeast_temperature_c")
+    yeast_comments = form.getlist("yeast_comment")
     yeast_inv_ids = form.getlist("yeast_inventory_id")
-    for i, name in enumerate(names):
-        if not name.strip():
+    for i in range(len(names)):
+        yeast_inv_id = int(yeast_inv_ids[i]) if i < len(yeast_inv_ids) and yeast_inv_ids[i] else None
+        if not names[i].strip() and not yeast_inv_id:
             continue
         session.add(
             YeastAddition(
                 batch_id=batch.id,
                 position=i,
-                yeast_name=name.strip(),
+                yeast_name=_resolve_ingredient_name(session, names[i], yeast_inv_id),
                 generation_label=generations[i].strip() if i < len(generations) else "",
                 amount=_f(yeast_amounts[i]) if i < len(yeast_amounts) else None,
                 unit=yeast_units[i].strip() if i < len(yeast_units) and yeast_units[i] else "g",
                 pitch_temperature_c=_f(yeast_temps[i]) if i < len(yeast_temps) else None,
-                inventory_item_id=int(yeast_inv_ids[i]) if i < len(yeast_inv_ids) and yeast_inv_ids[i] else None,
+                comment=yeast_comments[i].strip() if i < len(yeast_comments) else "",
+                inventory_item_id=yeast_inv_id,
             )
         )
 
@@ -346,6 +383,7 @@ def batch_edit_form(batch_id: int, request: Request, session: Session = Depends(
             "request": request,
             "batch": batch,
             "default_tasks": [],
+            "mash_step_names": MASH_STEP_NAMES,
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
         },
@@ -444,6 +482,7 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
                 amount=y.amount,
                 unit=y.unit,
                 pitch_temperature_c=y.pitch_temperature_c,
+                comment=y.comment,
                 inventory_item_id=y.inventory_item_id,
             )
         )
@@ -485,6 +524,26 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
 
     session.commit()
     return RedirectResponse(f"/batches/{copy.id}/edit", status_code=303)
+
+
+@router.get("/{batch_id}/mash/{step_id}/comment")
+def mash_step_comment_form(batch_id: int, step_id: int, request: Request, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    step = session.get(MashStep, step_id)
+    return templates.TemplateResponse(
+        "mash_comment_form.html",
+        {"request": request, "batch": batch, "step": step},
+    )
+
+
+@router.post("/{batch_id}/mash/{step_id}/comment")
+async def mash_step_comment_update(batch_id: int, step_id: int, request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    step = session.get(MashStep, step_id)
+    step.comment = form.get("comment", "").strip()
+    session.add(step)
+    session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
 
 
 @router.post("/{batch_id}/fermentation")
