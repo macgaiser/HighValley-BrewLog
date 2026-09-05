@@ -57,9 +57,14 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 36vh;
+  /* Breitenbasiert statt hoehenbasiert: die Baeume am Bildrand reichen fast
+     bis zum oberen Bildrand (kein Himmel-Puffer), daher wuerde jede feste
+     Hoehe auf breiten Bildschirmen den harten Kamm hart abschneiden. 36vw
+     entspricht in etwa dem Seitenverhaeltnis des Bildes, sodass es
+     (innerhalb der Grenzen) nahezu vollstaendig sichtbar bleibt. */
+  height: 36vw;
   min-height: 240px;
-  max-height: 440px;
+  max-height: 820px;
   background-image: url("/static/img/bg-valley.png");
   background-repeat: no-repeat;
   background-position: bottom center;
@@ -168,6 +173,7 @@ h1, h2, h3 {
 }
 .tab-nav .tab-nav-icon { --icon-1: var(--brown); --icon-2: var(--gold); }
 .tab-nav:hover { background: var(--gold); }
+.tab-nav:hover .tab-nav-icon { --icon-1: var(--brown-dark); --icon-2: var(--brown-dark); }
 .tab-nav.active { background: var(--brown-dark); color: white; border-color: var(--gold); }
 .tab-nav.active .tab-nav-icon { --icon-1: white; --icon-2: var(--gold); }
 
