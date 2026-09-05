@@ -20,6 +20,24 @@ document.addEventListener("click", (event) => {
   if (removeBtn) {
     event.preventDefault();
     removeBtn.closest("tr").remove();
+    return;
+  }
+
+  const upBtn = event.target.closest("[data-move-up]");
+  if (upBtn) {
+    event.preventDefault();
+    const row = upBtn.closest("tr");
+    const prev = row.previousElementSibling;
+    if (prev) row.parentNode.insertBefore(row, prev);
+    return;
+  }
+
+  const downBtn = event.target.closest("[data-move-down]");
+  if (downBtn) {
+    event.preventDefault();
+    const row = downBtn.closest("tr");
+    const next = row.nextElementSibling;
+    if (next) row.parentNode.insertBefore(next, row);
   }
 });
 

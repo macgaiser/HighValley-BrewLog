@@ -231,6 +231,8 @@ h1, h2, h3 {
 .btn-danger { background: white; color: var(--danger); border-color: var(--danger); }
 .btn-danger:hover { background: #fbeceb; }
 .btn-small { padding: 0.25rem 0.7rem; font-size: 0.85rem; border-radius: 999px; }
+.row-move { display: flex; gap: 0.2rem; white-space: nowrap; }
+.row-move .btn-small { padding: 0.25rem 0.5rem; line-height: 1; }
 
 .searchbar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.5rem; margin: 1rem 0; }
 .searchbar > input[type="text"] { flex: 1; min-width: 200px; padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 999px; }
