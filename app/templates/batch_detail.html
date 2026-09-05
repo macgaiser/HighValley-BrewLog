@@ -63,12 +63,17 @@
   <h2><span>Maischplan</span><img class="step-icon" src="/static/img/step-maischen.png" alt=""></h2>
   <table class="mini-table">
     <thead><tr><th>Rast</th><th>Temperatur</th><th>Dauer</th><th>Kommentar</th></tr></thead>
+    <tbody>
     {% for s in batch.mash_steps %}
-    <tr><td>{{ s.name }}</td><td>{{ s.temperature_c|fmt(0) }} °C</td><td>{{ s.duration_min|fmt(0) }} min</td><td>{{ s.comment }}</td></tr>
+    <tr onclick="window.location='/batches/{{ batch.id }}/mash/{{ s.id }}/comment'" class="clickable-row">
+      <td>{{ s.name }}</td><td>{{ s.temperature_c|fmt(0) }} °C</td><td>{{ s.duration_min|fmt(0) }} min</td><td>{{ s.comment }}</td>
+    </tr>
     {% else %}
     <tr><td colspan="4">–</td></tr>
     {% endfor %}
+    </tbody>
   </table>
+  <p class="hint">Auf eine Zeile klicken, um den Kommentar zu bearbeiten.</p>
 </section>
 
 <section class="card">
@@ -95,9 +100,9 @@
     <h2><span>Hefegabe</span><img class="step-icon" src="/static/img/step-kuehlen.png" alt=""></h2>
     <table class="mini-table">
       {% for y in batch.yeast_additions %}
-      <tr><td>{{ y.yeast_name }}</td><td>{{ y.generation_label }}</td><td>{{ y.amount|fmt(0) }} {{ y.unit }}</td><td>{{ y.pitch_temperature_c|fmt(0) }} °C</td></tr>
+      <tr><td>{{ y.yeast_name }}</td><td>{{ y.generation_label }}</td><td>{{ y.amount|fmt(0) }} {{ y.unit }}</td><td>{{ y.pitch_temperature_c|fmt(0) }} °C</td><td>{{ y.comment }}</td></tr>
       {% else %}
-      <tr><td colspan="4">–</td></tr>
+      <tr><td colspan="5">–</td></tr>
       {% endfor %}
     </table>
   </section>
