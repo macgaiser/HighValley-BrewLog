@@ -146,28 +146,30 @@ h1, h2, h3 {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 0.7rem;
+  align-self: flex-end;
+  gap: 0.6rem;
+  margin-bottom: -0.4rem; /* hebt das Bottom-Padding von .topbar auf, damit die Tabs direkt an der goldenen Linie anliegen */
 }
-.nav-btn {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.15rem;
+
+/* Hängeschild-Tabs: direkt im Banner, ohne zusaetzliche Kopfzeilen-Hoehe */
+.tab-nav-icon { display: block; width: 26px; height: 26px; --icon-1: white; --icon-2: var(--gold); }
+.tab-nav {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-display); font-weight: 400; font-size: 1.05rem;
   letter-spacing: 0.02em;
-  padding: 0.6rem 1.5rem;
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: white;
-}
-.nav-btn:hover {
-  background: white;
+  padding: 0.5rem 1.2rem 0.4rem;
+  background: var(--card-bg);
+  border: 3px solid var(--gold);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
   color: var(--brown);
-  border-color: white;
+  text-decoration: none;
+  white-space: nowrap;
 }
-.nav-btn-icon {
-  font-size: 1.4rem;
-  padding: 0.5rem 1rem;
-  line-height: 1;
-}
+.tab-nav .tab-nav-icon { --icon-1: var(--brown); --icon-2: var(--gold); }
+.tab-nav:hover { background: var(--gold); }
+.tab-nav.active { background: var(--brown-dark); color: white; border-color: var(--gold); }
+.tab-nav.active .tab-nav-icon { --icon-1: white; --icon-2: var(--gold); }
 
 @media (max-width: 700px) {
   .topbar {
@@ -177,9 +179,13 @@ h1, h2, h3 {
   .brand-logo img { height: 76px; }
   .brand-name, .brand-suffix { font-size: 1.2rem; }
   .brand-number { font-size: 0.4rem; }
-  .topbar nav { width: 100%; justify-content: flex-end; }
-  .nav-btn { padding: 0.45rem 1rem; font-size: 1rem; }
-  .nav-btn-icon { padding: 0.4rem 0.8rem; font-size: 1.2rem; }
+  .topbar nav {
+    width: 100%; justify-content: flex-end; flex-wrap: nowrap;
+    overflow-x: auto; /* Sicherheitsnetz: lieber scrollbar als abgeschnitten, falls es doch mal eng wird */
+  }
+  .tab-nav { padding: 0.4rem 0.6rem 0.3rem; font-size: 0.85rem; gap: 0.35rem; flex-shrink: 0; }
+  .tab-nav-icon { width: 22px; height: 22px; }
+  .tab-nav-settings .tab-nav-label { display: none; }
 }
 
 .container {
