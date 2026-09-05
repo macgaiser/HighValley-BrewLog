@@ -177,7 +177,7 @@
           <td><input type="number" step="1" name="hop_temperature_c" value="{{ h.temperature_c }}"></td>
           <td>
             <select name="hop_type">
-              {% for t in hop_types %}<option value="{{ t.value }}" {% if h.addition_type==t %}selected{% endif %}>{{ t.value|upper }}</option>{% endfor %}
+              {% for t in hop_types %}<option value="{{ t.value }}" {% if h.addition_type==t %}selected{% endif %}>{{ t.value|capitalize }}</option>{% endfor %}
             </select>
           </td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
@@ -196,7 +196,7 @@
         <td><input type="number" step="1" name="hop_temperature_c"></td>
         <td>
           <select name="hop_type">
-            {% for t in hop_types %}<option value="{{ t.value }}">{{ t.value|upper }}</option>{% endfor %}
+            {% for t in hop_types %}<option value="{{ t.value }}">{{ t.value|capitalize }}</option>{% endfor %}
           </select>
         </td>
         <td><button class="btn btn-small" data-remove-row>✕</button></td>
