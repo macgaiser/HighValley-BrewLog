@@ -12,6 +12,7 @@ from app.models import (
     BatchComment,
     BrewDayTask,
     CarbonationEntry,
+    DefaultBrewDayTask,
     DryHopAddition,
     FermentationLogEntry,
     GrainAddition,
@@ -128,12 +129,14 @@ def batch_list(
 @router.get("/new")
 def batch_new_form(request: Request, session: Session = Depends(get_session)):
     next_number = (session.exec(select(Batch.batch_number).order_by(Batch.batch_number.desc())).first() or 0) + 1
+    default_tasks = session.exec(select(DefaultBrewDayTask).order_by(DefaultBrewDayTask.position)).all()
     return templates.TemplateResponse(
         "batch_form.html",
         {
             "request": request,
             "batch": None,
             "next_number": next_number,
+            "default_tasks": default_tasks,
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
         },
@@ -342,6 +345,7 @@ def batch_edit_form(batch_id: int, request: Request, session: Session = Depends(
         {
             "request": request,
             "batch": batch,
+            "default_tasks": [],
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
         },
@@ -371,6 +375,116 @@ def batch_delete(batch_id: int, session: Session = Depends(get_session)):
         session.delete(batch)
         session.commit()
     return RedirectResponse("/batches", status_code=303)
+
+
+@router.post("/{batch_id}/copy")
+def batch_copy(batch_id: int, session: Session = Depends(get_session)):
+    source = session.get(Batch, batch_id)
+    next_number = (session.exec(select(Batch.batch_number).order_by(Batch.batch_number.desc())).first() or 0) + 1
+
+    copy = Batch(
+        batch_number=next_number,
+        name=source.name,
+        style=source.style,
+        fermentation_type=source.fermentation_type,
+        target_volume_l=source.target_volume_l,
+        color_ebc=source.color_ebc,
+        main_water_l=source.main_water_l,
+        sparge_water_l=source.sparge_water_l,
+        lactic_acid_80_ml=source.lactic_acid_80_ml,
+        boil_time_min=source.boil_time_min,
+        target_og_plato=source.target_og_plato,
+    )
+    session.add(copy)
+    session.commit()
+    session.refresh(copy)
+
+    for g in source.grain_additions:
+        session.add(
+            GrainAddition(
+                batch_id=copy.id,
+                position=g.position,
+                malt_name=g.malt_name,
+                amount_kg=g.amount_kg,
+                inventory_item_id=g.inventory_item_id,
+            )
+        )
+    for s in source.mash_steps:
+        session.add(
+            MashStep(
+                batch_id=copy.id,
+                position=s.position,
+                name=s.name,
+                temperature_c=s.temperature_c,
+                duration_min=s.duration_min,
+                comment=s.comment,
+            )
+        )
+    for h in source.hop_additions:
+        session.add(
+            HopAddition(
+                batch_id=copy.id,
+                position=h.position,
+                hop_name=h.hop_name,
+                alpha_acid_percent=h.alpha_acid_percent,
+                amount_g=h.amount_g,
+                time_min=h.time_min,
+                temperature_c=h.temperature_c,
+                addition_type=h.addition_type,
+                inventory_item_id=h.inventory_item_id,
+            )
+        )
+    for y in source.yeast_additions:
+        session.add(
+            YeastAddition(
+                batch_id=copy.id,
+                position=y.position,
+                yeast_name=y.yeast_name,
+                generation_label=y.generation_label,
+                amount=y.amount,
+                unit=y.unit,
+                pitch_temperature_c=y.pitch_temperature_c,
+                inventory_item_id=y.inventory_item_id,
+            )
+        )
+    for d in source.dry_hop_additions:
+        session.add(
+            DryHopAddition(
+                batch_id=copy.id,
+                position=d.position,
+                hop_name=d.hop_name,
+                timing_label=d.timing_label,
+                amount_g=d.amount_g,
+                inventory_item_id=d.inventory_item_id,
+            )
+        )
+    for c in source.carbonation_entries:
+        session.add(
+            CarbonationEntry(
+                batch_id=copy.id,
+                position=c.position,
+                sugar_g=c.sugar_g,
+                bottle_volume_l=c.bottle_volume_l,
+                label=c.label,
+            )
+        )
+    # Zeitplan-Positionen werden übernommen, aber ohne Zeitwerte - die neuen
+    # Zeiten hängen vom tatsächlichen Ablauf des neuen Brautags ab.
+    for t in source.brew_day_tasks:
+        session.add(
+            BrewDayTask(
+                batch_id=copy.id,
+                position=t.position,
+                task_name=t.task_name,
+                planned_duration_min=None,
+                note=t.note,
+            )
+        )
+    # Gärverlauf und Kommentare sind sud-spezifisch und werden bewusst nicht
+    # übernommen.
+
+    session.commit()
+    return RedirectResponse(f"/batches/{copy.id}/edit", status_code=303)
 
 
 @router.post("/{batch_id}/fermentation")
