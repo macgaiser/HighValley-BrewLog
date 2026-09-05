@@ -26,4 +26,37 @@
     <button class="btn btn-primary" type="submit">Speichern</button>
   </div>
 </form>
+
+<form method="post" action="/settings/brew-day-tasks">
+  <section class="card">
+    <div class="section-title-row"><h2>Standard Brautag-Zeitplan</h2><button class="btn btn-small" data-add-row="task">+ Zeile</button></div>
+    <p class="hint">Diese Positionen werden bei einem neuen Sud automatisch als Vorschlag in den Brautag-Zeitplan übernommen (dort weiterhin frei anpassbar).</p>
+    <div class="table-scroll">
+    <table class="form-table">
+      <thead><tr><th>Tätigkeit</th><th>Dauer (min)</th><th>Notiz</th><th></th></tr></thead>
+      <tbody data-rows="task">
+        {% for t in default_tasks %}
+        <tr>
+          <td><input type="text" name="task_name" value="{{ t.task_name }}"></td>
+          <td><input type="number" step="1" name="task_duration_min" value="{{ t.planned_duration_min }}"></td>
+          <td><input type="text" name="task_note" value="{{ t.note }}"></td>
+          <td><button class="btn btn-small" data-remove-row>✕</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <template data-row-template="task">
+      <tr>
+        <td><input type="text" name="task_name"></td>
+        <td><input type="number" step="1" name="task_duration_min"></td>
+        <td><input type="text" name="task_note"></td>
+        <td><button class="btn btn-small" data-remove-row>✕</button></td>
+      </tr>
+    </template>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Speichern</button>
+    </div>
+  </section>
+</form>
 {% endblock %}

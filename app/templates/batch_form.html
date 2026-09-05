@@ -289,7 +289,7 @@
     <table class="form-table">
       <thead><tr><th>Tätigkeit</th><th>Dauer (min)</th><th>Notiz</th><th></th></tr></thead>
       <tbody data-rows="task">
-        {% for t in (batch.brew_day_tasks if batch else []) %}
+        {% for t in (batch.brew_day_tasks if batch else default_tasks) %}
         <tr>
           <td><input type="text" name="task_name" value="{{ t.task_name }}"></td>
           <td><input type="number" step="1" name="task_duration_min" value="{{ t.planned_duration_min }}"></td>
