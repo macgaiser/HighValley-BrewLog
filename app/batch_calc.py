@@ -26,6 +26,7 @@ class BatchMetrics:
     latest_brix: float | None = None
     latest_fermentation_date: date | None = None
     attenuation_percent: float | None = None
+    attenuation_uncertain: bool = False
     abv_percent: float | None = None
     abv_display: str | None = None
     ibu_is_recorded: bool = False
@@ -105,9 +106,12 @@ def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
         latest = fermentation_readings[-1]
         m.latest_brix = latest.brix
         m.latest_fermentation_date = latest.entry_date
-        m.attenuation_percent = formulas.attenuation_percent(m.og_plato, latest.brix)
-        m.abv_percent = formulas.abv_from_brix(m.og_plato, latest.brix)
+        m.attenuation_percent = formulas.attenuation_percent(
+            m.og_plato, latest.brix, settings.wort_correction_factor
+        )
+        m.abv_percent = formulas.abv_from_brix(m.og_plato, latest.brix, settings.wort_correction_factor)
         m.abv_display = f"{m.abv_percent:.1f} Vol.-%"
+        m.attenuation_uncertain = formulas.is_attenuation_uncertain(m.attenuation_percent)
 
     if m.abv_display is None and batch.recorded_abv_text:
         m.abv_display = batch.recorded_abv_text

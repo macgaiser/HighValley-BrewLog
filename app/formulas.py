@@ -9,10 +9,12 @@ Quellen:
 - Plato <-> spezifisches Gewicht: ASBC-Näherungsformel (Kunze, "Technologie
   Brauer & Mälzer")
 - Refraktometer-Korrektur (Brix während der Gärung -> reales Extrakt):
-  Sean Terrill, "New (and Improved?) Formula for Calculating Refractometer
-  FG Results" (2011) - Standardformel, wie sie auch von Kleiner Brauhelfer,
-  Brewer's Friend u.a. verwendet wird
-- Alkohol aus realem Extrakt: Balling-Formel (ABW), umgerechnet in ABV
+  lineare Sean-Terrill-Formel (2011), so wie sie u.a. von Kleiner Brauhelfer
+  und maischemalzundmehr.de verwendet wird - beide Brix-Ablesungen (Stamm-
+  würze UND aktuelle Messung) werden dafür durch denselben Refraktometer-
+  Korrekturfaktor geteilt, nicht nur die Stammwürze
+- Alkohol aus realem Extrakt: einfache Faustformel ABV = (OG_SG - RE_SG) *
+  131,25, wie sie u.a. auch von maischemalzundmehr.de verwendet wird
 - IBU: Glenn Tinseth, "A Recreation of Ray Daniels' IBU Formula" (1997)
 - Bierfarbe: Morey-Gleichung (Daniels, "Designing Great Beers", 2000),
   heutiger Quasi-Standard fürs Homebrewing (u.a. auch in Kleiner
@@ -22,6 +24,14 @@ Quellen:
 from __future__ import annotations
 
 import math
+
+# Die lineare Terrill-Formel ist an echten (teil-)vergorenen Bieren
+# kalibriert, nicht am (in der Praxis irrelevanten) Fall "noch gar nicht
+# vergoren". Liegt die aktuelle Messung sehr nah an der Stammwürze, liefert
+# sie dadurch einen unrealistischen Vergärungsgrad von ca. 33-35% statt der
+# eigentlich erwarteten ~0% - dieser Schwellwert liegt bequem darüber, wird
+# aber schon nach wenigen °Brix spürbarer Gärung wieder unterschritten.
+ATTENUATION_UNCERTAIN_BELOW_PERCENT = 40.0
 
 
 def plato_to_sg(plato: float) -> float:
@@ -39,54 +49,53 @@ def sg_to_plato(sg: float) -> float:
     )
 
 
-def real_extract_sg(og_brix: float, current_brix: float) -> float:
-    """Reales Extrakt als spezifisches Gewicht, aus OG-Brix und aktueller
-    Brix-Ablesung (Sean-Terrill-Refraktometerkorrektur, 2011).
+def real_extract_sg(og_plato: float, current_brix: float, correction_factor: float = 1.03) -> float:
+    """Reales Extrakt als spezifisches Gewicht (lineare Sean-Terrill-
+    Refraktometerkorrektur, 2011).
 
     Ein Refraktometer zeigt während der Gärung zu hohe Werte, weil Alkohol
-    das Licht anders bricht als gelöster Zucker. Diese Formel korrigiert das.
+    das Licht anders bricht als gelöster Zucker. Diese Formel korrigiert das
+    - dafür müssen beide Ablesungen im selben "wortkorrigierten" Brix
+    vorliegen: `og_plato` ist das an anderer Stelle bereits durch den
+    Korrekturfaktor geteilte Stammwürze, `current_brix` ist die rohe
+    Gärverlauf-Ablesung und wird hier zusätzlich durch denselben Faktor
+    geteilt.
     """
+    current_corrected = current_brix / correction_factor
     return (
-        1.001843
-        - 0.002318474 * og_brix
-        - 0.000007775 * og_brix**2
-        - 0.000000034 * og_brix**3
-        + 0.00574 * current_brix
-        + 0.00003344 * current_brix**2
-        + 0.000000086 * current_brix**3
+        1.0000
+        - 0.00085683 * og_plato
+        + 0.0034941 * current_corrected
     )
 
 
-def attenuation_percent(og_plato: float, current_brix: float) -> float:
+def attenuation_percent(og_plato: float, current_brix: float, correction_factor: float = 1.03) -> float:
     """Scheinbarer Vergärungsgrad (EVG) in Prozent, auf Basis des realen
     Extrakts."""
     if og_plato <= 0:
         return 0.0
-    re_plato = max(0.0, sg_to_plato(real_extract_sg(og_plato, current_brix)))
+    re_plato = max(0.0, sg_to_plato(real_extract_sg(og_plato, current_brix, correction_factor)))
     return round(min(100.0, max(0.0, (og_plato - re_plato) / og_plato * 100)), 1)
 
 
-def abv_from_brix(og_plato: float, current_brix: float) -> float:
+def is_attenuation_uncertain(attenuation_percent_value: float) -> bool:
+    """Die lineare Terrill-Formel ist an echten, spürbar vergorenen Bieren
+    kalibriert - liegt die Messung noch sehr nah an der Stammwürze, liefert
+    sie einen falsch hohen "Sockelwert" (siehe ATTENUATION_UNCERTAIN_BELOW_
+    PERCENT) statt der eigentlich erwarteten ~0%. Für die Anzeige eines
+    Hinweises, nicht zur weiteren Berechnung gedacht."""
+    return attenuation_percent_value < ATTENUATION_UNCERTAIN_BELOW_PERCENT
+
+
+def abv_from_brix(og_plato: float, current_brix: float, correction_factor: float = 1.03) -> float:
     """Alkoholgehalt (Vol.-%) aus OG (°Plato) und aktueller Brix-Messung.
 
     Nutzt die Refraktometer-Korrektur für das reale Restextrakt und dann die
-    Balling-Formel für den Alkoholgehalt aus realem Extrakt.
+    einfache Faustformel ABV = (OG_SG - RE_SG) * 131,25.
     """
-    re_sg = max(1.0, real_extract_sg(og_plato, current_brix))
-    re_plato = max(0.0, sg_to_plato(re_sg))
-    return abv_from_og_re_plato(og_plato, re_plato, re_sg)
-
-
-def abv_from_og_re_plato(og_plato: float, re_plato: float, re_sg: float) -> float:
-    """Alkoholgehalt (Vol.-%) aus Stammwürze und realem Extrakt (°Plato)."""
-    if og_plato <= re_plato:
-        return 0.0
-    denom = 2.0665 - 0.010665 * og_plato
-    if denom <= 0:
-        return 0.0
-    abw = (og_plato - re_plato) / denom  # Alkohol Gewichtsprozent
-    abv = abw * re_sg / 0.794
-    return round(max(0.0, abv), 2)
+    re_sg = max(0.9, real_extract_sg(og_plato, current_brix, correction_factor))
+    og_sg = plato_to_sg(og_plato)
+    return round(max(0.0, (og_sg - re_sg) * 131.25), 2)
 
 
 def tinseth_ibu(
