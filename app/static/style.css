@@ -59,12 +59,13 @@ body::before {
   bottom: 0;
   /* Breitenbasiert statt hoehenbasiert: die Baeume am Bildrand reichen fast
      bis zum oberen Bildrand (kein Himmel-Puffer), daher wuerde jede feste
-     Hoehe auf breiten Bildschirmen den harten Kamm hart abschneiden. 36vw
-     entspricht in etwa dem Seitenverhaeltnis des Bildes, sodass es
-     (innerhalb der Grenzen) nahezu vollstaendig sichtbar bleibt. */
-  height: 36vw;
+     Hoehe auf breiten Bildschirmen den harten Kamm hart abschneiden.
+     36,45vw entspricht exakt dem Seitenverhaeltnis des Bildes (624/1712),
+     sodass es unabhaengig von der Bildschirmbreite vollstaendig sichtbar
+     bleibt, solange die max-height (bis knapp 2900px Breite) nicht greift. */
+  height: 36.45vw;
   min-height: 240px;
-  max-height: 820px;
+  max-height: 1050px;
   background-image: url("/static/img/bg-valley.png");
   background-repeat: no-repeat;
   background-position: bottom center;
