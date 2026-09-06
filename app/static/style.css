@@ -459,17 +459,16 @@ h1, h2, h3 {
 .label-right-row-stats { margin-top: 0.75rem; }
 .label-right-row-meta { justify-content: flex-end; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
-.label-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.62rem; line-height: 1.3; }
-/* Positioniert per top/bottom statt fester Hoehe: Oberkante auf Hoehe der
-   Mitte von IBU/Plato (erste Zeile), Unterkante auf der Unterkante des
-   Abfuelldatums (zweite Zeile) - Prozentwerte anhand der tatsaechlichen
-   Zeilenhoehen ausgemessen. */
+/* 2/3 der Groesse von .label-val-value (1.3rem * 2/3). */
+.label-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.87rem; line-height: 1.3; }
 .label-mug-wrap {
   position: absolute;
   left: 32.65%;
   transform: translateX(-50%);
-  top: 13%;
-  bottom: 16%;
+  /* Um 1mm nach oben verschoben (ca. 3,5 Prozentpunkte bei ~28,5mm
+     Zeilenhoehe im Druck), Groesse dabei unveraendert. */
+  top: 9.5%;
+  bottom: 12.5%;
   aspect-ratio: 1;
 }
 .label-mug { display: block; width: 100%; height: 100%; --icon-1: var(--label-green); }
