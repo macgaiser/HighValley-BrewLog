@@ -510,12 +510,11 @@ h1, h2, h3 {
   --icon-1: var(--label-green);
   --icon-2: var(--label-bg);
 }
-.label-batch-value, .label-batch-hash {
+.label-batch-value {
   font-family: "Ranchers", "Segoe UI", sans-serif;
   fill: var(--label-green);
+  font-size: 8px;
 }
-.label-batch-value { font-size: 5.5px; }
-.label-batch-hash { font-size: 4px; }
 .label-batch-date { font-size: 0.55rem; line-height: 1; white-space: nowrap; }
 .label-mug-wrap {
   position: absolute;
