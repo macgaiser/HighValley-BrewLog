@@ -404,3 +404,13 @@ def ebc_to_hex(ebc: float) -> str:
     UI-Elements (z.B. des Bierkrug-Symbols)."""
     r, g, b = ebc_to_rgb(ebc)
     return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def ebc_to_text_color(ebc: float) -> str:
+    """Gut lesbare Textfarbe (schwarz oder weiss) fuer eine Beschriftung
+    direkt auf der Bierfarbe (z.B. der EBC-Zahl im Bierkrug-Symbol) - nach
+    der relativen Luminanz (WCAG-Naeherung), damit es sowohl auf einem
+    hellen Lager als auch auf einem fast schwarzen Stout lesbar bleibt."""
+    r, g, b = ebc_to_rgb(ebc)
+    luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    return "#1a1200" if luminance > 140 else "#fff8e8"

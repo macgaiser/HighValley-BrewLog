@@ -181,6 +181,7 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     batch.style = form.get("style", "").strip()
     batch.fermentation_type = form.get("fermentation_type", "").strip()
     batch.brew_date = _d(form.get("brew_date"))
+    batch.bottling_date = _d(form.get("bottling_date"))
     batch.inventory_deduction_locked = form.get("inventory_deduction_locked") == "on"
     batch.target_volume_l = _f(form.get("target_volume_l"))
     batch.color_ebc = _f(form.get("color_ebc"))

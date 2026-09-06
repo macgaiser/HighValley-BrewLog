@@ -19,11 +19,12 @@
     <h2>Stammdaten</h2>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Sud-Nr.</th><th>Datum</th><th>Sud Name</th><th>Gärart</th><th>Stil / Notiz</th></tr></thead>
+      <thead><tr><th>Sud-Nr.</th><th>Brautag</th><th>Abfülldatum</th><th>Sud Name</th><th>Gärart</th><th>Stil / Notiz</th></tr></thead>
       <tbody>
         <tr>
           <td><input type="number" name="batch_number" value="{{ batch.batch_number if batch else next_number }}" required></td>
           <td><input type="date" name="brew_date" value="{{ batch.brew_date if batch and batch.brew_date else '' }}"></td>
+          <td><input type="date" name="bottling_date" value="{{ batch.bottling_date if batch and batch.bottling_date else '' }}"></td>
           <td><input type="text" name="name" value="{{ batch.name if batch else '' }}"></td>
           <td>
             <select name="fermentation_type">
