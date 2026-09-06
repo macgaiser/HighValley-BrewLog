@@ -8,13 +8,12 @@
     <a class="btn" href="/batches/{{ batch.id }}">Zurück</a>
   </div>
 </div>
-<p class="subtitle no-print">Vorschau für ein A4-Blatt mit 9 übereinander angeordneten Wickel-Etiketten. Ausschneiden entlang der gestrichelten Linien, dann zu einem Ring zusammenkleben: das linke Quadrat ist die Klebefläche, das rechte umrahmt nach dem Kleben das Logo. Zum Drucken oder als PDF speichern den Button oben nutzen (Browser-Druckdialog).</p>
+<p class="subtitle no-print">Vorschau für ein A4-Blatt mit 9 übereinander angeordneten Wickel-Etiketten. Ausschneiden entlang der gestrichelten Linien, dann zu einem Ring zusammenkleben. Zum Drucken oder als PDF speichern den Button oben nutzen (Browser-Druckdialog).</p>
 
 <div class="label-sheet">
   {% for _ in label_count %}
   <div class="label-strip">
-    <div class="label-cell label-glue-cell"></div>
-    <div class="label-cell label-logo-cell"><img class="label-logo-img" src="{{ logo_url }}" alt=""></div>
+    <div class="label-cell label-left-square"><img class="label-logo-img" src="{{ logo_url }}" alt=""></div>
     <div class="label-maincontent">
       <div class="label-cell label-brand">
         <span class="label-brand-name">{{ brand_name }}</span>
