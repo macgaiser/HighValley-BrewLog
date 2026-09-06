@@ -353,10 +353,10 @@ h1, h2, h3 {
 
 /* Etikettengenerator - schmale Wickel-Etiketten, ganze Seitenbreite, 9
    uebereinander ohne Abstand (zum Ausschneiden/Zusammenkleben zu einem
-   Ring: linkes Quadrat = Klebeflaeche, rechtes Quadrat umrahmt nach dem
-   Kleben das Logo). Die Hopfenranke sitzt mittig auf jeder Schnittlinie
-   (haelftig je Etikett), viermal nebeneinander ueber die Breite des
-   mittleren Etikettenteils gekachelt. */
+   Ring). Linkes Quadrat zeigt zentriert das Logo (225 Grad gedreht),
+   rechtes Quadrat ist ein leerer Rahmen. Die Hopfenranke sitzt mittig auf
+   jeder Schnittlinie (haelftig je Etikett), viermal nebeneinander ueber
+   die Breite des mittleren Etikettenteils gekachelt. */
 .label-sheet {
   --label-green: #1a6b1a;
   position: relative;
@@ -367,8 +367,8 @@ h1, h2, h3 {
 .label-strip {
   position: relative;
   display: grid;
-  grid-template-columns: 16fr 12fr 56fr 16fr;
-  grid-template-areas: "glue logo content frame";
+  grid-template-columns: 16fr 68fr 16fr;
+  grid-template-areas: "left content frame";
   aspect-ratio: 204 / 32.6;
   width: 100%;
   border-top: 1px dashed var(--label-green);
@@ -376,10 +376,9 @@ h1, h2, h3 {
   color: var(--label-green);
 }
 .label-cell { display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0 2px; }
-.label-glue-cell { grid-area: glue; border: 2px solid var(--label-green); margin: 3px; }
+.label-left-square { grid-area: left; border: 2px solid var(--label-green); margin: 3px; }
 .label-frame-cell { grid-area: frame; border: 2px solid var(--label-green); margin: 3px; }
-.label-logo-cell { grid-area: logo; }
-.label-logo-img { width: 78%; height: auto; transform: rotate(45deg); }
+.label-logo-img { width: 72%; height: auto; transform: rotate(45deg); }
 
 .label-maincontent {
   grid-area: content;
@@ -396,28 +395,28 @@ h1, h2, h3 {
 .label-brand {
   grid-area: brand;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.2rem;
   text-align: center;
-  padding: 0 0.3rem;
+  padding: 0 0.4rem;
 }
-.label-brand-name { font-weight: bold; font-size: 1.3rem; line-height: 1.05; }
-.label-beername { font-size: 1.05rem; line-height: 1; }
+.label-brand-name { font-weight: bold; font-size: 1.55rem; line-height: 1.05; }
+.label-beername { font-size: 1.25rem; line-height: 1; }
 .label-mug-cell { grid-area: mug; }
 .label-mug { height: 88%; width: auto; --icon-1: var(--label-green); }
 .label-ibu { grid-area: ibu; }
 .label-plato { grid-area: plato; }
-.label-batch { grid-area: batch; font-size: 0.6rem; white-space: nowrap; }
+.label-batch { grid-area: batch; font-size: 0.68rem; white-space: nowrap; }
 .label-ebc { grid-area: ebc; }
 .label-abv { grid-area: abv; }
-.label-date { grid-area: date; font-size: 0.6rem; white-space: nowrap; }
-.label-hops { grid-area: hops; font-size: 0.58rem; text-align: center; line-height: 1.05; }
-.label-val { flex-direction: column; line-height: 1; font-size: 0.68rem; }
-.label-val-value { font-size: 1.05rem; }
-.label-val-unit { font-size: 0.52rem; }
+.label-date { grid-area: date; font-size: 0.68rem; white-space: nowrap; }
+.label-hops { grid-area: hops; font-size: 0.66rem; text-align: center; line-height: 1.1; }
+.label-val { flex-direction: column; line-height: 1; font-size: 0.75rem; }
+.label-val-value { font-size: 1.2rem; }
+.label-val-unit { font-size: 0.58rem; }
 
 .label-vine-row {
   position: absolute;
-  left: 28%;
+  left: 16%;
   right: 16%;
   height: 2.6%;
   transform: translateY(-50%);
