@@ -21,10 +21,10 @@
         <span class="label-beername">{{ batch.name }}</span>
       </div>
       <div class="label-right">
-        <div class="label-right-row">
+        <div class="label-right-row label-right-row-stats">
           <span class="label-stat"><span class="label-val-value">{{ m.ibu_total|fmt(0) }}</span><span class="label-val-unit">IBU</span></span>
           <span class="label-stat"><span class="label-val-value">{{ m.og_plato|fmt(1) if m.og_plato is not none else "–" }}</span><span class="label-val-unit">°P</span></span>
-          <span class="label-stat"><span class="label-val-value">{{ m.abv_display or "–" }}</span></span>
+          <span class="label-stat"><span class="label-val-value">{{ m.abv_percent|fmt(1) if m.abv_percent is not none else "–" }}</span><span class="label-val-unit">%Vol</span></span>
         </div>
         <div class="label-right-row label-right-row-meta">
           <span class="label-meta">
