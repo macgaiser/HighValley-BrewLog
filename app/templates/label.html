@@ -8,28 +8,34 @@
     <a class="btn" href="/batches/{{ batch.id }}">Zurück</a>
   </div>
 </div>
-<p class="subtitle no-print">Vorschau für ein A4-Blatt mit 9 übereinander angeordneten Wickel-Etiketten (zum Ausschneiden entlang der gestrichelten Linien und zu einem Ring zusammenkleben). Zum Drucken oder als PDF speichern den Button oben nutzen (Browser-Druckdialog).</p>
+<p class="subtitle no-print">Vorschau für ein A4-Blatt mit 9 übereinander angeordneten Wickel-Etiketten. Ausschneiden entlang der gestrichelten Linien, dann zu einem Ring zusammenkleben: das linke Quadrat ist die Klebefläche, das rechte umrahmt nach dem Kleben das Logo. Zum Drucken oder als PDF speichern den Button oben nutzen (Browser-Druckdialog).</p>
 
 <div class="label-sheet">
   {% for _ in label_count %}
   <div class="label-strip">
-    <div class="label-cell label-logo-cell"><img class="label-logo-img" src="/static/img/logo-shield.png" alt=""></div>
-    <div class="label-cell label-banner-cell"><img class="label-banner-img" src="/static/img/label-hopvine.png" alt=""></div>
-    <div class="label-cell label-val label-ibu"><span class="label-val-value">{{ m.ibu_total|fmt(0) }}</span><span class="label-val-unit">IBU</span></div>
-    <div class="label-cell label-val label-plato"><span class="label-val-value">{{ m.og_plato|fmt(1) if m.og_plato is not none else "–" }}</span><span class="label-val-unit">°P</span></div>
-    <div class="label-cell label-batch">Batch# {{ batch.batch_number }}</div>
-
-    <div class="label-cell label-brand">HIGH VALLEY Brew Co.</div>
-    <div class="label-cell label-val label-ebc" style="background: {{ m.color_hex or '#e3d8bd' }};"><span class="label-val-value">{{ m.color_ebc|fmt(0) if m.color_ebc is not none else "–" }}</span><span class="label-val-unit">EBC</span></div>
-    <div class="label-cell label-val label-abv"><span class="label-val-value">{{ m.abv_display or "–" }}</span></div>
-    <div class="label-cell label-date">{{ batch.brew_date|de_date if batch.brew_date else "" }}</div>
-
-    <div class="label-cell label-beername">{{ batch.name }}</div>
-    <div class="label-cell label-hops">{{ hop_names }}</div>
-    <div class="label-cell label-frame-cell">
-      <svg class="label-mug" viewBox="0 0 28 28" style="--icon-2: {{ m.color_hex or '#e3d8bd' }}"><use href="#icon-stein"/></svg>
+    <div class="label-cell label-glue-cell"></div>
+    <div class="label-cell label-logo-cell"><img class="label-logo-img" src="{{ logo_url }}" alt=""></div>
+    <div class="label-maincontent">
+      <div class="label-cell label-brand">
+        <span class="label-brand-name">{{ brand_name }}</span>
+        <span class="label-beername">{{ batch.name }}</span>
+      </div>
+      <div class="label-cell label-mug-cell">
+        <svg class="label-mug" viewBox="0 0 28 28" style="--icon-2: {{ m.color_hex or '#e3d8bd' }}"><use href="#icon-stein"/></svg>
+      </div>
+      <div class="label-cell label-val label-ibu"><span class="label-val-value">{{ m.ibu_total|fmt(0) }}</span><span class="label-val-unit">IBU</span></div>
+      <div class="label-cell label-val label-plato"><span class="label-val-value">{{ m.og_plato|fmt(1) if m.og_plato is not none else "–" }}</span><span class="label-val-unit">°P</span></div>
+      <div class="label-cell label-batch">Batch# {{ batch.batch_number }}</div>
+      <div class="label-cell label-val label-ebc"><span class="label-val-value">{{ m.color_ebc|fmt(0) if m.color_ebc is not none else "–" }}</span><span class="label-val-unit">EBC</span></div>
+      <div class="label-cell label-val label-abv"><span class="label-val-value">{{ m.abv_display or "–" }}</span></div>
+      <div class="label-cell label-date">{{ batch.brew_date|de_date if batch.brew_date else "" }}</div>
+      <div class="label-cell label-hops">{{ hop_names }}</div>
     </div>
+    <div class="label-cell label-frame-cell"></div>
   </div>
+  {% endfor %}
+  {% for n in range(10) %}
+  <div class="label-vine-row" style="top: {{ (n * 100 / 9)|round(4) }}%;"></div>
   {% endfor %}
 </div>
 {% endblock %}

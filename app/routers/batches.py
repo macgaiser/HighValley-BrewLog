@@ -21,6 +21,7 @@ from app.models import (
     InventoryCategory,
     InventoryItem,
     InventoryTransaction,
+    Logo,
     MashStep,
     Settings,
     YeastAddition,
@@ -388,6 +389,11 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
     for h in batch.hop_additions:
         if h.hop_name and h.hop_name not in hop_names:
             hop_names.append(h.hop_name)
+    logo_url = "/static/img/logo-shield.png"
+    if settings.active_logo_id:
+        logo = session.get(Logo, settings.active_logo_id)
+        if logo:
+            logo_url = f"/logos/{logo.filename}"
     return templates.TemplateResponse(
         "label.html",
         {
@@ -396,6 +402,8 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
             "m": metrics,
             "hop_names": ", ".join(hop_names) if hop_names else "–",
             "label_count": range(9),
+            "brand_name": settings.label_brand_name,
+            "logo_url": logo_url,
         },
     )
 
