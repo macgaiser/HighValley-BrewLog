@@ -353,72 +353,102 @@ h1, h2, h3 {
 
 /* Etikettengenerator - schmale Wickel-Etiketten, ganze Seitenbreite, 9
    uebereinander ohne Abstand (zum Ausschneiden/Zusammenkleben zu einem
-   Ring). Linkes Quadrat zeigt zentriert das Logo (225 Grad gedreht),
-   rechtes Quadrat ist ein leerer Rahmen. Die Hopfenranke sitzt mittig auf
-   jeder Schnittlinie (haelftig je Etikett), viermal nebeneinander ueber
-   die Breite des mittleren Etikettenteils gekachelt. */
+   Ring). Die beiden aeusseren Quadrate werden ueber aspect-ratio (nicht
+   ueber eine geschaetzte Breiten-Prozentzahl) erzwungen, damit sie
+   unabhaengig von der tatsaechlichen Etikettenhoehe immer exakt
+   quadratisch sind - die mittlere Spalte (1fr) nimmt automatisch den
+   kompletten Rest ein. Linkes Quadrat zeigt zentriert das Logo (225 Grad
+   gedreht), rechtes Quadrat ist ein leerer Rahmen. Der mittlere Teil ist
+   in zwei gleich breite Haelften geteilt: links Marke/Sudname, rechts
+   alle Werte. Die Hopfenranke sitzt mittig auf jeder Schnittlinie
+   (haelftig je Etikett), viermal ueber die Breite des mittleren Teils
+   gekachelt. */
 .label-sheet {
   --label-green: #1a6b1a;
   position: relative;
   max-width: 780px;
   margin: 0 auto;
   border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  /* Gesamthoehe der 9 Etiketten uebereinander (9 * 32,6mm), damit jeder
+     einzelne Streifen unten per flex (nicht per eigenem aspect-ratio)
+     eine garantiert definierte Hoehe bekommt - vermeidet einen sonst
+     moeglichen Zirkelbezug mit den quadratischen Rand-Feldern (die ihre
+     Breite per aspect-ratio aus der Etikettenhoehe ableiten). */
+  aspect-ratio: 204 / 293.4;
 }
 .label-strip {
   position: relative;
+  flex: 1 1 0;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 16fr 68fr 16fr;
+  grid-template-columns: auto 1fr auto;
   grid-template-areas: "left content frame";
-  aspect-ratio: 204 / 32.6;
-  width: 100%;
   border-top: 1px dashed var(--label-green);
   font-family: "Ranchers", "Segoe UI", sans-serif;
   color: var(--label-green);
 }
 .label-cell { display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0 2px; }
-.label-left-square { grid-area: left; border: 2px solid var(--label-green); margin: 3px; }
-.label-frame-cell { grid-area: frame; border: 2px solid var(--label-green); margin: 3px; }
-.label-logo-img { width: 72%; height: auto; transform: rotate(45deg); }
+.label-left-square, .label-frame-cell {
+  height: 100%;
+  aspect-ratio: 1;
+  width: auto;
+  box-sizing: border-box;
+  border: 4px solid var(--label-green);
+}
+.label-left-square { grid-area: left; }
+.label-frame-cell { grid-area: frame; }
+.label-logo-img { width: 74%; height: auto; transform: rotate(45deg); }
 
 .label-maincontent {
   grid-area: content;
+  position: relative;
   display: grid;
-  grid-template-columns: 40fr 14fr 16fr 16fr 14fr;
-  grid-template-rows: 1fr 1fr 1fr;
-  grid-template-areas:
-    "brand mug ibu  plato batch"
-    "brand mug ebc  abv   date"
-    "brand hops hops hops hops";
+  grid-template-columns: 1fr 1fr;
   height: 100%;
-  padding: 4% 0;
+  /* Bewusst rem statt % fuer oben/unten: vertikales padding in Prozent
+     bezieht sich in CSS immer auf die BREITE des Elternelements (nicht
+     dessen Hoehe) - bei dieser sehr breiten, sehr flachen Box wuerde ein
+     Prozentwert den Inhalt je nach Bildschirm/Druckbreite unterschiedlich
+     stark zusammenstauchen (und im Druck sogar mit der Hopfenranke
+     ueberlappen). rem bleibt unabhaengig von der Etikettenbreite konstant. */
+  padding: 0.85rem 0.3rem;
 }
 .label-brand {
-  grid-area: brand;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
   text-align: center;
   padding: 0 0.4rem;
 }
-.label-brand-name { font-weight: bold; font-size: 1.55rem; line-height: 1.05; }
-.label-beername { font-size: 1.25rem; line-height: 1; }
-.label-mug-cell { grid-area: mug; }
-.label-mug { height: 88%; width: auto; --icon-1: var(--label-green); }
-.label-ibu { grid-area: ibu; }
-.label-plato { grid-area: plato; }
-.label-batch { grid-area: batch; font-size: 0.68rem; white-space: nowrap; }
-.label-ebc { grid-area: ebc; }
-.label-abv { grid-area: abv; }
-.label-date { grid-area: date; font-size: 0.68rem; white-space: nowrap; }
-.label-hops { grid-area: hops; font-size: 0.66rem; text-align: center; line-height: 1.1; }
-.label-val { flex-direction: column; line-height: 1; font-size: 0.75rem; }
+.label-brand-name { font-weight: bold; font-size: 1.6rem; line-height: 1.05; }
+.label-beername { font-size: 1.3rem; line-height: 1; }
+
+.label-right { display: flex; flex-direction: column; height: 100%; padding: 0 0.3rem; }
+.label-right-row { display: flex; align-items: baseline; justify-content: space-around; }
+.label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.label-color-group { display: flex; align-items: center; gap: 0.2rem; line-height: 1; }
+.label-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.68rem; line-height: 1.3; }
+.label-mug { height: 1.5em; width: auto; --icon-1: var(--label-green); }
 .label-val-value { font-size: 1.2rem; }
 .label-val-unit { font-size: 0.58rem; }
+.label-hops {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.72rem;
+  line-height: 1.15;
+  padding: 0 0.2rem;
+}
 
-.label-vine-row {
+.label-vine {
   position: absolute;
-  left: 16%;
-  right: 16%;
-  height: 2.6%;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 22%;
   transform: translateY(-50%);
   background-image: url("/static/img/label-hopvine.png");
   background-repeat: repeat-x;
@@ -426,13 +456,14 @@ h1, h2, h3 {
   z-index: 3;
   pointer-events: none;
 }
+.label-vine-bottom { top: auto; bottom: 0; transform: translateY(50%); }
 
 @media print {
   .topbar, .no-print { display: none !important; }
   body::before { display: none !important; }
   .container { padding: 0 !important; max-width: none !important; margin: 0 !important; }
-  .label-sheet { max-width: none; width: 200mm; border: none; }
-  .label-strip { aspect-ratio: unset; height: 31.9mm; page-break-inside: avoid; }
+  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 287.1mm; border: none; }
+  .label-strip { flex: none; height: 31.9mm; page-break-inside: avoid; }
 }
 
 @page { size: A4; margin: 5mm; }
