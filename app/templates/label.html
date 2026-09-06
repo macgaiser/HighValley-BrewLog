@@ -4,13 +4,17 @@
 <div class="page-header no-print">
   <h1>Etikett drucken – Sud #{{ batch.batch_number }}</h1>
   <div class="actions">
+    <label class="label-theme-toggle">
+      <input type="checkbox" id="label-dark-toggle">
+      Dunkler Hintergrund (z.B. für Stout)
+    </label>
     <button class="btn btn-primary" type="button" onclick="window.print()">Drucken</button>
     <a class="btn" href="/batches/{{ batch.id }}">Zurück</a>
   </div>
 </div>
 <p class="subtitle no-print">Vorschau für ein A4-Blatt mit 9 übereinander angeordneten Wickel-Etiketten. Ausschneiden entlang der gestrichelten Linien, dann zu einem Ring zusammenkleben. Zum Drucken oder als PDF speichern den Button oben nutzen (Browser-Druckdialog).</p>
 
-<div class="label-sheet">
+<div class="label-sheet" id="label-sheet">
   {% for _ in label_count %}
   <div class="label-strip">
     <div class="label-cell label-left-square"><img class="label-logo-img" src="{{ logo_url }}" alt=""></div>
@@ -29,7 +33,7 @@
           <span class="label-stat"><span class="label-val-value">{{ m.og_plato|fmt(1) if m.og_plato is not none else "–" }}</span><span class="label-val-unit">°P</span></span>
           <span class="label-stat"><span class="label-val-value">{{ m.abv_percent|fmt(1) if m.abv_percent is not none else "–" }}</span><span class="label-val-unit">%Vol</span></span>
         </div>
-        <div class="label-right-row label-right-row-meta">
+        <div class="label-meta-wrap">
           <span class="label-meta">
             <span>Batch# {{ batch.batch_number }}</span>
             <span>{{ batch.bottling_date|de_date if batch.bottling_date else "–" }}</span>
@@ -55,4 +59,11 @@
   </div>
   {% endfor %}
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById('label-dark-toggle').addEventListener('change', function (e) {
+    document.getElementById('label-sheet').classList.toggle('label-sheet--dark', e.target.checked);
+  });
+</script>
 {% endblock %}

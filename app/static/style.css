@@ -212,7 +212,17 @@ h1, h2, h3 {
 .page-header h1 { margin: 0; font-size: 2.1rem; color: var(--brown); }
 .subtitle { color: var(--muted); margin-top: 0.15rem; }
 
-.actions { display: flex; gap: 0.5rem; }
+.actions { display: flex; gap: 0.5rem; align-items: center; }
+
+.label-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-right: 0.3rem;
+  cursor: pointer;
+}
 
 .btn {
   display: inline-block;
@@ -365,6 +375,7 @@ h1, h2, h3 {
    gekachelt. */
 .label-sheet {
   --label-green: #1a6b1a;
+  --label-bg: var(--bg);
   position: relative;
   max-width: 780px;
   margin: 0 auto;
@@ -378,6 +389,15 @@ h1, h2, h3 {
      Breite per aspect-ratio aus der Etikettenhoehe ableiten). */
   aspect-ratio: 204 / 293.4;
 }
+/* Dunkle Variante (z.B. fuer Stout-Etiketten): helles Gold statt Gruen
+   fuer ausreichend Kontrast auf fast schwarzem Grund. Die Bierkrug-Farbe
+   selbst (EBC-abhaengig) und ihre Textfarbe bleiben unveraendert, da sie
+   sich bereits eigenstaendig nach der jeweiligen Bierfarbe richten. */
+.label-sheet--dark {
+  --label-green: #f3c750;
+  --label-bg: #100e0a;
+}
+.label-sheet--dark .label-brand::before { opacity: 0.5; }
 .label-strip {
   position: relative;
   flex: 1 1 0;
@@ -388,7 +408,7 @@ h1, h2, h3 {
   border-top: 1px dashed var(--label-green);
   font-family: "Ranchers", "Segoe UI", sans-serif;
   color: var(--label-green);
-  background: var(--bg);
+  background: var(--label-bg);
 }
 .label-cell { display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0 2px; }
 .label-left-square, .label-frame-cell {
@@ -422,7 +442,7 @@ h1, h2, h3 {
   gap: 0.25rem;
   text-align: center;
   padding: 0 0.4rem;
-  background: var(--bg);
+  background: var(--label-bg);
 }
 .label-brand::before {
   content: "";
@@ -466,8 +486,20 @@ h1, h2, h3 {
 }
 .label-right-row { display: flex; align-items: center; justify-content: space-around; }
 .label-right-row-stats { margin-top: 0.75rem; }
-.label-right-row-meta { justify-content: flex-end; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+/* Mittig zwischen der Unterkante der IBU/Plato/Vol-Zeile (38%) und der
+   Oberkante des Bierkrugs (64,1%) positioniert - beide Werte direkt am
+   gerenderten Layout ausgemessen. */
+.label-meta-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  bottom: 35.9%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
 /* 2/3 der Groesse von .label-val-value (1.3rem * 2/3), nebeneinander
    statt untereinander. */
 .label-meta { display: flex; flex-direction: row; align-items: baseline; gap: 0.4rem; font-size: 0.87rem; line-height: 1; }
@@ -486,8 +518,16 @@ h1, h2, h3 {
 .label-mug-unit { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 3.4px; }
 .label-val-value { font-size: 1.3rem; }
 .label-val-unit { font-size: 0.58rem; }
+/* Mittig zwischen der Unterkante des Bierkrugs (64,1%) und der von unten
+   hereinragenden Hopfenranke (reservierter Randabstand wie beim Vine-
+   Clearance von .label-right) positioniert - unabhaengig davon, ob der
+   Hopfentext ein- oder zweizeilig ist. */
 .label-hops {
-  flex: 1;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 64.1%;
+  bottom: 0.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
