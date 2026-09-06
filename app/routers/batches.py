@@ -386,10 +386,29 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
     batch = session.get(Batch, batch_id)
     settings = session.get(Settings, 1)
     metrics = compute_metrics(batch, settings)
-    hop_names: list[str] = []
+
+    # Reihenfolge nach eingesetzter Menge (meiste Menge zuerst) statt nach
+    # Eingabereihenfolge - mehrere Gaben derselben Sorte (z.B. Kochen +
+    # Whirlpool) werden dafür zu einer Gesamtmenge aufsummiert.
+    hop_amounts: dict[str, float] = {}
     for h in batch.hop_additions:
-        if h.hop_name and h.hop_name not in hop_names:
-            hop_names.append(h.hop_name)
+        if h.hop_name:
+            hop_amounts[h.hop_name] = hop_amounts.get(h.hop_name, 0) + (h.amount_g or 0)
+    hop_names_sorted = sorted(hop_amounts, key=lambda name: hop_amounts[name], reverse=True)
+    hop_names = ", ".join(hop_names_sorted) if hop_names_sorted else "–"
+
+    # Schriftgroesse der Hopfenzeile nach Textlaenge gestuft, damit sowohl
+    # ein einzelner Hopfen (grosse Schrift) als auch eine lange Liste (auf
+    # zwei Zeilen, kleinere Schrift) noch in die reservierte Flaeche passt.
+    if len(hop_names) <= 26:
+        hop_names_size = 1
+    elif len(hop_names) <= 48:
+        hop_names_size = 2
+    elif len(hop_names) <= 75:
+        hop_names_size = 3
+    else:
+        hop_names_size = 4
+
     logo_url = "/static/img/logo-shield.png"
     if settings.active_logo_id:
         logo = session.get(Logo, settings.active_logo_id)
@@ -401,7 +420,8 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
             "request": request,
             "batch": batch,
             "m": metrics,
-            "hop_names": ", ".join(hop_names) if hop_names else "–",
+            "hop_names": hop_names,
+            "hop_names_size": hop_names_size,
             "label_count": range(9),
             "brand_name": settings.label_brand_name,
             "logo_url": logo_url,

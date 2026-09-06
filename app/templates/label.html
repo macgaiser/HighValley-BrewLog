@@ -15,7 +15,10 @@
   <div class="label-strip">
     <div class="label-cell label-left-square"><img class="label-logo-img" src="{{ logo_url }}" alt=""></div>
     <div class="label-maincontent">
-      <div class="label-vine{% if loop.first %} label-vine-edge-top{% endif %}"></div>
+      <div class="label-vine{% if loop.first %} label-vine-edge-top{% endif %}">
+        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+      </div>
       <div class="label-cell label-brand">
         <span class="label-brand-name">{{ brand_name }}</span>
         <span class="label-beername">{{ batch.name }}</span>
@@ -32,7 +35,7 @@
             <span>{{ batch.bottling_date|de_date if batch.bottling_date else "–" }}</span>
           </span>
         </div>
-        <div class="label-hops">{{ hop_names }}</div>
+        <div class="label-hops"><span class="label-hops-text label-hops-size-{{ hop_names_size }}">{{ hop_names }}</span></div>
         <div class="label-mug-wrap">
           <svg class="label-mug" viewBox="0 0 28 28" style="--icon-2: {{ m.color_hex or '#e3d8bd' }}">
             <use href="#icon-stein"/>
@@ -41,7 +44,12 @@
           </svg>
         </div>
       </div>
-      {% if loop.last %}<div class="label-vine label-vine-bottom label-vine-edge-bottom"></div>{% endif %}
+      {% if loop.last %}
+      <div class="label-vine label-vine-bottom label-vine-edge-bottom">
+        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+      </div>
+      {% endif %}
     </div>
     <div class="label-cell label-frame-cell"></div>
   </div>

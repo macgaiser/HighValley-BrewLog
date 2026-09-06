@@ -427,12 +427,12 @@ h1, h2, h3 {
 .label-brand::before {
   content: "";
   position: absolute;
-  /* Oben/unten um 11% eingerueckt, so weit wie die Hopfenranke von oben
-     bzw. unten in dieses Feld hineinragt - das Talbild soll die Ranke
-     nicht beruehren. Zusaetzlich auf allen vier Seiten weich ausgeblendet
+  /* Oben/unten eingerueckt, so weit wie die Hopfenranke von oben bzw.
+     unten in dieses Feld hineinragt - das Talbild soll die Ranke nicht
+     beruehren. Zusaetzlich auf allen vier Seiten weich ausgeblendet
      (nicht wie beim App-weiten Hintergrund hart abgeschnitten). */
-  top: 11%;
-  bottom: 11%;
+  top: 17%;
+  bottom: 17%;
   left: 0;
   right: 0;
   background-image: url("/static/img/bg-valley.png");
@@ -456,10 +456,10 @@ h1, h2, h3 {
 
 .label-right { position: relative; display: flex; flex-direction: column; height: 100%; padding: 0 0.3rem; }
 .label-right-row { display: flex; align-items: center; justify-content: space-around; }
-.label-right-row-stats { margin-top: 0.5rem; }
+.label-right-row-stats { margin-top: 0.75rem; }
 .label-right-row-meta { justify-content: flex-end; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
-.label-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 1rem; line-height: 1.35; }
+.label-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.62rem; line-height: 1.3; }
 /* Positioniert per top/bottom statt fester Hoehe: Oberkante auf Hoehe der
    Mitte von IBU/Plato (erste Zeile), Unterkante auf der Unterkante des
    Abfuelldatums (zweite Zeile) - Prozentwerte anhand der tatsaechlichen
@@ -468,8 +468,8 @@ h1, h2, h3 {
   position: absolute;
   left: 32.65%;
   transform: translateX(-50%);
-  top: 20.8%;
-  bottom: 26.5%;
+  top: 13%;
+  bottom: 16%;
   aspect-ratio: 1;
 }
 .label-mug { display: block; width: 100%; height: 100%; --icon-1: var(--label-green); }
@@ -483,24 +483,40 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 0.72rem;
-  line-height: 1.15;
   padding: 0 0.2rem;
+  min-height: 0;
 }
+.label-hops-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.18;
+}
+/* Schriftgroesse serverseitig nach Textlaenge gestuft (siehe
+   batch_label()) - so passt auch eine laengere Hopfenliste noch auf die
+   zwei reservierten Zeilen. */
+.label-hops-size-1 { font-size: 0.95rem; }
+.label-hops-size-2 { font-size: 0.8rem; }
+.label-hops-size-3 { font-size: 0.68rem; }
+.label-hops-size-4 { font-size: 0.56rem; }
 
 .label-vine {
+  /* Echte <img>-Elemente statt background-image: so ergibt sich die
+     Hoehe automatisch und korrekt aus dem Originalseitenverhaeltnis des
+     Bildes (keine Stauchung), und die Box selbst hat eine echte,
+     messbare Hoehe, auf die der Rest des Layouts (Abstand der Werte,
+     Talbild-Aussparung) abgestimmt werden kann. */
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
-  height: 22%;
+  display: flex;
   transform: translateY(-50%);
-  background-image: url("/static/img/label-hopvine.png");
-  background-repeat: repeat-x;
-  background-size: 50% 100%;
   z-index: 3;
   pointer-events: none;
 }
+.label-vine-img { display: block; width: 50%; height: auto; }
 .label-vine-bottom { top: auto; bottom: 0; transform: translateY(50%); }
 /* Ganz oben (vor Etikett 1) und ganz unten (nach Etikett 9) liegt sonst
    die Haelfte der Ranke ausserhalb jedes Etiketts - abgeschnitten statt
