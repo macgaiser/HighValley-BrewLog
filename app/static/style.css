@@ -403,7 +403,24 @@ h1, h2, h3 {
   flex: 1 1 0;
   min-height: 0;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* Feste Prozentwerte statt "auto ... auto" mit aspect-ratio auf den
+     Eckquadraten: die Kombination aus CSS-Grid-Auto-Spalten und
+     aspect-ratio wird von manchen Browsern (v.a. mobil) nicht bei jedem
+     Reflow zuverlaessig neu berechnet - sichtbar als Luecke zwischen
+     Quadrat und Inhalt, die erst nach einem spaeteren Layout-Trigger
+     (z.B. Logo-Bild laedt) auftauchte. 15,9804% ergibt sich rechnerisch
+     aus dem festen Etiketten-Seitenverhaeltnis (293,4/204/9 Streifen) und
+     ist daher exakt gleichwertig, aber ohne die fragile Neuberechnung. */
+  grid-template-columns: 15.9804% 1fr 15.9804%;
+  /* Ohne explizite Zeilenhoehe bemisst sich die (einzige, implizite)
+     Grid-Zeile per "auto" am eigenen Inhalt - wird der Inhalt (z.B. ein
+     neu hochgeladenes Logo mit anderem Seitenverhaeltnis) minimal hoeher
+     als vorher, waechst die Zeile mit und alle height:100%-Kindelemente
+     (Eckquadrate, Hauptbereich) beziehen sich dann auf diese groessere
+     Zeile statt auf die tatsaechliche, per flex fixierte Streifenhoehe -
+     sichtbar als Luecke/Versatz. grid-template-rows:100% zwingt die
+     Zeile auf die echte Streifenhoehe. */
+  grid-template-rows: 100%;
   grid-template-areas: "left content frame";
   border-top: 1px dashed var(--label-green);
   font-family: "Ranchers", "Segoe UI", sans-serif;
@@ -413,14 +430,17 @@ h1, h2, h3 {
 .label-cell { display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0 2px; }
 .label-left-square, .label-frame-cell {
   height: 100%;
-  aspect-ratio: 1;
-  width: auto;
+  width: 100%;
   box-sizing: border-box;
   border: 8px solid var(--label-green);
 }
 .label-left-square { grid-area: left; }
 .label-frame-cell { grid-area: frame; }
-.label-logo-img { width: 74%; height: auto; transform: rotate(45deg); }
+/* object-fit:contain in einer festen quadratischen Box statt nur
+   width:74%;height:auto - so wird jedes hochgeladene Logo unabhaengig
+   von seinem eigenen Seitenverhaeltnis gleich gross (und nicht
+   unerwartet klein) dargestellt, mit Rand zum gruenen Rahmen. */
+.label-logo-img { width: 82%; height: 82%; object-fit: contain; transform: rotate(45deg); }
 
 .label-maincontent {
   grid-area: content;
@@ -613,8 +633,12 @@ h1, h2, h3 {
   .topbar, .no-print { display: none !important; }
   body::before { display: none !important; }
   .container { padding: 0 !important; max-width: none !important; margin: 0 !important; }
-  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 287.1mm; border: none; }
-  .label-strip { flex: none; height: 31.9mm; page-break-inside: avoid; }
+  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 287mm; border: none; }
+  /* Keine feste mm-Hoehe pro Streifen (9 * 31,9mm ergab 287,1mm - 0,1mm
+     mehr als die 287mm Nutzhoehe der Seite, wodurch der 9. Streifen auf
+     eine zweite Seite rutschte). flex:1 1 0 (wie im Bildschirm-Modus)
+     teilt die exakten 287mm ohne Rundungsfehler gleichmaessig auf. */
+  .label-strip { page-break-inside: avoid; }
 }
 
 @page { size: A4; margin: 5mm; }
