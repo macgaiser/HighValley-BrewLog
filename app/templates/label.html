@@ -36,7 +36,8 @@
         <div class="label-batch-icon-wrap">
           <svg class="label-batch-icon" viewBox="0 0 28 28">
             <use href="#icon-barrel"/>
-            <text x="14" y="17.5" text-anchor="middle" class="label-batch-value">{{ batch.batch_number }}</text>
+            <rect x="4.5" y="6.3" width="19" height="9.8" rx="2" class="label-batch-plate"/>
+            <text x="14" y="14" text-anchor="middle" class="label-batch-value">{{ batch.batch_number }}</text>
           </svg>
         </div>
         <span class="label-batch-date">{{ batch.bottling_date|de_date if batch.bottling_date else "–" }}</span>
