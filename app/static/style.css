@@ -485,11 +485,9 @@ h1, h2, h3 {
   padding-bottom: 0.85rem;
 }
 .label-right-row { display: flex; align-items: center; justify-content: space-around; }
-/* IBU/Stammwuerze/Alkohol etwas enger zusammengeschoben (Rechtsrand der
-   Reihe auf 90% statt 100%), damit rechts sichtbar Luft zum Abfuelldatum
-   bleibt, das unabhaengig davon (siehe .label-batch-date) am rechten
-   Rand positioniert ist und nicht mehr um denselben Platz konkurriert. */
-.label-right-row-stats { margin-top: 0.75rem; }
+/* Etwas Luft rechts, damit die schmale senkrechte Datums-Spalte (siehe
+   .label-batch-date) neben %Vol nicht anstoesst. */
+.label-right-row-stats { margin-top: 0.75rem; padding-right: 8%; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
 /* Fass-Symbol fuer die Batch-Nummer, exakt gleich gross und an derselben
    Ober-/Unterkante wie der Bierkrug positioniert. */
@@ -511,23 +509,22 @@ h1, h2, h3 {
 .label-batch-value {
   font-family: "Ranchers", "Segoe UI", sans-serif;
   fill: var(--label-green);
-  font-size: 9.5px;
+  font-size: 6.8px;
   paint-order: stroke;
   stroke: var(--label-bg);
-  stroke-width: 2.5px;
+  stroke-width: 1.8px;
   stroke-linejoin: round;
 }
-/* Rechtsbuendig am rechten Rahmenquadrat positioniert (right:0 nutzt das
-   bestehende Padding von .label-right als kleinen Abstand), Unterkante
-   auf Hoehe der Unterkante der IBU/°Plato/%Vol-Zeile verankert (top +
-   translateY(-100%) statt einer festen Hoehe, damit die Grundlinie exakt
-   zu den anderen Werten passt statt nur ungefaehr zentriert zu sein). */
+/* Hochkant (senkrecht von oben nach unten lesend) in der schmalen Spalte
+   zwischen %Vol und dem rechten Rahmenquadrat, rechtsbuendig mit kleinem
+   Abstand zum Quadrat (right:0 nutzt das bestehende Padding von
+   .label-right). */
 .label-batch-date {
   position: absolute;
   right: 0;
-  top: 38%;
-  transform: translateY(-100%);
-  font-size: 0.48rem;
+  top: 10.8%;
+  writing-mode: vertical-rl;
+  font-size: 0.5rem;
   line-height: 1;
   white-space: nowrap;
 }
