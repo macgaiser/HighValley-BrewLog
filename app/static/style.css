@@ -350,86 +350,68 @@ h1, h2, h3 {
 }
 .table .beer-color-icon { width: 1.5rem; height: 1.5rem; margin-left: 0; }
 
-/* Etikettengenerator */
+/* Etikettengenerator - schmale Wickel-Etiketten, ganze Seitenbreite, 9
+   uebereinander ohne Abstand (zum Ausschneiden/Zusammenkleben zu einem
+   Ring), Spaltenbreiten/Zeilenhoehen 1:1 aus der Excel-Druckvorlage
+   uebernommen (Spalten A:F, Zeilen 1-3 je Etikett). */
+.label-green { --label-green: #1a6b1a; }
 .label-sheet {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4mm;
-  max-width: 920px;
+  --label-green: #1a6b1a;
+  max-width: 780px;
   margin: 0 auto;
-}
-.label-card {
-  position: relative;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  background: var(--card-bg);
-  padding: 0.6rem 0.7rem 0.5rem;
-  aspect-ratio: 2 / 3;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-.label-logo {
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  width: 58px;
-  height: auto;
-  transform: rotate(-12deg);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
-}
-.label-banner { width: 100%; height: auto; margin-top: 2px; }
-.label-row { display: flex; align-items: center; justify-content: space-between; gap: 0.35rem; }
-.label-box {
-  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 0.15rem 0.4rem;
-  display: flex;
-  align-items: baseline;
-  gap: 0.2rem;
-  font-size: 0.8rem;
-  white-space: nowrap;
 }
-.label-box-value { font-family: var(--font-display); font-size: 1.05rem; color: var(--brown); }
-.label-box-unit { font-size: 0.68rem; color: var(--muted); }
-.label-box-color { color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); }
-.label-box-color .label-box-value, .label-box-color .label-box-unit { color: inherit; }
-.label-batch, .label-date { font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
-.label-brand {
-  font-size: 0.7rem;
-  color: var(--muted);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  margin-left: 62px;
+.label-strip {
+  display: grid;
+  grid-template-columns: 14.4fr 42.1fr 14.1fr 13fr 13fr 14.4fr;
+  grid-template-rows: 27.95fr 21.6fr 33.75fr;
+  grid-template-areas:
+    "logo banner ibu   plato batch frame"
+    "logo brand  ebc   abv   date  frame"
+    "logo beer   hops  hops  hops  frame";
+  aspect-ratio: 204 / 32.6;
+  width: 100%;
+  border-top: 1px dashed var(--label-green);
+  font-family: "Ranchers", "Segoe UI", sans-serif;
+  color: var(--label-green);
+  overflow: hidden;
 }
-.label-beername { font-family: var(--font-display); font-size: 1.35rem; color: var(--brown); margin: 0; line-height: 1.05; }
-.label-mug-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
-.label-mug { width: 30%; max-width: 90px; height: auto; --icon-1: var(--brown); opacity: 0.92; }
-.label-hops { font-size: 0.7rem; color: var(--text); }
-
-@media (max-width: 700px) {
-  .label-sheet { grid-template-columns: repeat(2, 1fr); }
+.label-cell { display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0 2px; }
+.label-logo-cell { grid-area: logo; position: relative; }
+.label-logo-img { width: 82%; height: auto; transform: rotate(-18deg); }
+.label-banner-cell { grid-area: banner; padding: 1px 4px; }
+.label-banner-img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+.label-brand { grid-area: brand; font-weight: bold; font-size: 1rem; letter-spacing: 0.02em; }
+.label-beername {
+  grid-area: beer;
+  justify-content: flex-start;
+  padding-left: 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1;
 }
+.label-ibu { grid-area: ibu; }
+.label-plato { grid-area: plato; }
+.label-batch { grid-area: batch; font-size: 0.6rem; white-space: nowrap; }
+.label-ebc { grid-area: ebc; }
+.label-abv { grid-area: abv; }
+.label-date { grid-area: date; font-size: 0.6rem; white-space: nowrap; }
+.label-hops { grid-area: hops; font-size: 0.58rem; text-align: center; line-height: 1.05; }
+.label-frame-cell { grid-area: frame; border: 2px solid var(--label-green); margin: 3px; }
+.label-val { flex-direction: column; line-height: 1; font-size: 0.68rem; }
+.label-val-value { font-size: 1rem; }
+.label-val-unit { font-size: 0.52rem; }
+.label-ebc.label-val { color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); }
+.label-mug { width: 62%; height: auto; --icon-1: var(--label-green); }
 
 @media print {
   .topbar, .no-print { display: none !important; }
   body::before { display: none !important; }
   .container { padding: 0 !important; max-width: none !important; margin: 0 !important; }
-  .label-sheet {
-    max-width: none;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 3mm;
-    width: 194mm;
-    height: 281mm;
-    margin: 0;
-  }
-  .label-card { aspect-ratio: unset; page-break-inside: avoid; }
+  .label-sheet { max-width: none; width: 200mm; border: none; }
+  .label-strip { aspect-ratio: unset; height: 31.9mm; page-break-inside: avoid; }
 }
 
-@page { size: A4; margin: 8mm; }
+@page { size: A4; margin: 5mm; }
 
 @media (max-width: 700px) {
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
