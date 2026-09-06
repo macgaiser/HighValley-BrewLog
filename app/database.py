@@ -16,6 +16,9 @@ DATA_DIR = Path(os.environ.get("DATA_DIR", "./data"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH = DATA_DIR / "brewlog.db"
 
+LOGO_DIR = DATA_DIR / "logos"
+LOGO_DIR.mkdir(parents=True, exist_ok=True)
+
 engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread": False})
 
 
