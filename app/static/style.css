@@ -73,16 +73,6 @@ body::before {
   opacity: 0.35;
   z-index: 0;
   pointer-events: none;
-  /* Links, rechts und unten ueber 2mm hinweg ausblenden, damit die
-     Bildkante nicht hart gegen den Seitenhintergrund abschneidet. */
-  -webkit-mask-image:
-    linear-gradient(to right, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%),
-    linear-gradient(to top, transparent 0, black 2mm, black 100%);
-  -webkit-mask-composite: source-in, source-over;
-  mask-image:
-    linear-gradient(to right, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%),
-    linear-gradient(to top, transparent 0, black 2mm, black 100%);
-  mask-composite: intersect;
 }
 .topbar, .container { position: relative; z-index: 1; }
 
@@ -437,13 +427,28 @@ h1, h2, h3 {
 .label-brand::before {
   content: "";
   position: absolute;
-  inset: 0;
+  /* Oben/unten um 11% eingerueckt, so weit wie die Hopfenranke von oben
+     bzw. unten in dieses Feld hineinragt - das Talbild soll die Ranke
+     nicht beruehren. Zusaetzlich auf allen vier Seiten weich ausgeblendet
+     (nicht wie beim App-weiten Hintergrund hart abgeschnitten). */
+  top: 11%;
+  bottom: 11%;
+  left: 0;
+  right: 0;
   background-image: url("/static/img/bg-valley.png");
   background-repeat: no-repeat;
   background-position: bottom center;
   background-size: cover;
   opacity: 0.35;
   z-index: 0;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%),
+    linear-gradient(to bottom, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%);
+  -webkit-mask-composite: source-in, source-over;
+  mask-image:
+    linear-gradient(to right, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%),
+    linear-gradient(to bottom, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%);
+  mask-composite: intersect;
 }
 .label-brand-name, .label-beername { position: relative; z-index: 1; }
 .label-brand-name { font-weight: bold; font-size: 1.6rem; line-height: 1.05; }
@@ -451,6 +456,7 @@ h1, h2, h3 {
 
 .label-right { position: relative; display: flex; flex-direction: column; height: 100%; padding: 0 0.3rem; }
 .label-right-row { display: flex; align-items: center; justify-content: space-around; }
+.label-right-row-stats { margin-top: 0.5rem; }
 .label-right-row-meta { justify-content: flex-end; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
 .label-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 1rem; line-height: 1.35; }
@@ -460,17 +466,17 @@ h1, h2, h3 {
    Zeilenhoehen ausgemessen. */
 .label-mug-wrap {
   position: absolute;
-  left: 24.7%;
+  left: 32.65%;
   transform: translateX(-50%);
-  top: 15.5%;
-  bottom: 30%;
+  top: 20.8%;
+  bottom: 26.5%;
   aspect-ratio: 1;
 }
 .label-mug { display: block; width: 100%; height: 100%; --icon-1: var(--label-green); }
 .label-mug-value { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 6.2px; }
 .label-mug-unit { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 3.4px; }
-.label-val-value { font-size: 1.5rem; }
-.label-val-unit { font-size: 0.65rem; }
+.label-val-value { font-size: 1.3rem; }
+.label-val-unit { font-size: 0.58rem; }
 .label-hops {
   flex: 1;
   display: flex;
@@ -491,7 +497,7 @@ h1, h2, h3 {
   transform: translateY(-50%);
   background-image: url("/static/img/label-hopvine.png");
   background-repeat: repeat-x;
-  background-size: 25% 100%;
+  background-size: 50% 100%;
   z-index: 3;
   pointer-events: none;
 }
