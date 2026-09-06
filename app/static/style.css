@@ -507,11 +507,14 @@ h1, h2, h3 {
   --icon-1: var(--label-green);
   --icon-2: var(--label-bg);
 }
-.label-batch-plate { fill: var(--label-bg); }
 .label-batch-value {
   font-family: "Ranchers", "Segoe UI", sans-serif;
   fill: var(--label-green);
   font-size: 9.5px;
+  paint-order: stroke;
+  stroke: var(--label-bg);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
 }
 .label-batch-date {
   position: absolute;
