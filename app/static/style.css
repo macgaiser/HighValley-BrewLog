@@ -493,7 +493,7 @@ h1, h2, h3 {
    Ober-/Unterkante wie der Bierkrug positioniert. */
 .label-batch-icon-wrap {
   position: absolute;
-  left: 65.5%;
+  left: 61.5%;
   transform: translateX(-50%);
   top: 9.5%;
   bottom: 35.9%;
@@ -522,9 +522,9 @@ h1, h2, h3 {
 .label-batch-date {
   position: absolute;
   right: 0;
-  top: 10.8%;
+  top: 12%;
   writing-mode: vertical-rl;
-  font-size: 0.5rem;
+  font-size: 1.15rem;
   line-height: 1;
   white-space: nowrap;
 }
@@ -545,11 +545,12 @@ h1, h2, h3 {
 .label-val-unit { font-size: 0.58rem; }
 /* Mittig zwischen der Unterkante des Bierkrugs/Fasses (64,1%) und der von
    unten hereinragenden Hopfenranke positioniert - unabhaengig davon, ob
-   der Hopfentext ein- oder zweizeilig ist. */
+   der Hopfentext ein- oder zweizeilig ist. Rechts auf die hochkant
+   stehende Datums-Spalte Ruecksicht genommen (right:8% statt 0). */
 .label-hops {
   position: absolute;
   left: 0;
-  right: 0;
+  right: 8%;
   top: 64.1%;
   bottom: 0.85rem;
   display: flex;
