@@ -73,6 +73,16 @@ body::before {
   opacity: 0.35;
   z-index: 0;
   pointer-events: none;
+  /* Links, rechts und unten ueber 2mm hinweg ausblenden, damit die
+     Bildkante nicht hart gegen den Seitenhintergrund abschneidet. */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%),
+    linear-gradient(to top, transparent 0, black 2mm, black 100%);
+  -webkit-mask-composite: source-in, source-over;
+  mask-image:
+    linear-gradient(to right, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%),
+    linear-gradient(to top, transparent 0, black 2mm, black 100%);
+  mask-composite: intersect;
 }
 .topbar, .container { position: relative; z-index: 1; }
 
@@ -210,7 +220,7 @@ h1, h2, h3 {
 }
 
 .page-header h1 { margin: 0; font-size: 2.1rem; color: var(--brown); }
-.subtitle { color: var(--muted); margin-top: -0.5rem; }
+.subtitle { color: var(--muted); margin-top: 0.15rem; }
 
 .actions { display: flex; gap: 0.5rem; }
 
@@ -396,7 +406,7 @@ h1, h2, h3 {
   aspect-ratio: 1;
   width: auto;
   box-sizing: border-box;
-  border: 4px solid var(--label-green);
+  border: 8px solid var(--label-green);
 }
 .label-left-square { grid-area: left; }
 .label-frame-cell { grid-area: frame; }
@@ -414,7 +424,7 @@ h1, h2, h3 {
      Prozentwert den Inhalt je nach Bildschirm/Druckbreite unterschiedlich
      stark zusammenstauchen (und im Druck sogar mit der Hopfenranke
      ueberlappen). rem bleibt unabhaengig von der Etikettenbreite konstant. */
-  padding: 0.85rem 0.3rem;
+  padding: 0.4rem 0.3rem;
 }
 .label-brand {
   position: relative;
@@ -439,16 +449,28 @@ h1, h2, h3 {
 .label-brand-name { font-weight: bold; font-size: 1.6rem; line-height: 1.05; }
 .label-beername { font-size: 1.3rem; line-height: 1; }
 
-.label-right { display: flex; flex-direction: column; height: 100%; padding: 0 0.3rem; }
+.label-right { position: relative; display: flex; flex-direction: column; height: 100%; padding: 0 0.3rem; }
 .label-right-row { display: flex; align-items: center; justify-content: space-around; }
+.label-right-row-meta { justify-content: flex-end; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
-.label-color-group { display: flex; align-items: center; line-height: 1; }
-.label-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.68rem; line-height: 1.3; }
-.label-mug { height: 3.4em; width: auto; --icon-1: var(--label-green); }
+.label-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 1rem; line-height: 1.35; }
+/* Positioniert per top/bottom statt fester Hoehe: Oberkante auf Hoehe der
+   Mitte von IBU/Plato (erste Zeile), Unterkante auf der Unterkante des
+   Abfuelldatums (zweite Zeile) - Prozentwerte anhand der tatsaechlichen
+   Zeilenhoehen ausgemessen. */
+.label-mug-wrap {
+  position: absolute;
+  left: 24.7%;
+  transform: translateX(-50%);
+  top: 15.5%;
+  bottom: 30%;
+  aspect-ratio: 1;
+}
+.label-mug { display: block; width: 100%; height: 100%; --icon-1: var(--label-green); }
 .label-mug-value { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 6.2px; }
 .label-mug-unit { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 3.4px; }
-.label-val-value { font-size: 1.2rem; }
-.label-val-unit { font-size: 0.58rem; }
+.label-val-value { font-size: 1.5rem; }
+.label-val-unit { font-size: 0.65rem; }
 .label-hops {
   flex: 1;
   display: flex;
@@ -474,6 +496,11 @@ h1, h2, h3 {
   pointer-events: none;
 }
 .label-vine-bottom { top: auto; bottom: 0; transform: translateY(50%); }
+/* Ganz oben (vor Etikett 1) und ganz unten (nach Etikett 9) liegt sonst
+   die Haelfte der Ranke ausserhalb jedes Etiketts - abgeschnitten statt
+   einfach ueberstehen zu lassen. */
+.label-vine-edge-top { clip-path: inset(50% 0 0 0); }
+.label-vine-edge-bottom { clip-path: inset(0 0 50% 0); }
 
 @media print {
   .topbar, .no-print { display: none !important; }

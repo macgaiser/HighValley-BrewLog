@@ -15,7 +15,7 @@
   <div class="label-strip">
     <div class="label-cell label-left-square"><img class="label-logo-img" src="{{ logo_url }}" alt=""></div>
     <div class="label-maincontent">
-      <div class="label-vine"></div>
+      <div class="label-vine{% if loop.first %} label-vine-edge-top{% endif %}"></div>
       <div class="label-cell label-brand">
         <span class="label-brand-name">{{ brand_name }}</span>
         <span class="label-beername">{{ batch.name }}</span>
@@ -26,22 +26,22 @@
           <span class="label-stat"><span class="label-val-value">{{ m.og_plato|fmt(1) if m.og_plato is not none else "–" }}</span><span class="label-val-unit">°P</span></span>
           <span class="label-stat"><span class="label-val-value">{{ m.abv_display or "–" }}</span></span>
         </div>
-        <div class="label-right-row">
-          <span class="label-color-group">
-            <svg class="label-mug" viewBox="0 0 28 28" style="--icon-2: {{ m.color_hex or '#e3d8bd' }}">
-              <use href="#icon-stein"/>
-              <text x="13" y="14.6" text-anchor="middle" class="label-mug-value" fill="{{ m.color_text_hex or '#1a6b1a' }}">{{ m.color_ebc|fmt(0) if m.color_ebc is not none else "–" }}</text>
-              <text x="13" y="20.4" text-anchor="middle" class="label-mug-unit" fill="{{ m.color_text_hex or '#1a6b1a' }}">EBC</text>
-            </svg>
-          </span>
+        <div class="label-right-row label-right-row-meta">
           <span class="label-meta">
             <span>Batch# {{ batch.batch_number }}</span>
             <span>{{ batch.bottling_date|de_date if batch.bottling_date else "–" }}</span>
           </span>
         </div>
         <div class="label-hops">{{ hop_names }}</div>
+        <div class="label-mug-wrap">
+          <svg class="label-mug" viewBox="0 0 28 28" style="--icon-2: {{ m.color_hex or '#e3d8bd' }}">
+            <use href="#icon-stein"/>
+            <text x="13" y="14.6" text-anchor="middle" class="label-mug-value" fill="{{ m.color_text_hex or '#1a6b1a' }}">{{ m.color_ebc|fmt(0) if m.color_ebc is not none else "–" }}</text>
+            <text x="13" y="20.4" text-anchor="middle" class="label-mug-unit" fill="{{ m.color_text_hex or '#1a6b1a' }}">EBC</text>
+          </svg>
+        </div>
       </div>
-      {% if loop.last %}<div class="label-vine label-vine-bottom"></div>{% endif %}
+      {% if loop.last %}<div class="label-vine label-vine-bottom label-vine-edge-bottom"></div>{% endif %}
     </div>
     <div class="label-cell label-frame-cell"></div>
   </div>
