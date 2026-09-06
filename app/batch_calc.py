@@ -33,6 +33,7 @@ class BatchMetrics:
     abv_is_recorded: bool = False
     color_ebc: float | None = None
     color_is_recorded: bool = False
+    color_hex: str | None = None
     malt_cost: float = 0.0
     hop_cost: float = 0.0
     yeast_cost: float = 0.0
@@ -41,6 +42,26 @@ class BatchMetrics:
     cost_per_liter: float | None = None
     cost_per_0_5l: float | None = None
     cost_is_incomplete: bool = False
+
+
+def resolve_color_hex(batch: Batch) -> str | None:
+    """Bierfarbe eines Suds als #rrggbb-Hex, fuer die Sude-Uebersicht - eine
+    schlanke Kurzform der Farb-Ermittlung aus compute_metrics(), ohne die
+    uebrigen (fuer eine reine Listenansicht unnoetigen) Kennzahlen
+    mitzuberechnen."""
+    color_ebc: float | None = None
+    if (
+        batch.target_volume_l
+        and batch.grain_additions
+        and all(g.inventory_item and g.inventory_item.color_ebc for g in batch.grain_additions)
+    ):
+        grain_colors = [(g.amount_kg or 0, g.inventory_item.color_ebc) for g in batch.grain_additions]
+        color_ebc = formulas.beer_color_ebc(grain_colors, batch.target_volume_l)
+    if not color_ebc and batch.color_ebc:
+        color_ebc = batch.color_ebc
+    if color_ebc is None:
+        return None
+    return formulas.ebc_to_hex(color_ebc)
 
 
 def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
@@ -100,6 +121,9 @@ def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
     if not m.color_ebc and batch.color_ebc:
         m.color_ebc = batch.color_ebc
         m.color_is_recorded = True
+
+    if m.color_ebc is not None:
+        m.color_hex = formulas.ebc_to_hex(m.color_ebc)
 
     fermentation_readings = [e for e in batch.fermentation_entries if e.brix is not None]
     if fermentation_readings and m.og_plato:
