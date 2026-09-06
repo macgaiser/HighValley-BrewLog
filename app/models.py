@@ -75,6 +75,7 @@ class Batch(SQLModel, table=True):
     style: str = ""
     fermentation_type: str = ""  # "Obergärig" / "Untergärig"
     brew_date: Optional[date] = None
+    bottling_date: Optional[date] = None
 
     target_volume_l: Optional[float] = None  # Ausschlagwürze
     color_ebc: Optional[float] = None

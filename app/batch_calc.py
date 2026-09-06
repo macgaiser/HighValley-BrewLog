@@ -34,6 +34,7 @@ class BatchMetrics:
     color_ebc: float | None = None
     color_is_recorded: bool = False
     color_hex: str | None = None
+    color_text_hex: str | None = None
     malt_cost: float = 0.0
     hop_cost: float = 0.0
     yeast_cost: float = 0.0
@@ -124,6 +125,7 @@ def compute_metrics(batch: Batch, settings: Settings) -> BatchMetrics:
 
     if m.color_ebc is not None:
         m.color_hex = formulas.ebc_to_hex(m.color_ebc)
+        m.color_text_hex = formulas.ebc_to_text_color(m.color_ebc)
 
     fermentation_readings = [e for e in batch.fermentation_entries if e.brix is not None]
     if fermentation_readings and m.og_plato:
