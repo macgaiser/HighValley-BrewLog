@@ -454,21 +454,31 @@ h1, h2, h3 {
 .label-brand-name { font-weight: bold; font-size: 1.6rem; line-height: 1.05; }
 .label-beername { font-size: 1.3rem; line-height: 1; }
 
-.label-right { position: relative; display: flex; flex-direction: column; height: 100%; padding: 0 0.3rem; }
+.label-right {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 0.3rem;
+  /* Bewusst rem statt % (gleicher Grund wie bei .label-maincontent):
+     Platz fuer die von unten hereinragende Hopfenranke reservieren. */
+  padding-bottom: 0.85rem;
+}
 .label-right-row { display: flex; align-items: center; justify-content: space-around; }
 .label-right-row-stats { margin-top: 0.75rem; }
 .label-right-row-meta { justify-content: flex-end; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
-/* 2/3 der Groesse von .label-val-value (1.3rem * 2/3). */
-.label-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.87rem; line-height: 1.3; }
+/* 2/3 der Groesse von .label-val-value (1.3rem * 2/3), nebeneinander
+   statt untereinander. */
+.label-meta { display: flex; flex-direction: row; align-items: baseline; gap: 0.4rem; font-size: 0.87rem; line-height: 1; }
 .label-mug-wrap {
   position: absolute;
   left: 32.65%;
   transform: translateX(-50%);
-  /* Um 1mm nach oben verschoben (ca. 3,5 Prozentpunkte bei ~28,5mm
-     Zeilenhoehe im Druck), Groesse dabei unveraendert. */
+  /* Um 1mm nach oben verschoben, Oberkante danach fix - um 30% verkleinert
+     (Hoehe * 0.7) durch Anheben der Unterkante, Oberkante unveraendert. */
   top: 9.5%;
-  bottom: 12.5%;
+  bottom: 35.9%;
   aspect-ratio: 1;
 }
 .label-mug { display: block; width: 100%; height: 100%; --icon-1: var(--label-green); }
