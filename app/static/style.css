@@ -59,12 +59,13 @@ body::before {
   bottom: 0;
   /* Breitenbasiert statt hoehenbasiert: die Baeume am Bildrand reichen fast
      bis zum oberen Bildrand (kein Himmel-Puffer), daher wuerde jede feste
-     Hoehe auf breiten Bildschirmen den harten Kamm hart abschneiden. 36vw
-     entspricht in etwa dem Seitenverhaeltnis des Bildes, sodass es
-     (innerhalb der Grenzen) nahezu vollstaendig sichtbar bleibt. */
-  height: 36vw;
+     Hoehe auf breiten Bildschirmen den harten Kamm hart abschneiden.
+     36,45vw entspricht exakt dem Seitenverhaeltnis des Bildes (624/1712),
+     sodass es unabhaengig von der Bildschirmbreite vollstaendig sichtbar
+     bleibt, solange die max-height (bis knapp 2900px Breite) nicht greift. */
+  height: 36.45vw;
   min-height: 240px;
-  max-height: 820px;
+  max-height: 1050px;
   background-image: url("/static/img/bg-valley.png");
   background-repeat: no-repeat;
   background-position: bottom center;
@@ -209,9 +210,19 @@ h1, h2, h3 {
 }
 
 .page-header h1 { margin: 0; font-size: 2.1rem; color: var(--brown); }
-.subtitle { color: var(--muted); margin-top: -0.5rem; }
+.subtitle { color: var(--muted); margin-top: 0.15rem; }
 
-.actions { display: flex; gap: 0.5rem; }
+.actions { display: flex; gap: 0.5rem; align-items: center; }
+
+.label-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-right: 0.3rem;
+  cursor: pointer;
+}
 
 .btn {
   display: inline-block;
@@ -338,6 +349,276 @@ h1, h2, h3 {
 .stat-label { font-size: 0.76rem; color: var(--muted); }
 .stat-value { font-family: var(--font-display); font-size: 1.55rem; color: var(--brown); }
 
+.beer-color-icon {
+  display: inline-block;
+  width: 1.3rem;
+  height: 1.3rem;
+  vertical-align: middle;
+  margin-left: 0.35rem;
+  --icon-1: var(--brown);
+  --icon-2: var(--border);
+}
+.table .beer-color-icon { width: 1.5rem; height: 1.5rem; margin-left: 0; }
+.stat .beer-color-icon { width: 1.7rem; height: 1.7rem; }
+
+/* Etikettengenerator - schmale Wickel-Etiketten, ganze Seitenbreite, 9
+   uebereinander ohne Abstand (zum Ausschneiden/Zusammenkleben zu einem
+   Ring). Die beiden aeusseren Quadrate werden ueber aspect-ratio (nicht
+   ueber eine geschaetzte Breiten-Prozentzahl) erzwungen, damit sie
+   unabhaengig von der tatsaechlichen Etikettenhoehe immer exakt
+   quadratisch sind - die mittlere Spalte (1fr) nimmt automatisch den
+   kompletten Rest ein. Linkes Quadrat zeigt zentriert das Logo (225 Grad
+   gedreht), rechtes Quadrat ist ein leerer Rahmen. Der mittlere Teil ist
+   in zwei gleich breite Haelften geteilt: links Marke/Sudname, rechts
+   alle Werte. Die Hopfenranke sitzt mittig auf jeder Schnittlinie
+   (haelftig je Etikett), viermal ueber die Breite des mittleren Teils
+   gekachelt. */
+.label-sheet {
+  --label-green: #1a6b1a;
+  --label-bg: var(--bg);
+  position: relative;
+  max-width: 780px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  /* Gesamthoehe der 9 Etiketten uebereinander (9 * 32,6mm), damit jeder
+     einzelne Streifen unten per flex (nicht per eigenem aspect-ratio)
+     eine garantiert definierte Hoehe bekommt - vermeidet einen sonst
+     moeglichen Zirkelbezug mit den quadratischen Rand-Feldern (die ihre
+     Breite per aspect-ratio aus der Etikettenhoehe ableiten). */
+  aspect-ratio: 204 / 293.4;
+}
+/* Dunkle Variante (z.B. fuer Stout-Etiketten): helles Gold statt Gruen
+   fuer ausreichend Kontrast auf fast schwarzem Grund. Die Bierkrug-Farbe
+   selbst (EBC-abhaengig) und ihre Textfarbe bleiben unveraendert, da sie
+   sich bereits eigenstaendig nach der jeweiligen Bierfarbe richten. */
+.label-sheet--dark {
+  --label-green: #f3c750;
+  --label-bg: #100e0a;
+}
+.label-sheet--dark .label-brand::before { opacity: 0.5; }
+.label-strip {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "left content frame";
+  border-top: 1px dashed var(--label-green);
+  font-family: "Ranchers", "Segoe UI", sans-serif;
+  color: var(--label-green);
+  background: var(--label-bg);
+}
+.label-cell { display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0 2px; }
+.label-left-square, .label-frame-cell {
+  height: 100%;
+  aspect-ratio: 1;
+  width: auto;
+  box-sizing: border-box;
+  border: 8px solid var(--label-green);
+}
+.label-left-square { grid-area: left; }
+.label-frame-cell { grid-area: frame; }
+.label-logo-img { width: 74%; height: auto; transform: rotate(45deg); }
+
+.label-maincontent {
+  grid-area: content;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+  /* Bewusst rem statt % fuer oben/unten: vertikales padding in Prozent
+     bezieht sich in CSS immer auf die BREITE des Elternelements (nicht
+     dessen Hoehe) - bei dieser sehr breiten, sehr flachen Box wuerde ein
+     Prozentwert den Inhalt je nach Bildschirm/Druckbreite unterschiedlich
+     stark zusammenstauchen (und im Druck sogar mit der Hopfenranke
+     ueberlappen). rem bleibt unabhaengig von der Etikettenbreite konstant. */
+  padding: 0.4rem 0.3rem;
+}
+.label-brand {
+  position: relative;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: center;
+  padding: 0 0.4rem;
+  background: var(--label-bg);
+}
+.label-brand::before {
+  content: "";
+  position: absolute;
+  /* Oben/unten eingerueckt, so weit wie die Hopfenranke von oben bzw.
+     unten in dieses Feld hineinragt - das Talbild soll die Ranke nicht
+     beruehren. Zusaetzlich auf allen vier Seiten weich ausgeblendet
+     (nicht wie beim App-weiten Hintergrund hart abgeschnitten). */
+  top: 17%;
+  bottom: 17%;
+  left: 0;
+  right: 0;
+  background-image: url("/static/img/bg-valley.png");
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: cover;
+  opacity: 0.35;
+  z-index: 0;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%),
+    linear-gradient(to bottom, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%);
+  -webkit-mask-composite: source-in, source-over;
+  mask-image:
+    linear-gradient(to right, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%),
+    linear-gradient(to bottom, transparent 0, black 2mm, black calc(100% - 2mm), transparent 100%);
+  mask-composite: intersect;
+}
+.label-brand-name, .label-beername { position: relative; z-index: 1; }
+.label-brand-name { font-weight: bold; font-size: 1.6rem; line-height: 1.05; }
+.label-beername { font-size: 1.3rem; line-height: 1; }
+
+.label-right {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 0.3rem;
+  /* Bewusst rem statt % (gleicher Grund wie bei .label-maincontent):
+     Platz fuer die von unten hereinragende Hopfenranke reservieren. */
+  padding-bottom: 0.85rem;
+}
+.label-right-row { display: flex; align-items: center; justify-content: space-around; }
+.label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+/* IBU/Bierkrug/Stammwuerze/Fass/Alkohol als fuenf gleichmaessig
+   verteilte Punkte quer ueber die Reihe (statt nur die drei Textwerte
+   per space-around), damit die Abstaende zwischen allen fuenf
+   Infos - nicht nur den dreien - gleich gross sind. Dafuer werden die
+   drei Textwerte wie Bierkrug/Fass einzeln absolut positioniert statt
+   ueber Flexbox verteilt. */
+.label-right-row-stats .label-stat {
+  position: absolute;
+  top: 10.85%;
+  transform: translateX(-50%);
+}
+.label-right-row-stats .label-stat:nth-child(1) { left: 16.8%; }
+.label-right-row-stats .label-stat:nth-child(2) { left: 53.8%; }
+.label-right-row-stats .label-stat:nth-child(3) { left: 90.8%; }
+/* Fass-Symbol fuer die Batch-Nummer, exakt gleich gross und an derselben
+   Ober-/Unterkante wie der Bierkrug positioniert. */
+.label-batch-icon-wrap {
+  position: absolute;
+  left: 72.3%;
+  transform: translateX(-50%);
+  top: 9.5%;
+  bottom: 35.9%;
+  aspect-ratio: 1;
+}
+.label-batch-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  --icon-1: var(--label-green);
+  --icon-2: #8a5a2e;
+}
+.label-batch-value {
+  font-family: "Ranchers", "Segoe UI", sans-serif;
+  fill: var(--label-green);
+  font-size: 6.8px;
+  paint-order: stroke;
+  stroke: var(--label-bg);
+  stroke-width: 1.8px;
+  stroke-linejoin: round;
+}
+/* Hochkant, um 180 Grad gedreht, an der linken Seite des rechten
+   Informationsfeldes (linksbuendig mit kleinem Abstand durch das
+   Padding von .label-right, statt wie zuvor rechts neben %Vol). */
+.label-batch-date {
+  position: absolute;
+  left: 0;
+  top: 12%;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 1.15rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+.label-mug-wrap {
+  position: absolute;
+  left: 35.3%;
+  transform: translateX(-50%);
+  /* Um 1mm nach oben verschoben, Oberkante danach fix - um 30% verkleinert
+     (Hoehe * 0.7) durch Anheben der Unterkante, Oberkante unveraendert. */
+  top: 9.5%;
+  bottom: 35.9%;
+  aspect-ratio: 1;
+}
+.label-mug { display: block; width: 100%; height: 100%; --icon-1: var(--label-green); }
+.label-mug-value { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 6.2px; }
+.label-mug-unit { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 3.4px; }
+.label-val-value { font-size: 1.3rem; }
+.label-val-unit { font-size: 0.58rem; }
+/* Mittig zwischen der Unterkante des Bierkrugs/Fasses (64,1%) und der von
+   unten hereinragenden Hopfenranke positioniert - unabhaengig davon, ob
+   der Hopfentext ein- oder zweizeilig ist. Links auf die hochkant
+   stehende Datums-Spalte Ruecksicht genommen (left:8% statt 0). */
+.label-hops {
+  position: absolute;
+  left: 8%;
+  right: 0;
+  top: 64.1%;
+  bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 0.2rem;
+  min-height: 0;
+}
+.label-hops-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.18;
+}
+/* Schriftgroesse serverseitig nach Textlaenge gestuft (siehe
+   batch_label()) - so passt auch eine laengere Hopfenliste noch auf die
+   zwei reservierten Zeilen. */
+.label-hops-size-1 { font-size: 0.95rem; }
+.label-hops-size-2 { font-size: 0.8rem; }
+.label-hops-size-3 { font-size: 0.68rem; }
+.label-hops-size-4 { font-size: 0.56rem; }
+
+.label-vine {
+  /* Echte <img>-Elemente statt background-image: so ergibt sich die
+     Hoehe automatisch und korrekt aus dem Originalseitenverhaeltnis des
+     Bildes (keine Stauchung), und die Box selbst hat eine echte,
+     messbare Hoehe, auf die der Rest des Layouts (Abstand der Werte,
+     Talbild-Aussparung) abgestimmt werden kann. */
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  transform: translateY(-50%);
+  z-index: 3;
+  pointer-events: none;
+}
+.label-vine-img { display: block; width: 50%; height: auto; }
+.label-vine-bottom { top: auto; bottom: 0; transform: translateY(50%); }
+/* Ganz oben (vor Etikett 1) und ganz unten (nach Etikett 9) liegt sonst
+   die Haelfte der Ranke ausserhalb jedes Etiketts - abgeschnitten statt
+   einfach ueberstehen zu lassen. */
+.label-vine-edge-top { clip-path: inset(50% 0 0 0); }
+.label-vine-edge-bottom { clip-path: inset(0 0 50% 0); }
+
+@media print {
+  .topbar, .no-print { display: none !important; }
+  body::before { display: none !important; }
+  .container { padding: 0 !important; max-width: none !important; margin: 0 !important; }
+  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 287.1mm; border: none; }
+  .label-strip { flex: none; height: 31.9mm; page-break-inside: avoid; }
+}
+
+@page { size: A4; margin: 5mm; }
+
 @media (max-width: 700px) {
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -364,6 +645,22 @@ h1, h2, h3 {
 
 .inline-form { display: flex; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
 .inline-form input { padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; }
+
+.logo-gallery { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
+.logo-gallery-item {
+  width: 110px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  background: white;
+}
+.logo-gallery-item.active { border-color: var(--green); }
+.logo-gallery-item img { width: 100%; height: 70px; object-fit: contain; }
+.badge-active { font-size: 0.75rem; color: var(--green); font-weight: 600; }
 
 .comment-add-form { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; align-items: flex-start; }
 .comment-add-form input { padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; }

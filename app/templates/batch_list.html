@@ -58,6 +58,7 @@
       <th>Biertyp</th>
       <th>Stil</th>
       <th>Stammwürze (°P)</th>
+      <th>Farbe</th>
       <th></th>
     </tr>
   </thead>
@@ -69,10 +70,11 @@
       <td>{{ b.name }}</td>
       <td>{{ b.fermentation_type }}</td>
       <td>{{ og_display.get(b.id, "–") }}</td>
+      <td>{% if color_hex.get(b.id) %}<svg class="beer-color-icon" viewBox="0 0 28 28" style="--icon-2: {{ color_hex.get(b.id) }}"><use href="#icon-stein"/></svg>{% endif %}</td>
       <td><a class="btn btn-small" href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()">Bearbeiten</a></td>
     </tr>
     {% else %}
-    <tr><td colspan="6">Noch keine Sude erfasst.</td></tr>
+    <tr><td colspan="7">Noch keine Sude erfasst.</td></tr>
     {% endfor %}
   </tbody>
 </table>

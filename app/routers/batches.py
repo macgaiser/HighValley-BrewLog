@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
 
-from app.batch_calc import compute_metrics
+from app.batch_calc import compute_metrics, resolve_color_hex
 from app.database import get_session
 from app.inventory import sync_batch_deductions
 from app.models import (
@@ -21,6 +21,7 @@ from app.models import (
     InventoryCategory,
     InventoryItem,
     InventoryTransaction,
+    Logo,
     MashStep,
     Settings,
     YeastAddition,
@@ -131,11 +132,15 @@ def batch_list(
 
     settings = session.get(Settings, 1)
     og_display: dict[int, float] = {}
+    color_hex: dict[int, str] = {}
     for b in batches:
         if b.post_boil_brix:
             og_display[b.id] = round(b.post_boil_brix / settings.wort_correction_factor, 1)
         elif b.target_og_plato:
             og_display[b.id] = round(b.target_og_plato, 1)
+        hex_value = resolve_color_hex(b)
+        if hex_value:
+            color_hex[b.id] = hex_value
 
     return templates.TemplateResponse(
         "batch_list.html",
@@ -147,6 +152,7 @@ def batch_list(
             "ingredient_ids": ingredient_ids,
             "inventory": _inventory_options(session),
             "og_display": og_display,
+            "color_hex": color_hex,
         },
     )
 
@@ -175,6 +181,7 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     batch.style = form.get("style", "").strip()
     batch.fermentation_type = form.get("fermentation_type", "").strip()
     batch.brew_date = _d(form.get("brew_date"))
+    batch.bottling_date = _d(form.get("bottling_date"))
     batch.inventory_deduction_locked = form.get("inventory_deduction_locked") == "on"
     batch.target_volume_l = _f(form.get("target_volume_l"))
     batch.color_ebc = _f(form.get("color_ebc"))
@@ -371,6 +378,54 @@ def batch_detail(batch_id: int, request: Request, session: Session = Depends(get
     return templates.TemplateResponse(
         "batch_detail.html",
         {"request": request, "batch": batch, "m": metrics, "today": date.today().isoformat()},
+    )
+
+
+@router.get("/{batch_id}/label")
+def batch_label(batch_id: int, request: Request, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    settings = session.get(Settings, 1)
+    metrics = compute_metrics(batch, settings)
+
+    # Reihenfolge nach eingesetzter Menge (meiste Menge zuerst) statt nach
+    # Eingabereihenfolge - mehrere Gaben derselben Sorte (z.B. Kochen +
+    # Whirlpool) werden dafür zu einer Gesamtmenge aufsummiert.
+    hop_amounts: dict[str, float] = {}
+    for h in batch.hop_additions:
+        if h.hop_name:
+            hop_amounts[h.hop_name] = hop_amounts.get(h.hop_name, 0) + (h.amount_g or 0)
+    hop_names_sorted = sorted(hop_amounts, key=lambda name: hop_amounts[name], reverse=True)
+    hop_names = ", ".join(hop_names_sorted) if hop_names_sorted else "–"
+
+    # Schriftgroesse der Hopfenzeile nach Textlaenge gestuft, damit sowohl
+    # ein einzelner Hopfen (grosse Schrift) als auch eine lange Liste (auf
+    # zwei Zeilen, kleinere Schrift) noch in die reservierte Flaeche passt.
+    if len(hop_names) <= 26:
+        hop_names_size = 1
+    elif len(hop_names) <= 48:
+        hop_names_size = 2
+    elif len(hop_names) <= 75:
+        hop_names_size = 3
+    else:
+        hop_names_size = 4
+
+    logo_url = "/static/img/logo-shield.png"
+    if settings.active_logo_id:
+        logo = session.get(Logo, settings.active_logo_id)
+        if logo:
+            logo_url = f"/logos/{logo.filename}"
+    return templates.TemplateResponse(
+        "label.html",
+        {
+            "request": request,
+            "batch": batch,
+            "m": metrics,
+            "hop_names": hop_names,
+            "hop_names_size": hop_names_size,
+            "label_count": range(9),
+            "brand_name": settings.label_brand_name,
+            "logo_url": logo_url,
+        },
     )
 
 

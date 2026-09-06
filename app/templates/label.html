@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Etikett – Sud #{{ batch.batch_number }} – HighValley BrewLog{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <h1>Etikett drucken – Sud #{{ batch.batch_number }}</h1>
+  <div class="actions">
+    <label class="label-theme-toggle">
+      <input type="checkbox" id="label-dark-toggle">
+      Dunkler Hintergrund (z.B. für Stout)
+    </label>
+    <button class="btn btn-primary" type="button" onclick="window.print()">Drucken</button>
+    <a class="btn" href="/batches/{{ batch.id }}">Zurück</a>
+  </div>
+</div>
+<p class="subtitle no-print">Vorschau für ein A4-Blatt mit 9 übereinander angeordneten Wickel-Etiketten. Ausschneiden entlang der gestrichelten Linien, dann zu einem Ring zusammenkleben. Zum Drucken oder als PDF speichern den Button oben nutzen (Browser-Druckdialog).</p>
+
+<div class="label-sheet" id="label-sheet">
+  {% for _ in label_count %}
+  <div class="label-strip">
+    <div class="label-cell label-left-square"><img class="label-logo-img" src="{{ logo_url }}" alt=""></div>
+    <div class="label-maincontent">
+      <div class="label-vine{% if loop.first %} label-vine-edge-top{% endif %}">
+        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+      </div>
+      <div class="label-cell label-brand">
+        <span class="label-brand-name">{{ brand_name }}</span>
+        <span class="label-beername">{{ batch.name }}</span>
+      </div>
+      <div class="label-right">
+        <div class="label-right-row label-right-row-stats">
+          <span class="label-stat"><span class="label-val-value">{{ m.ibu_total|fmt(0) }}</span><span class="label-val-unit">IBU</span></span>
+          <span class="label-stat"><span class="label-val-value">{{ m.og_plato|fmt(1) if m.og_plato is not none else "–" }}</span><span class="label-val-unit">°Plato</span></span>
+          <span class="label-stat"><span class="label-val-value">{{ m.abv_percent|fmt(1) if m.abv_percent is not none else "–" }}</span><span class="label-val-unit">%Vol</span></span>
+        </div>
+        <span class="label-batch-date">{{ batch.bottling_date|de_date if batch.bottling_date else "–" }}</span>
+        <div class="label-batch-icon-wrap">
+          <svg class="label-batch-icon" viewBox="0 0 28 28">
+            <use href="#icon-barrel"/>
+            <text x="17" y="16.3" text-anchor="middle" class="label-batch-value">{{ batch.batch_number }}</text>
+          </svg>
+        </div>
+        <div class="label-hops"><span class="label-hops-text label-hops-size-{{ hop_names_size }}">{{ hop_names }}</span></div>
+        <div class="label-mug-wrap">
+          <svg class="label-mug" viewBox="0 0 28 28" style="--icon-2: {{ m.color_hex or '#e3d8bd' }}">
+            <use href="#icon-stein"/>
+            <text x="13" y="14.6" text-anchor="middle" class="label-mug-value" fill="{{ m.color_text_hex or '#1a6b1a' }}">{{ m.color_ebc|fmt(0) if m.color_ebc is not none else "–" }}</text>
+            <text x="13" y="20.4" text-anchor="middle" class="label-mug-unit" fill="{{ m.color_text_hex or '#1a6b1a' }}">EBC</text>
+          </svg>
+        </div>
+      </div>
+      {% if loop.last %}
+      <div class="label-vine label-vine-bottom label-vine-edge-bottom">
+        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+      </div>
+      {% endif %}
+    </div>
+    <div class="label-cell label-frame-cell"></div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById('label-dark-toggle').addEventListener('change', function (e) {
+    document.getElementById('label-sheet').classList.toggle('label-sheet--dark', e.target.checked);
+  });
+</script>
+{% endblock %}
