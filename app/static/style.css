@@ -485,15 +485,26 @@ h1, h2, h3 {
   padding-bottom: 0.85rem;
 }
 .label-right-row { display: flex; align-items: center; justify-content: space-around; }
-/* Etwas Luft rechts, damit die schmale senkrechte Datums-Spalte (siehe
-   .label-batch-date) neben %Vol nicht anstoesst. */
-.label-right-row-stats { margin-top: 0.75rem; padding-right: 8%; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+/* IBU/Bierkrug/Stammwuerze/Fass/Alkohol als fuenf gleichmaessig
+   verteilte Punkte quer ueber die Reihe (statt nur die drei Textwerte
+   per space-around), damit die Abstaende zwischen allen fuenf
+   Infos - nicht nur den dreien - gleich gross sind. Dafuer werden die
+   drei Textwerte wie Bierkrug/Fass einzeln absolut positioniert statt
+   ueber Flexbox verteilt. */
+.label-right-row-stats .label-stat {
+  position: absolute;
+  top: 10.85%;
+  transform: translateX(-50%);
+}
+.label-right-row-stats .label-stat:nth-child(1) { left: 16.8%; }
+.label-right-row-stats .label-stat:nth-child(2) { left: 53.8%; }
+.label-right-row-stats .label-stat:nth-child(3) { left: 90.8%; }
 /* Fass-Symbol fuer die Batch-Nummer, exakt gleich gross und an derselben
    Ober-/Unterkante wie der Bierkrug positioniert. */
 .label-batch-icon-wrap {
   position: absolute;
-  left: 61.5%;
+  left: 72.3%;
   transform: translateX(-50%);
   top: 9.5%;
   bottom: 35.9%;
@@ -530,7 +541,7 @@ h1, h2, h3 {
 }
 .label-mug-wrap {
   position: absolute;
-  left: 32.65%;
+  left: 35.3%;
   transform: translateX(-50%);
   /* Um 1mm nach oben verschoben, Oberkante danach fix - um 30% verkleinert
      (Hoehe * 0.7) durch Anheben der Unterkante, Oberkante unveraendert. */
