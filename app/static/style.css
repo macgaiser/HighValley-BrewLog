@@ -487,22 +487,19 @@ h1, h2, h3 {
 .label-right-row { display: flex; align-items: center; justify-content: space-around; }
 .label-right-row-stats { margin-top: 0.75rem; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
-/* Fass-Symbol fuer die Batch-Nummer, im gleichen Prinzip wie der
-   Bierkrug positioniert (top/bottom fest, Breite/Groesse ueber eine
-   aspect-ratio-Huelle abgeleitet) - waagerecht zwischen Stammwuerze und
-   Alkoholgehalt zentriert, das Abfuelldatum als Beschriftung darunter. */
-.label-batch-wrap {
+/* Fass-Symbol fuer die Batch-Nummer, an der Oberkante wie der Bierkrug
+   positioniert (gleiches top). Die Unterkante ist knapp oberhalb des fest
+   positionierten Abfuelldatums gedeckelt, damit sich beide nicht
+   ueberlappen - das Abfuelldatum wandert beim Anpassen des Symbols nicht
+   mit. */
+.label-batch-icon-wrap {
   position: absolute;
   left: 65.5%;
   transform: translateX(-50%);
   top: 9.5%;
-  bottom: 35.9%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
+  bottom: 48.3%;
+  aspect-ratio: 1;
 }
-.label-batch-icon-wrap { aspect-ratio: 1; height: 78%; }
 .label-batch-icon {
   display: block;
   width: 100%;
@@ -515,7 +512,15 @@ h1, h2, h3 {
   fill: var(--label-green);
   font-size: 8px;
 }
-.label-batch-date { font-size: 0.55rem; line-height: 1; white-space: nowrap; }
+.label-batch-date {
+  position: absolute;
+  left: 65.5%;
+  transform: translateX(-50%);
+  top: 53.5%;
+  font-size: 0.55rem;
+  line-height: 1;
+  white-space: nowrap;
+}
 .label-mug-wrap {
   position: absolute;
   left: 32.65%;
