@@ -33,15 +33,13 @@
           <span class="label-stat"><span class="label-val-value">{{ m.og_plato|fmt(1) if m.og_plato is not none else "–" }}</span><span class="label-val-unit">°P</span></span>
           <span class="label-stat"><span class="label-val-value">{{ m.abv_percent|fmt(1) if m.abv_percent is not none else "–" }}</span><span class="label-val-unit">%Vol</span></span>
         </div>
-        <div class="label-batch-wrap">
-          <div class="label-batch-icon-wrap">
-            <svg class="label-batch-icon" viewBox="0 0 28 28">
-              <use href="#icon-barrel"/>
-              <text x="14" y="17.5" text-anchor="middle" class="label-batch-value">{{ batch.batch_number }}</text>
-            </svg>
-          </div>
-          <span class="label-batch-date">{{ batch.bottling_date|de_date if batch.bottling_date else "–" }}</span>
+        <div class="label-batch-icon-wrap">
+          <svg class="label-batch-icon" viewBox="0 0 28 28">
+            <use href="#icon-barrel"/>
+            <text x="14" y="17.5" text-anchor="middle" class="label-batch-value">{{ batch.batch_number }}</text>
+          </svg>
         </div>
+        <span class="label-batch-date">{{ batch.bottling_date|de_date if batch.bottling_date else "–" }}</span>
         <div class="label-hops"><span class="label-hops-text label-hops-size-{{ hop_names_size }}">{{ hop_names }}</span></div>
         <div class="label-mug-wrap">
           <svg class="label-mug" viewBox="0 0 28 28" style="--icon-2: {{ m.color_hex or '#e3d8bd' }}">
