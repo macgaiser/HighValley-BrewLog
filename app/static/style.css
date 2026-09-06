@@ -339,6 +339,98 @@ h1, h2, h3 {
 .stat-label { font-size: 0.76rem; color: var(--muted); }
 .stat-value { font-family: var(--font-display); font-size: 1.55rem; color: var(--brown); }
 
+.beer-color-icon {
+  display: inline-block;
+  width: 1.3rem;
+  height: 1.3rem;
+  vertical-align: middle;
+  margin-left: 0.35rem;
+  --icon-1: var(--brown);
+  --icon-2: var(--border);
+}
+.table .beer-color-icon { width: 1.5rem; height: 1.5rem; margin-left: 0; }
+
+/* Etikettengenerator */
+.label-sheet {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4mm;
+  max-width: 920px;
+  margin: 0 auto;
+}
+.label-card {
+  position: relative;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  padding: 0.6rem 0.7rem 0.5rem;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.label-logo {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 58px;
+  height: auto;
+  transform: rotate(-12deg);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+.label-banner { width: 100%; height: auto; margin-top: 2px; }
+.label-row { display: flex; align-items: center; justify-content: space-between; gap: 0.35rem; }
+.label-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.label-box-value { font-family: var(--font-display); font-size: 1.05rem; color: var(--brown); }
+.label-box-unit { font-size: 0.68rem; color: var(--muted); }
+.label-box-color { color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); }
+.label-box-color .label-box-value, .label-box-color .label-box-unit { color: inherit; }
+.label-batch, .label-date { font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+.label-brand {
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-left: 62px;
+}
+.label-beername { font-family: var(--font-display); font-size: 1.35rem; color: var(--brown); margin: 0; line-height: 1.05; }
+.label-mug-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.label-mug { width: 30%; max-width: 90px; height: auto; --icon-1: var(--brown); opacity: 0.92; }
+.label-hops { font-size: 0.7rem; color: var(--text); }
+
+@media (max-width: 700px) {
+  .label-sheet { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media print {
+  .topbar, .no-print { display: none !important; }
+  body::before { display: none !important; }
+  .container { padding: 0 !important; max-width: none !important; margin: 0 !important; }
+  .label-sheet {
+    max-width: none;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 3mm;
+    width: 194mm;
+    height: 281mm;
+    margin: 0;
+  }
+  .label-card { aspect-ratio: unset; page-break-inside: avoid; }
+}
+
+@page { size: A4; margin: 8mm; }
+
 @media (max-width: 700px) {
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }

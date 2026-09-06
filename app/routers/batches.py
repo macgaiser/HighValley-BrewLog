@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
 
-from app.batch_calc import compute_metrics
+from app.batch_calc import compute_metrics, resolve_color_hex
 from app.database import get_session
 from app.inventory import sync_batch_deductions
 from app.models import (
@@ -131,11 +131,15 @@ def batch_list(
 
     settings = session.get(Settings, 1)
     og_display: dict[int, float] = {}
+    color_hex: dict[int, str] = {}
     for b in batches:
         if b.post_boil_brix:
             og_display[b.id] = round(b.post_boil_brix / settings.wort_correction_factor, 1)
         elif b.target_og_plato:
             og_display[b.id] = round(b.target_og_plato, 1)
+        hex_value = resolve_color_hex(b)
+        if hex_value:
+            color_hex[b.id] = hex_value
 
     return templates.TemplateResponse(
         "batch_list.html",
@@ -147,6 +151,7 @@ def batch_list(
             "ingredient_ids": ingredient_ids,
             "inventory": _inventory_options(session),
             "og_display": og_display,
+            "color_hex": color_hex,
         },
     )
 
@@ -371,6 +376,27 @@ def batch_detail(batch_id: int, request: Request, session: Session = Depends(get
     return templates.TemplateResponse(
         "batch_detail.html",
         {"request": request, "batch": batch, "m": metrics, "today": date.today().isoformat()},
+    )
+
+
+@router.get("/{batch_id}/label")
+def batch_label(batch_id: int, request: Request, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    settings = session.get(Settings, 1)
+    metrics = compute_metrics(batch, settings)
+    hop_names: list[str] = []
+    for h in batch.hop_additions:
+        if h.hop_name and h.hop_name not in hop_names:
+            hop_names.append(h.hop_name)
+    return templates.TemplateResponse(
+        "label.html",
+        {
+            "request": request,
+            "batch": batch,
+            "m": metrics,
+            "hop_names": ", ".join(hop_names) if hop_names else "–",
+            "label_count": range(9),
+        },
     )
 
 
