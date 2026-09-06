@@ -5,6 +5,7 @@
   <h1>Sud #{{ batch.batch_number }} – {{ batch.name }}</h1>
   <div class="actions">
     <a class="btn" href="/batches/{{ batch.id }}/edit">Bearbeiten</a>
+    <a class="btn" href="/batches/{{ batch.id }}/label">Etikett drucken</a>
     <form method="post" action="/batches/{{ batch.id }}/copy">
       <button class="btn" type="submit">Sud kopieren</button>
     </form>
@@ -13,7 +14,7 @@
     </form>
   </div>
 </div>
-<p class="subtitle">{{ batch.style }} · {{ batch.fermentation_type }} · {{ batch.brew_date|de_date if batch.brew_date else "kein Datum" }}</p>
+<p class="subtitle">{{ batch.style }} · {{ batch.fermentation_type }} · Brautag: {{ batch.brew_date|de_date if batch.brew_date else "kein Datum" }}{% if batch.bottling_date %} · Abfülldatum: {{ batch.bottling_date|de_date }}{% endif %}</p>
 {% if batch.inventory_deduction_locked %}
 <p class="badge-locked">🔒 Lagerbuchung gesperrt – dieser Sud verändert beim Speichern keinen Lagerbestand</p>
 {% endif %}
@@ -21,7 +22,7 @@
 <div class="stat-grid">
   <div class="stat"><span class="stat-label">Stammwürze</span><span class="stat-value">{{ m.og_plato|fmt }} °P</span></div>
   <div class="stat"><span class="stat-label">Bittere{% if m.ibu_is_recorded %}*{% endif %}</span><span class="stat-value">{{ m.ibu_total|fmt(0) }} IBU</span></div>
-  <div class="stat"><span class="stat-label">Farbe{% if m.color_is_recorded %}*{% endif %}</span><span class="stat-value">{{ m.color_ebc|fmt(0) }} EBC</span></div>
+  <div class="stat"><span class="stat-label">Farbe{% if m.color_is_recorded %}*{% endif %}</span><span class="stat-value">{{ m.color_ebc|fmt(0) }} EBC{% if m.color_hex %}<svg class="beer-color-icon" viewBox="0 0 28 28" style="--icon-2: {{ m.color_hex }}"><use href="#icon-stein"/></svg>{% endif %}</span></div>
   <div class="stat"><span class="stat-label">Alkohol{% if m.abv_is_recorded %}*{% endif %}</span><span class="stat-value">{{ m.abv_display or "–" }}</span></div>
   <div class="stat"><span class="stat-label">Endvergärungsgrad (EVG){% if m.attenuation_uncertain %}*{% endif %}</span><span class="stat-value">{{ m.attenuation_percent|fmt }} %</span></div>
   <div class="stat"><span class="stat-label">Sudhausausbeute</span><span class="stat-value">{{ m.mash_efficiency_percent|fmt }} %</span></div>

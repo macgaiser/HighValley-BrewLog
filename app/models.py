@@ -37,6 +37,20 @@ class Settings(SQLModel, table=True):
     labor_cost_per_hour: float = 30.0
     wort_correction_factor: float = 1.03
     mash_efficiency_correction_factor: float = 1.0
+    label_brand_name: str = "HIGH VALLEY Brew Co."
+    active_logo_id: Optional[int] = Field(default=None, foreign_key="logo.id")
+
+
+class Logo(SQLModel, table=True):
+    """Ein hochgeladenes Logo-Bild fuer den Etikettengenerator. Bleibt nach
+    dem Hochladen dauerhaft in der Galerie erhalten, auch wenn spaeter ein
+    anderes Logo aktiv gesetzt wird - so kann jederzeit wieder zu einem
+    frueher genutzten Logo zurueckgewechselt werden."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    filename: str  # Dateiname auf der Platte, unter DATA_DIR/logos
+    original_filename: str = ""
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class DefaultBrewDayTask(SQLModel, table=True):
@@ -61,6 +75,7 @@ class Batch(SQLModel, table=True):
     style: str = ""
     fermentation_type: str = ""  # "Obergärig" / "Untergärig"
     brew_date: Optional[date] = None
+    bottling_date: Optional[date] = None
 
     target_volume_l: Optional[float] = None  # Ausschlagwürze
     color_ebc: Optional[float] = None

@@ -22,10 +22,46 @@
   <input type="number" step="1" name="mash_efficiency_correction_factor" value="{{ (s.mash_efficiency_correction_factor * 100)|round(0) }}">
   <p class="hint">Nur anpassen, wenn die berechnete Sudhausausbeute systematisch von deinen eigenen Messungen abweicht.</p>
 
+  <label>Markenname auf dem Etikett</label>
+  <input type="text" name="label_brand_name" value="{{ s.label_brand_name }}">
+
   <div class="form-actions">
     <button class="btn btn-primary" type="submit">Speichern</button>
   </div>
 </form>
+
+<section class="card">
+  <h2>Logo für den Etikettengenerator</h2>
+  <p class="hint">Das aktive Logo wird auf allen gedruckten Etiketten verwendet. Bereits hochgeladene Logos bleiben gespeichert und können jederzeit wieder ausgewählt werden.</p>
+  <form method="post" action="/settings/logos" enctype="multipart/form-data" class="inline-form">
+    <input type="file" name="file" accept="image/*" required>
+    <button class="btn btn-primary" type="submit">Hochladen &amp; verwenden</button>
+  </form>
+  <div class="logo-gallery">
+    <div class="logo-gallery-item {{ 'active' if not s.active_logo_id }}">
+      <img src="/static/img/logo-shield.png" alt="Standard-Logo">
+      {% if not s.active_logo_id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/logos/reset">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% for logo in logos %}
+    <div class="logo-gallery-item {{ 'active' if s.active_logo_id == logo.id }}">
+      <img src="/logos/{{ logo.filename }}" alt="{{ logo.original_filename }}">
+      {% if s.active_logo_id == logo.id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/logos/{{ logo.id }}/activate">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
 
 <form method="post" action="/settings/brew-day-tasks">
   <section class="card">
