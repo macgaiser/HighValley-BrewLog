@@ -488,16 +488,16 @@ h1, h2, h3 {
 .label-right-row-stats { margin-top: 0.75rem; }
 .label-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; }
 /* Fass-Symbol fuer die Batch-Nummer, an der Oberkante wie der Bierkrug
-   positioniert (gleiches top). Die Unterkante ist knapp oberhalb des fest
-   positionierten Abfuelldatums gedeckelt, damit sich beide nicht
-   ueberlappen - das Abfuelldatum wandert beim Anpassen des Symbols nicht
-   mit. */
+   positioniert (gleiches top). Fuer die groessere Fass-Cluster-Grafik
+   wurde das Abfuelldatum etwas nach unten geschoben (und die Hopfenzeile
+   entsprechend mit) - Icon und Datum bleiben aber ueberlappungsfrei
+   zueinander. */
 .label-batch-icon-wrap {
   position: absolute;
   left: 65.5%;
   transform: translateX(-50%);
   top: 9.5%;
-  bottom: 48.3%;
+  bottom: 42.5%;
   aspect-ratio: 1;
 }
 .label-batch-icon {
@@ -507,16 +507,17 @@ h1, h2, h3 {
   --icon-1: var(--label-green);
   --icon-2: var(--label-bg);
 }
+.label-batch-plate { fill: var(--label-bg); }
 .label-batch-value {
   font-family: "Ranchers", "Segoe UI", sans-serif;
   fill: var(--label-green);
-  font-size: 8px;
+  font-size: 9.5px;
 }
 .label-batch-date {
   position: absolute;
   left: 65.5%;
   transform: translateX(-50%);
-  top: 53.5%;
+  top: 58.5%;
   font-size: 0.55rem;
   line-height: 1;
   white-space: nowrap;
@@ -536,15 +537,15 @@ h1, h2, h3 {
 .label-mug-unit { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 3.4px; }
 .label-val-value { font-size: 1.3rem; }
 .label-val-unit { font-size: 0.58rem; }
-/* Mittig zwischen der Unterkante des Bierkrugs (64,1%) und der von unten
-   hereinragenden Hopfenranke (reservierter Randabstand wie beim Vine-
-   Clearance von .label-right) positioniert - unabhaengig davon, ob der
-   Hopfentext ein- oder zweizeilig ist. */
+/* Knapp unterhalb des Abfuelldatums (58,5% + Zeilenhoehe) positioniert,
+   damit fuer das groessere Fass-Symbol genug Platz ist - die Hopfenzeile
+   selbst schrumpft dank der Schriftgroessen-Stufen und Zeilenbegrenzung
+   auch mit etwas weniger Hoehe noch sauber. */
 .label-hops {
   position: absolute;
   left: 0;
   right: 0;
-  top: 64.1%;
+  top: 67.5%;
   bottom: 0.85rem;
   display: flex;
   align-items: center;
