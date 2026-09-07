@@ -41,24 +41,18 @@ document.addEventListener("click", (event) => {
   }
 });
 
-// Brautag-Zeitplan-Dialog: Beginn/Ende sind reine HH:MM-Textfelder statt
-// <input type="time"> - das native Zeitfeld zeigt je nach Geraet/Browser
-// AM/PM statt 24h an (browser-/OS-Locale, laesst sich nicht per lang-Attribut
-// erzwingen). Ziffern werden beim Tippen automatisch zu "HH:MM" formatiert;
-// sobald beide Felder gefuellt sind, wird daraus die Dauer berechnet
-// (manuelle Eingabe der Dauer bleibt trotzdem jederzeit moeglich, wird nur
-// bei einer Aenderung von Beginn/Ende ueberschrieben).
+// Brautag-Zeitplan-Dialog: Dauer aus Beginn/Ende berechnen, sobald beide
+// <input type="time">-Felder einer Zeile gefuellt sind (manuelle Eingabe
+// der Dauer bleibt trotzdem jederzeit moeglich, wird nur bei einer
+// Aenderung von Beginn/Ende ueberschrieben).
 document.addEventListener("input", (event) => {
-  const timeField = event.target.closest("[data-time-input]");
+  const timeField = event.target.closest("[data-schedule-start], [data-schedule-end]");
   if (!timeField) return;
-  const digits = timeField.value.replace(/\D/g, "").slice(0, 4);
-  timeField.value = digits.length > 2 ? digits.slice(0, 2) + ":" + digits.slice(2) : digits;
-
   const row = timeField.closest("[data-schedule-row]");
   if (!row) return;
   const start = row.querySelector("[data-schedule-start]").value;
   const end = row.querySelector("[data-schedule-end]").value;
-  if (start.length !== 5 || end.length !== 5) return;
+  if (!start || !end) return;
   const [startH, startM] = start.split(":").map(Number);
   const [endH, endM] = end.split(":").map(Number);
   let minutes = (endH * 60 + endM) - (startH * 60 + startM);
