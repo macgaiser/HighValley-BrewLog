@@ -411,15 +411,12 @@ h1, h2, h3 {
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  /* Gesamthoehe der 10 Etiketten uebereinander (10 * 15,9804% der
-     Etikettenbreite), damit jeder einzelne Streifen unten per flex
-     (nicht per eigenem aspect-ratio) eine garantiert definierte Hoehe
-     bekommt - vermeidet einen sonst moeglichen Zirkelbezug mit den
-     quadratischen Rand-Feldern (die ihre Breite per aspect-ratio aus
-     der Etikettenhoehe ableiten). Bildschirm-Ansicht bleibt bei der
-     grosszuegigen Original-Proportion (anders als die Druckansicht,
-     die auf eine A4-Seite passen muss). */
-  aspect-ratio: 204 / 326;
+  /* Gesamthoehe der 9 Etiketten uebereinander (9 * 32,6mm), damit jeder
+     einzelne Streifen unten per flex (nicht per eigenem aspect-ratio)
+     eine garantiert definierte Hoehe bekommt - vermeidet einen sonst
+     moeglichen Zirkelbezug mit den quadratischen Rand-Feldern (die ihre
+     Breite per aspect-ratio aus der Etikettenhoehe ableiten). */
+  aspect-ratio: 204 / 293.4;
 }
 /* Dunkle Variante (z.B. fuer Stout-Etiketten): helles Gold statt Gruen
    fuer ausreichend Kontrast auf fast schwarzem Grund. Die Bierkrug-Farbe
@@ -675,23 +672,22 @@ h1, h2, h3 {
      @page-margin-Wert nicht zuverlaessig 1:1 uebernommen, sondern durch
      einen eigenen (teils groesseren) Standardrand ersetzt - dann reichte
      die bisher exakt auf 287mm (297mm - 2x5mm) berechnete Hoehe nicht
-     mehr aus und der 9. Streifen rutschte auf Seite 2. Ruecklmeldung nach
-     dem ersten (zu vorsichtigen) Puffer-Versuch: auf dem Handy blieb
-     sichtbar Platz uebrig - 270mm (10x27mm statt zuvor 9x28mm=252mm)
-     nutzt diesen Puffer aus und passt noch eine 10. Position drauf. */
-  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 270mm; margin: 8mm auto 0; border: none; }
+     mehr aus und der 9. Streifen rutschte auf Seite 2.
+
+     Ein Zwischenversuch, die Streifenhoehe zusaetzlich zu verkleinern (um
+     ein 10. Etikett unterzubringen bzw. mehr Puffer zu schaffen), wurde
+     wieder verworfen: die Eckquadrate/die Hopfenranke/das Abflludatum
+     sind alle auf die ca. 31,9mm hohen Streifen abgestimmt (Schriftgroessen
+     etc. bleiben fest) - kleinere Streifen liessen die Hopfenranke bzw.
+     das Abfuelldatum ineinander laufen, und ein Versuch, dafuer nur die
+     Hopfenranken-BREITE zu verkleinern, brach zusaetzlich die nahtlose
+     Aneinanderreihung der beiden Rankenbilder (die zusammen exakt 100%
+     Breite ergeben muessen). Streifenhoehe bleibt daher bei den
+     urspruenglichen, nie beanstandeten ca. 31,96mm (200mm * 15,9804%,
+     wie auf dem Bildschirm) - Eckquadrate und Hopfenranke brauchen so
+     auch im Druck keine eigene Breiten-Anpassung. */
+  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 287.65mm; margin: 5mm auto 0; border: none; }
   .label-strip { page-break-inside: avoid; }
-  /* 15,9804% (Bildschirm-Ansicht) war fuer 200mm Breite zu ca. 31,9mm
-     Streifenhoehe (echt quadratische Eckfelder) ausgerechnet - bei nur
-     27mm Streifenhoehe im Druck waeren die Felder ohne diese Anpassung
-     nicht mehr quadratisch, sondern gestaucht. 27/200 = 13,5% haelt sie
-     quadratisch (Etikettenbreite bleibt bewusst bei 200mm, sonst passt
-     das fertige Etikett nicht mehr um die Flasche). Aus demselben Grund
-     auch die Hopfenranke von 50% auf 42% verkleinert (50% war auf die
-     groesseren ca. 31,9mm Streifen ausgelegt - bei den kleineren 27mm
-     ragte sie sonst bis in die IBU/Plato-Zeile hinein). */
-  .label-left-square, .label-frame-cell { flex-basis: 13.5%; }
-  .label-vine-img { width: 42%; }
 }
 
 @page { size: A4; margin: 0; }
