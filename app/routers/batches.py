@@ -98,6 +98,19 @@ def _resolve_ingredient_name(session: Session, manual_name: str, inventory_item_
     return manual_name.strip()
 
 
+def _resolve_hop_name(session: Session, manual_name: str, inventory_item_id: int | None) -> str:
+    """Wie _resolve_ingredient_name, aber bei Hopfen werden Lagerartikel UND
+    Alternative kombiniert, falls ausnahmsweise mal beide Felder gefuellt
+    sind (Normalfall bleibt: nur eines von beiden ist ausgefuellt) - so geht
+    z.B. auf dem Etikett keine der beiden Angaben verloren."""
+    manual = manual_name.strip()
+    if inventory_item_id:
+        item = session.get(InventoryItem, inventory_item_id)
+        if item:
+            return f"{item.name} + {manual}" if manual else item.name
+    return manual
+
+
 @router.get("")
 def batch_list(
     request: Request,
@@ -296,7 +309,7 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
             HopAddition(
                 batch_id=batch.id,
                 position=i,
-                hop_name=_resolve_ingredient_name(session, names[i], hop_inv_id),
+                hop_name=_resolve_hop_name(session, names[i], hop_inv_id),
                 alpha_acid_percent=round(alpha, 1) if alpha is not None else None,
                 amount_g=_f(hop_amounts[i]) or 0,
                 time_min=_f(times[i]) if i < len(times) else None,
