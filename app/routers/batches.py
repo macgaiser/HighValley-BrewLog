@@ -426,6 +426,12 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
             "brand_name": settings.label_brand_name,
             "logo_url": logo_url,
         },
+        # Ohne das hier landet nach einem Logo-Wechsel in den Einstellungen
+        # (oder ueber die Browser-Historie/das Back-Forward-Cache) leicht
+        # eine veraltete Fassung dieser Seite im Browser-Cache - mit dem
+        # noch aktiven, inzwischen aber ausgetauschten Logo. Die Seite
+        # zeigt live Daten und soll deshalb nie aus dem Cache bedient werden.
+        headers={"Cache-Control": "no-store"},
     )
 
 
