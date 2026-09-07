@@ -380,6 +380,8 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     task_names = form.getlist("task_name")
     task_durations = form.getlist("task_duration_min")
     task_notes = form.getlist("task_note")
+    task_starts = form.getlist("task_start_time")
+    task_ends = form.getlist("task_end_time")
     for i, name in enumerate(task_names):
         if not name.strip():
             continue
@@ -388,6 +390,8 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
                 batch_id=batch.id,
                 position=i,
                 task_name=name.strip(),
+                start_time=task_starts[i].strip() or None if i < len(task_starts) else None,
+                end_time=task_ends[i].strip() or None if i < len(task_ends) else None,
                 planned_duration_min=_f(task_durations[i]) if i < len(task_durations) else None,
                 note=task_notes[i].strip() if i < len(task_notes) else "",
             )
@@ -625,6 +629,31 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
 
     session.commit()
     return RedirectResponse(f"/batches/{copy.id}/edit", status_code=303)
+
+
+@router.post("/{batch_id}/schedule")
+async def batch_schedule_update(batch_id: int, request: Request, session: Session = Depends(get_session)):
+    """Speichert Beginn/Ende/Dauer/Notiz der Brautag-Zeitplan-Positionen direkt
+    von der Sud-Detailseite aus - ohne über die grosse Bearbeiten-Maske zu
+    gehen. Aendert nur die Zeitwerte bestehender Positionen, legt keine neuen
+    an und loescht keine (das bleibt Sache der Bearbeiten-Maske)."""
+    form = await request.form()
+    task_ids = form.getlist("task_id")
+    starts = form.getlist("task_start")
+    ends = form.getlist("task_end")
+    durations = form.getlist("task_actual_duration")
+    notes = form.getlist("task_note")
+    for i, raw_id in enumerate(task_ids):
+        task = session.get(BrewDayTask, int(raw_id))
+        if not task or task.batch_id != batch_id:
+            continue
+        task.start_time = starts[i].strip() or None if i < len(starts) else None
+        task.end_time = ends[i].strip() or None if i < len(ends) else None
+        task.planned_duration_min = _f(durations[i]) if i < len(durations) else None
+        task.note = notes[i].strip() if i < len(notes) else ""
+        session.add(task)
+    session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
 
 
 @router.get("/{batch_id}/mash/{step_id}/comment")
