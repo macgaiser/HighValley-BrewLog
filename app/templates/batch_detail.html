@@ -120,29 +120,44 @@
   </section>
 </div>
 
-<div class="grid-2">
-  <section class="card">
-    <h2><span>Karbonisierung</span><img class="step-icon" src="/static/img/step-abfuellen.png" alt=""></h2>
-    <table class="mini-table">
-      {% for c in batch.carbonation_entries %}
-      <tr><td>{{ c.label }}</td><td>{{ c.sugar_g|fmt(1) }} g</td><td>je {{ c.bottle_volume_l|fmt(2) }} l Flasche</td></tr>
-      {% else %}
-      <tr><td colspan="3">–</td></tr>
-      {% endfor %}
-    </table>
-  </section>
+<section class="card">
+  <h2><span>Karbonisierung</span><img class="step-icon" src="/static/img/step-abfuellen.png" alt=""></h2>
+  <table class="mini-table">
+    {% for c in batch.carbonation_entries %}
+    <tr><td>{{ c.label }}</td><td>{{ c.sugar_g|fmt(1) }} g</td><td>je {{ c.bottle_volume_l|fmt(2) }} l Flasche</td></tr>
+    {% else %}
+    <tr><td colspan="3">–</td></tr>
+    {% endfor %}
+  </table>
+</section>
 
-  <section class="card">
-    <h2>Brautag-Zeitplan</h2>
-    <table class="mini-table">
-      {% for t in batch.brew_day_tasks %}
-      <tr><td>{{ t.task_name }}</td><td>{{ t.planned_duration_min|fmt(0) }} min</td><td>{{ t.note }}</td></tr>
-      {% else %}
-      <tr><td colspan="3">–</td></tr>
-      {% endfor %}
-    </table>
-  </section>
-</div>
+<section class="card">
+  <h2>Brautag-Zeitplan</h2>
+    {% if batch.brew_day_tasks %}
+    <form method="post" action="/batches/{{ batch.id }}/schedule">
+      <div class="table-scroll">
+      <table class="form-table">
+        <thead><tr><th>Tätigkeit</th><th>Beginn</th><th>Ende</th><th>Dauer (min)</th><th>Notiz</th></tr></thead>
+        <tbody data-schedule-rows>
+          {% for t in batch.brew_day_tasks %}
+          <tr>
+            <td>{{ t.task_name }}<input type="hidden" name="task_id" value="{{ t.id }}"></td>
+            <td><input type="time" name="task_start" value="{{ t.start_time or '' }}" data-schedule-start></td>
+            <td><input type="time" name="task_end" value="{{ t.end_time or '' }}" data-schedule-end></td>
+            <td><input type="number" step="1" name="task_actual_duration" value="{{ t.planned_duration_min if t.planned_duration_min is not none else '' }}" data-schedule-duration></td>
+            <td><input type="text" name="task_note" value="{{ t.note }}"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      <p class="hint">Bei Beginn + Ende wird die Dauer automatisch berechnet - alternativ direkt eine Dauer in Minuten eintragen.</p>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Zeitplan speichern</button></div>
+    </form>
+    {% else %}
+    <p class="hint">Noch keine Positionen – über "Bearbeiten" hinzufügen.</p>
+    {% endif %}
+</section>
 
 <section class="card">
   <h2><span>Gärverlauf</span><img class="step-icon" src="/static/img/step-gaeren.png" alt=""></h2>

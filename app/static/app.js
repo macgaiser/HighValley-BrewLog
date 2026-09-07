@@ -41,6 +41,24 @@ document.addEventListener("click", (event) => {
   }
 });
 
+// Brautag-Zeitplan auf der Sud-Detailseite: Dauer aus Beginn/Ende berechnen,
+// sobald beide Felder einer Zeile gefuellt sind (manuelle Eingabe der Dauer
+// bleibt trotzdem jederzeit moeglich, wird nur bei einer Aenderung von
+// Beginn/Ende ueberschrieben).
+document.addEventListener("input", (event) => {
+  const timeField = event.target.closest("[data-schedule-start], [data-schedule-end]");
+  if (!timeField) return;
+  const row = timeField.closest("tr");
+  const start = row.querySelector("[data-schedule-start]").value;
+  const end = row.querySelector("[data-schedule-end]").value;
+  if (!start || !end) return;
+  const [startH, startM] = start.split(":").map(Number);
+  const [endH, endM] = end.split(":").map(Number);
+  let minutes = (endH * 60 + endM) - (startH * 60 + startM);
+  if (minutes < 0) minutes += 24 * 60; // Ende nach Mitternacht
+  row.querySelector("[data-schedule-duration]").value = minutes;
+});
+
 // Datumsfelder zeigen ihr Format sonst je nach Browser-/Systemsprache an
 // (z.B. mm/dd/yyyy) statt einheitlich dd.mm.yyyy - flatpickr übernimmt die
 // Anzeige, das eigentliche Feld sendet weiterhin ISO-Format (yyyy-mm-dd).

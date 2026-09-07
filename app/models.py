@@ -248,12 +248,18 @@ class FermentationLogEntry(SQLModel, table=True):
 
 
 class BrewDayTask(SQLModel, table=True):
-    """Brautag-Zeitplan: eine Tätigkeit mit geplanter Dauer."""
+    """Brautag-Zeitplan: eine Taetigkeit mit der dafuer tatsaechlich
+    benoetigten Dauer (keine Vorab-Planung, sondern eine Erfassung waehrend/
+    nach dem Brautag) - direkt auf der Sud-Detailseite eingetragen, entweder
+    ueber Beginn/Ende (Dauer wird daraus berechnet) oder als manuelle
+    Minutenangabe."""
 
     id: Optional[int] = Field(default=None, primary_key=True)
     batch_id: int = Field(foreign_key="batch.id")
     position: int = 0
     task_name: str
+    start_time: Optional[str] = None  # "HH:MM"
+    end_time: Optional[str] = None  # "HH:MM"
     planned_duration_min: Optional[float] = None
     note: str = ""
 
