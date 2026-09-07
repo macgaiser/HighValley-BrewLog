@@ -38,6 +38,9 @@ class Settings(SQLModel, table=True):
     wort_correction_factor: float = 1.03
     mash_efficiency_correction_factor: float = 1.0
     label_brand_name: str = "HIGH VALLEY Brew Co."
+    label_brand_line1: str = ""
+    label_brand_line1_size: float = 0.7
+    label_brand_line2_size: float = 1.6
     active_logo_id: Optional[int] = Field(default=None, foreign_key="logo.id")
 
 
@@ -182,6 +185,7 @@ class HopAddition(SQLModel, table=True):
     temperature_c: Optional[float] = None
     addition_type: HopAdditionType = HopAdditionType.kochen
     inventory_item_id: Optional[int] = Field(default=None, foreign_key="inventoryitem.id")
+    show_on_label: bool = True  # ob diese Gabe in der Hopfensorten-Zeile des Etiketts auftaucht
 
     batch: Batch = Relationship(back_populates="hop_additions")
 
@@ -244,12 +248,18 @@ class FermentationLogEntry(SQLModel, table=True):
 
 
 class BrewDayTask(SQLModel, table=True):
-    """Brautag-Zeitplan: eine Tätigkeit mit geplanter Dauer."""
+    """Brautag-Zeitplan: eine Taetigkeit mit der dafuer tatsaechlich
+    benoetigten Dauer (keine Vorab-Planung, sondern eine Erfassung waehrend/
+    nach dem Brautag) - direkt auf der Sud-Detailseite eingetragen, entweder
+    ueber Beginn/Ende (Dauer wird daraus berechnet) oder als manuelle
+    Minutenangabe."""
 
     id: Optional[int] = Field(default=None, primary_key=True)
     batch_id: int = Field(foreign_key="batch.id")
     position: int = 0
     task_name: str
+    start_time: Optional[str] = None  # "HH:MM"
+    end_time: Optional[str] = None  # "HH:MM"
     planned_duration_min: Optional[float] = None
     note: str = ""
 

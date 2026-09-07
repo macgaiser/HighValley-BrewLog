@@ -54,6 +54,27 @@ def _d(value: str | None) -> date | None:
     return date.fromisoformat(value)
 
 
+def _parse_row_checkboxes(raw_values: list[str]) -> list[bool]:
+    """Ein nicht angehaktes Formular-Checkbox-Feld wird beim Absenden komplett
+    weggelassen, statt "false" zu liefern - dadurch waere bei mehreren Zeilen
+    die Reihenfolge in getlist() nicht mehr an die Zeilenposition gekoppelt.
+    Jede Zeile rendert daher zusaetzlich ein verstecktes Feld mit Wert
+    "false" direkt vor der Checkbox (Wert "true"): so liefert jede Zeile
+    garantiert 1 (nicht angehakt) oder 2 (angehakt) Eintraege in fester
+    Reihenfolge, aus denen sich hier wieder ein bool pro Zeile ergibt."""
+    result = []
+    i = 0
+    n = len(raw_values)
+    while i < n:
+        i += 1  # das feste "false" der Zeile ueberspringen
+        if i < n and raw_values[i] == "true":
+            result.append(True)
+            i += 1
+        else:
+            result.append(False)
+    return result
+
+
 def _inventory_options(session: Session) -> dict[str, list[InventoryItem]]:
     items = session.exec(select(InventoryItem).order_by(InventoryItem.name)).all()
     return {
@@ -75,6 +96,19 @@ def _resolve_ingredient_name(session: Session, manual_name: str, inventory_item_
         if item:
             return item.name
     return manual_name.strip()
+
+
+def _resolve_hop_name(session: Session, manual_name: str, inventory_item_id: int | None) -> str:
+    """Wie _resolve_ingredient_name, aber bei Hopfen werden Lagerartikel UND
+    Alternative kombiniert, falls ausnahmsweise mal beide Felder gefuellt
+    sind (Normalfall bleibt: nur eines von beiden ist ausgefuellt) - so geht
+    z.B. auf dem Etikett keine der beiden Angaben verloren."""
+    manual = manual_name.strip()
+    if inventory_item_id:
+        item = session.get(InventoryItem, inventory_item_id)
+        if item:
+            return f"{item.name} + {manual}" if manual else item.name
+    return manual
 
 
 @router.get("")
@@ -265,6 +299,7 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     hop_temps = form.getlist("hop_temperature_c")
     types = form.getlist("hop_type")
     hop_inv_ids = form.getlist("hop_inventory_id")
+    show_flags = _parse_row_checkboxes(form.getlist("hop_show_on_label"))
     for i in range(len(names)):
         hop_inv_id = int(hop_inv_ids[i]) if i < len(hop_inv_ids) and hop_inv_ids[i] else None
         if not names[i].strip() and not hop_inv_id:
@@ -274,13 +309,14 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
             HopAddition(
                 batch_id=batch.id,
                 position=i,
-                hop_name=_resolve_ingredient_name(session, names[i], hop_inv_id),
+                hop_name=_resolve_hop_name(session, names[i], hop_inv_id),
                 alpha_acid_percent=round(alpha, 1) if alpha is not None else None,
                 amount_g=_f(hop_amounts[i]) or 0,
                 time_min=_f(times[i]) if i < len(times) else None,
                 temperature_c=_f(hop_temps[i]) if i < len(hop_temps) else None,
                 addition_type=HopAdditionType(types[i]) if i < len(types) and types[i] else HopAdditionType.kochen,
                 inventory_item_id=hop_inv_id,
+                show_on_label=show_flags[i] if i < len(show_flags) else True,
             )
         )
 
@@ -344,6 +380,8 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     task_names = form.getlist("task_name")
     task_durations = form.getlist("task_duration_min")
     task_notes = form.getlist("task_note")
+    task_starts = form.getlist("task_start_time")
+    task_ends = form.getlist("task_end_time")
     for i, name in enumerate(task_names):
         if not name.strip():
             continue
@@ -352,6 +390,8 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
                 batch_id=batch.id,
                 position=i,
                 task_name=name.strip(),
+                start_time=task_starts[i].strip() or None if i < len(task_starts) else None,
+                end_time=task_ends[i].strip() or None if i < len(task_ends) else None,
                 planned_duration_min=_f(task_durations[i]) if i < len(task_durations) else None,
                 note=task_notes[i].strip() if i < len(task_notes) else "",
             )
@@ -392,7 +432,7 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
     # Whirlpool) werden dafür zu einer Gesamtmenge aufsummiert.
     hop_amounts: dict[str, float] = {}
     for h in batch.hop_additions:
-        if h.hop_name:
+        if h.hop_name and h.show_on_label:
             hop_amounts[h.hop_name] = hop_amounts.get(h.hop_name, 0) + (h.amount_g or 0)
     hop_names_sorted = sorted(hop_amounts, key=lambda name: hop_amounts[name], reverse=True)
     hop_names = ", ".join(hop_names_sorted) if hop_names_sorted else "–"
@@ -424,8 +464,17 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
             "hop_names_size": hop_names_size,
             "label_count": range(9),
             "brand_name": settings.label_brand_name,
+            "brand_line1": settings.label_brand_line1,
+            "brand_line1_size": settings.label_brand_line1_size,
+            "brand_line2_size": settings.label_brand_line2_size,
             "logo_url": logo_url,
         },
+        # Ohne das hier landet nach einem Logo-Wechsel in den Einstellungen
+        # (oder ueber die Browser-Historie/das Back-Forward-Cache) leicht
+        # eine veraltete Fassung dieser Seite im Browser-Cache - mit dem
+        # noch aktiven, inzwischen aber ausgetauschten Logo. Die Seite
+        # zeigt live Daten und soll deshalb nie aus dem Cache bedient werden.
+        headers={"Cache-Control": "no-store"},
     )
 
 
@@ -525,6 +574,7 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
                 temperature_c=h.temperature_c,
                 addition_type=h.addition_type,
                 inventory_item_id=h.inventory_item_id,
+                show_on_label=h.show_on_label,
             )
         )
     for y in source.yeast_additions:
@@ -579,6 +629,35 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
 
     session.commit()
     return RedirectResponse(f"/batches/{copy.id}/edit", status_code=303)
+
+
+@router.get("/{batch_id}/schedule/{task_id}")
+def schedule_task_form(batch_id: int, task_id: int, request: Request, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    task = session.get(BrewDayTask, task_id)
+    return templates.TemplateResponse(
+        "schedule_task_form.html",
+        {"request": request, "batch": batch, "task": task},
+    )
+
+
+@router.post("/{batch_id}/schedule/{task_id}")
+async def schedule_task_update(batch_id: int, task_id: int, request: Request, session: Session = Depends(get_session)):
+    """Speichert Beginn/Ende/Dauer/Notiz einer einzelnen Brautag-Zeitplan-
+    Position - aufgerufen aus dem kleinen Dialog, der beim Klick auf eine
+    Zeile in der Sud-Detailseite geoeffnet wird (analog zum Kommentar-Dialog
+    beim Maischplan), statt über die grosse Bearbeiten-Maske gehen zu
+    müssen."""
+    form = await request.form()
+    task = session.get(BrewDayTask, task_id)
+    if task and task.batch_id == batch_id:
+        task.start_time = form.get("start_time", "").strip() or None
+        task.end_time = form.get("end_time", "").strip() or None
+        task.planned_duration_min = _f(form.get("duration_min"))
+        task.note = form.get("note", "").strip()
+        session.add(task)
+        session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
 
 
 @router.get("/{batch_id}/mash/{step_id}/comment")
