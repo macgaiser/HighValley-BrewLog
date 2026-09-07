@@ -85,6 +85,31 @@ def settings_logo_activate(logo_id: int, session: Session = Depends(get_session)
     return RedirectResponse("/settings", status_code=303)
 
 
+@router.post("/logos/{logo_id}/scale")
+async def settings_logo_scale(logo_id: int, request: Request, session: Session = Depends(get_session)):
+    """Fuellgrad eines einzelnen hochgeladenen Logos speichern - unabhaengig
+    davon, ob es gerade aktiv ist, damit sich alle Logos schon vorab passend
+    einstellen lassen."""
+    form = await request.form()
+    logo = session.get(Logo, logo_id)
+    if logo:
+        logo.scale_percent = float(form.get("scale_percent") or 82)
+        session.add(logo)
+        session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.post("/logos/default-scale")
+async def settings_default_logo_scale(request: Request, session: Session = Depends(get_session)):
+    """Fuellgrad des eingebauten Standard-Logos speichern."""
+    form = await request.form()
+    s = session.get(Settings, 1)
+    s.default_logo_scale = float(form.get("scale_percent") or 82)
+    session.add(s)
+    session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
 @router.post("/logos/reset")
 def settings_logo_reset(session: Session = Depends(get_session)):
     s = session.get(Settings, 1)

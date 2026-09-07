@@ -17,7 +17,7 @@
 <div class="label-sheet" id="label-sheet">
   {% for _ in label_count %}
   <div class="label-strip">
-    <div class="label-cell label-left-square"><img class="label-logo-img" src="{{ logo_url }}" alt=""></div>
+    <div class="label-cell label-left-square"><img class="label-logo-img" src="{{ logo_url }}" style="width: {{ logo_scale }}%; height: {{ logo_scale }}%;" alt=""></div>
     <div class="label-maincontent">
       <div class="label-vine{% if loop.first %} label-vine-edge-top{% endif %}">
         <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">

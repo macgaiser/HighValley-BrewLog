@@ -450,10 +450,12 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
         hop_names_size = 4
 
     logo_url = "/static/img/logo-shield.png"
+    logo_scale = settings.default_logo_scale
     if settings.active_logo_id:
         logo = session.get(Logo, settings.active_logo_id)
         if logo:
             logo_url = f"/logos/{logo.filename}"
+            logo_scale = logo.scale_percent
     return templates.TemplateResponse(
         "label.html",
         {
@@ -468,6 +470,7 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
             "brand_line1_size": settings.label_brand_line1_size,
             "brand_line2_size": settings.label_brand_line2_size,
             "logo_url": logo_url,
+            "logo_scale": logo_scale,
         },
         # Ohne das hier landet nach einem Logo-Wechsel in den Einstellungen
         # (oder ueber die Browser-Historie/das Back-Forward-Cache) leicht

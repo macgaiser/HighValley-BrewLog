@@ -97,40 +97,40 @@
 </section>
 
 <div class="grid-2">
-  <section class="card">
-    <h2><span>Hefegabe</span><img class="step-icon" src="/static/img/step-kuehlen.png" alt=""></h2>
-    <table class="mini-table">
-      {% for y in batch.yeast_additions %}
-      <tr><td>{{ y.yeast_name }}</td><td>{{ y.generation_label }}</td><td>{{ y.amount|fmt(0) }} {{ y.unit }}</td><td>{{ y.pitch_temperature_c|fmt(0) }} °C</td><td>{{ y.comment }}</td></tr>
-      {% else %}
-      <tr><td colspan="5">–</td></tr>
-      {% endfor %}
-    </table>
-  </section>
+  <div class="card-stack">
+    <section class="card">
+      <h2><span>Hefegabe</span><img class="step-icon" src="/static/img/step-kuehlen.png" alt=""></h2>
+      <table class="mini-table">
+        {% for y in batch.yeast_additions %}
+        <tr><td>{{ y.yeast_name }}</td><td>{{ y.generation_label }}</td><td>{{ y.amount|fmt(0) }} {{ y.unit }}</td><td>{{ y.pitch_temperature_c|fmt(0) }} °C</td><td>{{ y.comment }}</td></tr>
+        {% else %}
+        <tr><td colspan="5">–</td></tr>
+        {% endfor %}
+      </table>
+    </section>
 
-  <section class="card">
-    <h2>Stopfhopfen</h2>
-    <table class="mini-table">
-      {% for d in batch.dry_hop_additions %}
-      <tr><td>{{ d.hop_name }}</td><td>{{ d.timing_label }}</td><td>{{ d.amount_g|fmt(0) }} g</td></tr>
-      {% else %}
-      <tr><td colspan="3">–</td></tr>
-      {% endfor %}
-    </table>
-  </section>
-</div>
+    <section class="card">
+      <h2>Stopfhopfen</h2>
+      <table class="mini-table">
+        {% for d in batch.dry_hop_additions %}
+        <tr><td>{{ d.hop_name }}</td><td>{{ d.timing_label }}</td><td>{{ d.amount_g|fmt(0) }} g</td></tr>
+        {% else %}
+        <tr><td colspan="3">–</td></tr>
+        {% endfor %}
+      </table>
+    </section>
 
-<div class="grid-2">
-  <section class="card">
-    <h2><span>Karbonisierung</span><img class="step-icon" src="/static/img/step-abfuellen.png" alt=""></h2>
-    <table class="mini-table">
-      {% for c in batch.carbonation_entries %}
-      <tr><td>{{ c.label }}</td><td>{{ c.sugar_g|fmt(1) }} g</td><td>je {{ c.bottle_volume_l|fmt(2) }} l Flasche</td></tr>
-      {% else %}
-      <tr><td colspan="3">–</td></tr>
-      {% endfor %}
-    </table>
-  </section>
+    <section class="card">
+      <h2><span>Karbonisierung</span><img class="step-icon" src="/static/img/step-abfuellen.png" alt=""></h2>
+      <table class="mini-table">
+        {% for c in batch.carbonation_entries %}
+        <tr><td>{{ c.label }}</td><td>{{ c.sugar_g|fmt(1) }} g</td><td>je {{ c.bottle_volume_l|fmt(2) }} l Flasche</td></tr>
+        {% else %}
+        <tr><td colspan="3">–</td></tr>
+        {% endfor %}
+      </table>
+    </section>
+  </div>
 
   <section class="card">
     <h2>Brautag-Zeitplan</h2>
