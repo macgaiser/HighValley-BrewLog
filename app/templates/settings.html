@@ -69,7 +69,7 @@
       </form>
       {% endif %}
       <form method="post" action="/settings/logos/default-scale" class="logo-scale-form">
-        <input type="number" name="scale_percent" value="{{ s.default_logo_scale }}" min="10" max="100" step="1">
+        <input type="number" name="scale_percent" value="{{ s.default_logo_scale }}" min="10" max="150" step="1">
         <button class="btn btn-small" type="submit" title="Größe speichern">%</button>
       </form>
     </div>
@@ -84,7 +84,7 @@
       </form>
       {% endif %}
       <form method="post" action="/settings/logos/{{ logo.id }}/scale" class="logo-scale-form">
-        <input type="number" name="scale_percent" value="{{ logo.scale_percent }}" min="10" max="100" step="1">
+        <input type="number" name="scale_percent" value="{{ logo.scale_percent }}" min="10" max="150" step="1">
         <button class="btn btn-small" type="submit" title="Größe speichern">%</button>
       </form>
     </div>
