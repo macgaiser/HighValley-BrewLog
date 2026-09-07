@@ -135,12 +135,22 @@
   <section class="card">
     <h2>Brautag-Zeitplan</h2>
     <table class="mini-table">
+      <thead><tr><th>Tätigkeit</th><th>Beginn</th><th>Ende</th><th>Dauer</th><th>Notiz</th></tr></thead>
+      <tbody>
       {% for t in batch.brew_day_tasks %}
-      <tr><td>{{ t.task_name }}</td><td>{{ t.planned_duration_min|fmt(0) }} min</td><td>{{ t.note }}</td></tr>
+      <tr onclick="window.location='/batches/{{ batch.id }}/schedule/{{ t.id }}'" class="clickable-row">
+        <td>{{ t.task_name }}</td>
+        <td>{{ t.start_time or "–" }}</td>
+        <td>{{ t.end_time or "–" }}</td>
+        <td>{{ t.planned_duration_min|fmt(0) }} min</td>
+        <td>{{ t.note }}</td>
+      </tr>
       {% else %}
-      <tr><td colspan="3">–</td></tr>
+      <tr><td colspan="5">–</td></tr>
       {% endfor %}
+      </tbody>
     </table>
+    <p class="hint">Auf eine Zeile klicken, um Beginn, Ende und Notiz einzutragen.</p>
   </section>
 </div>
 

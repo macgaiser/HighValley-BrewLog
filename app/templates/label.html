@@ -24,7 +24,10 @@
         <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
       </div>
       <div class="label-cell label-brand">
-        <span class="label-brand-name">{{ brand_name }}</span>
+        {% if brand_line1 %}
+        <span class="label-brand-name" style="font-size: {{ brand_line1_size }}rem;">{{ brand_line1 }}</span>
+        {% endif %}
+        <span class="label-brand-name" style="font-size: {{ brand_line2_size }}rem;">{{ brand_name }}</span>
         <span class="label-beername">{{ batch.name }}</span>
       </div>
       <div class="label-right">
