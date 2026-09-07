@@ -38,6 +38,9 @@ class Settings(SQLModel, table=True):
     wort_correction_factor: float = 1.03
     mash_efficiency_correction_factor: float = 1.0
     label_brand_name: str = "HIGH VALLEY Brew Co."
+    label_brand_line1: str = ""
+    label_brand_line1_size: float = 0.7
+    label_brand_line2_size: float = 1.6
     active_logo_id: Optional[int] = Field(default=None, foreign_key="logo.id")
 
 

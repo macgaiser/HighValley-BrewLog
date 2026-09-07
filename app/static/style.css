@@ -398,6 +398,10 @@ h1, h2, h3 {
   --label-bg: #100e0a;
 }
 .label-sheet--dark .label-brand::before { opacity: 0.5; }
+/* Radialer Verlauf im Logo-Feld (nur dort, nicht im rechten Rahmen-
+   Quadrat) statt einfarbig schwarz - sorgt fuer Kontrast sowohl zu
+   hellen als auch dunklen Logo-Bereichen, egal welches Logo aktiv ist. */
+.label-sheet--dark .label-left-square { background: radial-gradient(circle, #ffffff 0%, #100e0a 75%); }
 .label-strip {
   position: relative;
   flex: 1 1 0;
