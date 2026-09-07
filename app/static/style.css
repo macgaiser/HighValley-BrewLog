@@ -664,6 +664,12 @@ h1, h2, h3 {
 .label-vine-edge-bottom { clip-path: inset(0 0 50% 0); }
 
 @media print {
+  /* Browser drucken Hintergrundfarben/-bilder standardmaessig nicht (auch
+     nicht immer ueber die Option "Hintergrundgrafiken" im Druckdialog,
+     die zudem leicht uebersehen wird) - ohne dieses Opt-in blieb sowohl
+     die helle als auch die dunkle Etikett-Variante beim Drucken/als PDF
+     weiss statt der eigentlichen Hintergrundfarbe. */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .topbar, .no-print { display: none !important; }
   body::before { display: none !important; }
   .container { padding: 0 !important; max-width: none !important; margin: 0 !important; }
