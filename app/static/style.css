@@ -557,7 +557,10 @@ h1, h2, h3 {
   top: 12%;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font-size: 1.15rem;
+  /* 0.9rem statt 1.15rem - beruehrte bei 1.15rem knapp die Hopfenranke
+     (1rem = 16px = 4.233mm im Druck, die Differenz von 0.25rem
+     entspricht damit rund 1mm weniger Schrifthoehe). */
+  font-size: 0.9rem;
   line-height: 1;
   white-space: nowrap;
 }
