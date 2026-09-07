@@ -54,6 +54,27 @@ def _d(value: str | None) -> date | None:
     return date.fromisoformat(value)
 
 
+def _parse_row_checkboxes(raw_values: list[str]) -> list[bool]:
+    """Ein nicht angehaktes Formular-Checkbox-Feld wird beim Absenden komplett
+    weggelassen, statt "false" zu liefern - dadurch waere bei mehreren Zeilen
+    die Reihenfolge in getlist() nicht mehr an die Zeilenposition gekoppelt.
+    Jede Zeile rendert daher zusaetzlich ein verstecktes Feld mit Wert
+    "false" direkt vor der Checkbox (Wert "true"): so liefert jede Zeile
+    garantiert 1 (nicht angehakt) oder 2 (angehakt) Eintraege in fester
+    Reihenfolge, aus denen sich hier wieder ein bool pro Zeile ergibt."""
+    result = []
+    i = 0
+    n = len(raw_values)
+    while i < n:
+        i += 1  # das feste "false" der Zeile ueberspringen
+        if i < n and raw_values[i] == "true":
+            result.append(True)
+            i += 1
+        else:
+            result.append(False)
+    return result
+
+
 def _inventory_options(session: Session) -> dict[str, list[InventoryItem]]:
     items = session.exec(select(InventoryItem).order_by(InventoryItem.name)).all()
     return {
@@ -265,6 +286,7 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     hop_temps = form.getlist("hop_temperature_c")
     types = form.getlist("hop_type")
     hop_inv_ids = form.getlist("hop_inventory_id")
+    show_flags = _parse_row_checkboxes(form.getlist("hop_show_on_label"))
     for i in range(len(names)):
         hop_inv_id = int(hop_inv_ids[i]) if i < len(hop_inv_ids) and hop_inv_ids[i] else None
         if not names[i].strip() and not hop_inv_id:
@@ -281,6 +303,7 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
                 temperature_c=_f(hop_temps[i]) if i < len(hop_temps) else None,
                 addition_type=HopAdditionType(types[i]) if i < len(types) and types[i] else HopAdditionType.kochen,
                 inventory_item_id=hop_inv_id,
+                show_on_label=show_flags[i] if i < len(show_flags) else True,
             )
         )
 
@@ -392,7 +415,7 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
     # Whirlpool) werden dafür zu einer Gesamtmenge aufsummiert.
     hop_amounts: dict[str, float] = {}
     for h in batch.hop_additions:
-        if h.hop_name:
+        if h.hop_name and h.show_on_label:
             hop_amounts[h.hop_name] = hop_amounts.get(h.hop_name, 0) + (h.amount_g or 0)
     hop_names_sorted = sorted(hop_amounts, key=lambda name: hop_amounts[name], reverse=True)
     hop_names = ", ".join(hop_names_sorted) if hop_names_sorted else "–"
@@ -534,6 +557,7 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
                 temperature_c=h.temperature_c,
                 addition_type=h.addition_type,
                 inventory_item_id=h.inventory_item_id,
+                show_on_label=h.show_on_label,
             )
         )
     for y in source.yeast_additions:

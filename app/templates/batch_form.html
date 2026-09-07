@@ -166,7 +166,7 @@
     <div class="section-title-row"><h2><span>Würzekochen / Hopfengaben</span><img class="step-icon" src="/static/img/step-kochen.png" alt=""></h2><button class="btn btn-small" data-add-row="hop">+ Zeile</button></div>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Alpha (%)</th><th>Menge (g)</th><th>Zeit (min)</th><th>Temp. (°C)</th><th>Typ</th><th></th></tr></thead>
+      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Alpha (%)</th><th>Menge (g)</th><th>Zeit (min)</th><th>Temp. (°C)</th><th>Typ</th><th>Auf Etikett</th><th></th></tr></thead>
       <tbody data-rows="hop">
         {% for h in (batch.hop_additions if batch else []) %}
         <tr>
@@ -180,6 +180,10 @@
             <select name="hop_type">
               {% for t in hop_types %}<option value="{{ t.value }}" {% if h.addition_type==t %}selected{% endif %}>{{ t.value|capitalize }}</option>{% endfor %}
             </select>
+          </td>
+          <td>
+            <input type="hidden" name="hop_show_on_label" value="false">
+            <input type="checkbox" name="hop_show_on_label" value="true" {% if h.show_on_label %}checked{% endif %}>
           </td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
         </tr>
@@ -199,6 +203,10 @@
           <select name="hop_type">
             {% for t in hop_types %}<option value="{{ t.value }}">{{ t.value|capitalize }}</option>{% endfor %}
           </select>
+        </td>
+        <td>
+          <input type="hidden" name="hop_show_on_label" value="false">
+          <input type="checkbox" name="hop_show_on_label" value="true" checked>
         </td>
         <td><button class="btn btn-small" data-remove-row>✕</button></td>
       </tr>

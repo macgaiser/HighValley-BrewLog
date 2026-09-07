@@ -185,6 +185,7 @@ class HopAddition(SQLModel, table=True):
     temperature_c: Optional[float] = None
     addition_type: HopAdditionType = HopAdditionType.kochen
     inventory_item_id: Optional[int] = Field(default=None, foreign_key="inventoryitem.id")
+    show_on_label: bool = True  # ob diese Gabe in der Hopfensorten-Zeile des Etiketts auftaucht
 
     batch: Batch = Relationship(back_populates="hop_additions")
 
