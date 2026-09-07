@@ -330,6 +330,7 @@ h1, h2, h3 {
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+.card-stack { display: flex; flex-direction: column; gap: 1rem; }
 
 .stat-grid {
   display: grid;
@@ -554,13 +555,13 @@ h1, h2, h3 {
 .label-batch-date {
   position: absolute;
   left: 0;
-  top: 12%;
+  top: 50%;
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  /* 0.9rem statt 1.15rem - beruehrte bei 1.15rem knapp die Hopfenranke
-     (1rem = 16px = 4.233mm im Druck, die Differenz von 0.25rem
-     entspricht damit rund 1mm weniger Schrifthoehe). */
-  font-size: 0.9rem;
+  /* translateY(-50%) zentriert vertikal in .label-right (Elternbox mit
+     height:100%). 1.03rem statt urspruenglich 1.15rem - 0.9rem (vorheriger
+     Versuch) war mit ~1mm weniger Schrifthoehe zu viel, ~0.5mm reichten. */
+  transform: translateY(-50%) rotate(180deg);
+  font-size: 1.03rem;
   line-height: 1;
   white-space: nowrap;
 }
