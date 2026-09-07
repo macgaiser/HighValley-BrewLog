@@ -328,9 +328,37 @@ h1, h2, h3 {
   .card h2 .step-icon { height: 64px; }
 }
 
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; gap: 1rem; margin: 1rem 0; }
 @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
-.card-stack { display: flex; flex-direction: column; gap: 1rem; }
+/* .card bringt normalerweise sein eigenes margin:1rem 0 fuer den Abstand
+   zu Nachbarelementen mit - als direktes Grid-Kind wuerde das aber die
+   Stretch-Hoehe verfaelschen (die margin-Box zaehlt mit, ein .card mit
+   margin waere dadurch bei gleicher Stretch-Zielhoehe kleiner als eines
+   ohne). Der Abstand kommt bei .grid-2 daher vom Grid-Container selbst. */
+.grid-2 > .card { margin: 0; }
+/* .grid-2 stretcht seine beiden Kinder (diesen Stack und die Zeitplan-
+   Karte daneben) per Default schon auf gleiche Hoehe - hier zusaetzlich
+   dafuer sorgen, dass die drei gestapelten Karten die dadurch entstehende
+   Resthoehe untereinander aufteilen (flex:1), statt sie als eine grosse
+   Luecke nach der letzten Karte uebrig zu lassen. */
+.card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  /* Ohne das hier wuerde der Stack als Flex-Container die Summe der
+     Content-Hoehen seiner Karten als eigene Mindesthoehe beanspruchen
+     (implizites min-height:auto) - dadurch waere er tendenziell hoeher
+     als noetig statt sich sauber auf die Hoehe der Zeitplan-Karte
+     daneben stretchen zu lassen. */
+  min-height: 0;
+}
+/* flex-grow:1 mit flex-basis:auto (statt 0) verteilt nur die UEBRIGE
+   Hoehe gleichmaessig auf die 3 Karten, oben auf ihre jeweils eigene
+   Content-Hoehe drauf - mit flex-basis:0 wuerden die Karten stattdessen
+   gleich GROSS gestartet und ggf. unter ihre eigene Content-Hoehe
+   gequetscht (sichtbar als ueber den Kartenrand hinauslaufender Inhalt).
+   flex-shrink:0 verhindert das Quetschen zusaetzlich explizit. */
+.card-stack > .card { flex: 1 0 auto; margin: 0; }
 
 .stat-grid {
   display: grid;
@@ -629,13 +657,19 @@ h1, h2, h3 {
 }
 .label-vine-img { display: block; width: 50%; height: auto; }
 .label-vine-bottom { top: auto; bottom: 0; transform: translateY(50%); }
-/* Ganz oben (vor Etikett 1) und ganz unten (nach Etikett 9) liegt sonst
-   die Haelfte der Ranke ausserhalb jedes Etiketts - abgeschnitten statt
-   einfach ueberstehen zu lassen. */
+/* Ganz oben (vor dem 1.) und ganz unten (nach dem letzten Etikett) liegt
+   sonst die Haelfte der Ranke ausserhalb jedes Etiketts - abgeschnitten
+   statt einfach ueberstehen zu lassen. */
 .label-vine-edge-top { clip-path: inset(50% 0 0 0); }
 .label-vine-edge-bottom { clip-path: inset(0 0 50% 0); }
 
 @media print {
+  /* Browser drucken Hintergrundfarben/-bilder standardmaessig nicht (auch
+     nicht immer ueber die Option "Hintergrundgrafiken" im Druckdialog,
+     die zudem leicht uebersehen wird) - ohne dieses Opt-in blieb sowohl
+     die helle als auch die dunkle Etikett-Variante beim Drucken/als PDF
+     weiss statt der eigentlichen Hintergrundfarbe. */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .topbar, .no-print { display: none !important; }
   body::before { display: none !important; }
   .container { padding: 0 !important; max-width: none !important; margin: 0 !important; }
@@ -644,20 +678,22 @@ h1, h2, h3 {
      @page-margin-Wert nicht zuverlaessig 1:1 uebernommen, sondern durch
      einen eigenen (teils groesseren) Standardrand ersetzt - dann reichte
      die bisher exakt auf 287mm (297mm - 2x5mm) berechnete Hoehe nicht
-     mehr aus und der 9. Streifen rutschte auf Seite 2. 252mm (9x28mm)
-     statt 287mm lässt dafuer bewusst reichlich Puffer nach unten, auch
-     wenn der tatsaechliche Druckrand groesser als die hier gesetzten
-     8mm ausfaellt. */
-  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 252mm; margin: 8mm auto 0; border: none; }
+     mehr aus und der 9. Streifen rutschte auf Seite 2.
+
+     Ein Zwischenversuch, die Streifenhoehe zusaetzlich zu verkleinern (um
+     ein 10. Etikett unterzubringen bzw. mehr Puffer zu schaffen), wurde
+     wieder verworfen: die Eckquadrate/die Hopfenranke/das Abflludatum
+     sind alle auf die ca. 31,9mm hohen Streifen abgestimmt (Schriftgroessen
+     etc. bleiben fest) - kleinere Streifen liessen die Hopfenranke bzw.
+     das Abfuelldatum ineinander laufen, und ein Versuch, dafuer nur die
+     Hopfenranken-BREITE zu verkleinern, brach zusaetzlich die nahtlose
+     Aneinanderreihung der beiden Rankenbilder (die zusammen exakt 100%
+     Breite ergeben muessen). Streifenhoehe bleibt daher bei den
+     urspruenglichen, nie beanstandeten ca. 31,96mm (200mm * 15,9804%,
+     wie auf dem Bildschirm) - Eckquadrate und Hopfenranke brauchen so
+     auch im Druck keine eigene Breiten-Anpassung. */
+  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 287.65mm; margin: 5mm auto 0; border: none; }
   .label-strip { page-break-inside: avoid; }
-  /* 15,9804% war fuer 200mm Breite zu 287mm Hoehe (echt quadratische
-     Eckfelder) ausgerechnet - bei 252mm Hoehe waeren die Felder ohne
-     diese Anpassung nicht mehr quadratisch, sondern gestaucht. Bei
-     252mm/9 = 28mm Streifenhoehe braucht es 28/200 = 14% Breite, damit
-     die Felder wieder exakt quadratisch sind (Etikettenbreite bleibt
-     bewusst bei 200mm, sonst passt das fertige Etikett nicht mehr um
-     die Flasche). */
-  .label-left-square, .label-frame-cell { flex-basis: 14%; }
 }
 
 @page { size: A4; margin: 0; }
@@ -691,7 +727,7 @@ h1, h2, h3 {
 
 .logo-gallery { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
 .logo-gallery-item {
-  width: 110px;
+  width: 130px;
   border: 1.5px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem;
@@ -704,7 +740,8 @@ h1, h2, h3 {
 .logo-gallery-item.active { border-color: var(--green); }
 .logo-gallery-item img { width: 100%; height: 70px; object-fit: contain; }
 .badge-active { font-size: 0.75rem; color: var(--green); font-weight: 600; }
-.logo-scale-form { display: flex; gap: 0.3rem; }
+.logo-scale-form { display: flex; flex-direction: column; align-items: stretch; gap: 0.3rem; width: 100%; }
+.logo-scale-input-row { display: flex; align-items: center; justify-content: center; gap: 0.3rem; }
 .logo-scale-form input { width: 3.2rem; padding: 0.25rem; border: 1px solid var(--border); border-radius: 6px; }
 
 .comment-add-form { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; align-items: flex-start; }
