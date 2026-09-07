@@ -23,6 +23,7 @@
         <td>
           <form class="inline-form" method="post" action="/inventory/{{ item.id }}/restock" onclick="event.stopPropagation()">
             <input type="number" step="0.01" name="amount" placeholder="± Menge" style="width:100px" required>
+            <span>{{ item.unit }}</span>
             <input type="text" name="note" placeholder="Notiz (optional)" style="width:160px">
             <button class="btn btn-small" type="submit">Buchen</button>
           </form>

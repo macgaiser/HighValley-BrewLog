@@ -12,6 +12,20 @@ from app.templating import templates
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
 
+_FIXED_UNITS = {InventoryCategory.malz: "kg", InventoryCategory.hopfen: "g"}
+
+
+def _resolve_unit(category: InventoryCategory, form_unit: str) -> str:
+    """Malz und Hopfen gehen fest in kg bzw. g in die EBC-/IBU-Berechnung
+    und die automatische Lagerabbuchung ein (ohne jede Umrechnung) - die
+    Einheit ist dafuer nicht frei waehlbar, sondern liegt fest. Nur bei
+    Hefe bleibt sie frei editierbar (z.B. fuer ml bei Fluessighefe)."""
+    fixed = _FIXED_UNITS.get(category)
+    if fixed:
+        return fixed
+    return form_unit.strip() or "kg"
+
+
 def _parse_ebc(raw: str) -> float | None:
     """Parst eine EBC-Eingabe: eine einzelne Zahl ('4', '4,5') oder einen auf
     Malz-Datenblättern üblichen Bereich ('4-6') - dann wird der Mittelwert
@@ -53,13 +67,14 @@ def inventory_new_form(request: Request):
 @router.post("/new")
 async def inventory_create(request: Request, session: Session = Depends(get_session)):
     form = await request.form()
+    category = InventoryCategory(form.get("category"))
     item = InventoryItem(
-        category=InventoryCategory(form.get("category")),
+        category=category,
         name=form.get("name", "").strip(),
         brand=form.get("brand", "").strip(),
         spec=form.get("spec", "").strip(),
         color_ebc=_parse_ebc(form.get("color_ebc", "")),
-        unit=form.get("unit", "kg").strip() or "kg",
+        unit=_resolve_unit(category, form.get("unit", "")),
         amount=0,
     )
     session.add(item)
@@ -88,7 +103,7 @@ async def inventory_update(item_id: int, request: Request, session: Session = De
     item.brand = form.get("brand", "").strip()
     item.spec = form.get("spec", "").strip()
     item.color_ebc = _parse_ebc(form.get("color_ebc", ""))
-    item.unit = form.get("unit", "kg").strip() or "kg"
+    item.unit = _resolve_unit(item.category, form.get("unit", ""))
     session.add(item)
     session.commit()
     return RedirectResponse("/inventory", status_code=303)
