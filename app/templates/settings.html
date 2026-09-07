@@ -50,7 +50,9 @@
       {% endfor %}
     </select>
   </div>
-  <p class="hint">Beide Zeilen werden mit "Speichern" oben zusammen mit den übrigen Einstellungen gespeichert.</p>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit" form="settings-form">Speichern</button>
+  </div>
 
   <h2>Logo</h2>
   <p class="hint">Das aktive Logo wird auf allen gedruckten Etiketten verwendet. Bereits hochgeladene Logos bleiben gespeichert und können jederzeit wieder ausgewählt werden.</p>
@@ -69,8 +71,11 @@
       </form>
       {% endif %}
       <form method="post" action="/settings/logos/default-scale" class="logo-scale-form">
-        <input type="number" name="scale_percent" value="{{ s.default_logo_scale }}" min="10" max="150" step="1">
-        <button class="btn btn-small" type="submit" title="Größe speichern">%</button>
+        <div class="logo-scale-input-row">
+          <input type="number" name="scale_percent" value="{{ s.default_logo_scale }}" min="10" max="150" step="1">
+          <span>%</span>
+        </div>
+        <button class="btn btn-small" type="submit">Speichern</button>
       </form>
     </div>
     {% for logo in logos %}
@@ -84,8 +89,11 @@
       </form>
       {% endif %}
       <form method="post" action="/settings/logos/{{ logo.id }}/scale" class="logo-scale-form">
-        <input type="number" name="scale_percent" value="{{ logo.scale_percent }}" min="10" max="150" step="1">
-        <button class="btn btn-small" type="submit" title="Größe speichern">%</button>
+        <div class="logo-scale-input-row">
+          <input type="number" name="scale_percent" value="{{ logo.scale_percent }}" min="10" max="150" step="1">
+          <span>%</span>
+        </div>
+        <button class="btn btn-small" type="submit">Speichern</button>
       </form>
     </div>
     {% endfor %}
