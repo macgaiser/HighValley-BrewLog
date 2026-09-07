@@ -631,28 +631,32 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
     return RedirectResponse(f"/batches/{copy.id}/edit", status_code=303)
 
 
-@router.post("/{batch_id}/schedule")
-async def batch_schedule_update(batch_id: int, request: Request, session: Session = Depends(get_session)):
-    """Speichert Beginn/Ende/Dauer/Notiz der Brautag-Zeitplan-Positionen direkt
-    von der Sud-Detailseite aus - ohne über die grosse Bearbeiten-Maske zu
-    gehen. Aendert nur die Zeitwerte bestehender Positionen, legt keine neuen
-    an und loescht keine (das bleibt Sache der Bearbeiten-Maske)."""
+@router.get("/{batch_id}/schedule/{task_id}")
+def schedule_task_form(batch_id: int, task_id: int, request: Request, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    task = session.get(BrewDayTask, task_id)
+    return templates.TemplateResponse(
+        "schedule_task_form.html",
+        {"request": request, "batch": batch, "task": task},
+    )
+
+
+@router.post("/{batch_id}/schedule/{task_id}")
+async def schedule_task_update(batch_id: int, task_id: int, request: Request, session: Session = Depends(get_session)):
+    """Speichert Beginn/Ende/Dauer/Notiz einer einzelnen Brautag-Zeitplan-
+    Position - aufgerufen aus dem kleinen Dialog, der beim Klick auf eine
+    Zeile in der Sud-Detailseite geoeffnet wird (analog zum Kommentar-Dialog
+    beim Maischplan), statt über die grosse Bearbeiten-Maske gehen zu
+    müssen."""
     form = await request.form()
-    task_ids = form.getlist("task_id")
-    starts = form.getlist("task_start")
-    ends = form.getlist("task_end")
-    durations = form.getlist("task_actual_duration")
-    notes = form.getlist("task_note")
-    for i, raw_id in enumerate(task_ids):
-        task = session.get(BrewDayTask, int(raw_id))
-        if not task or task.batch_id != batch_id:
-            continue
-        task.start_time = starts[i].strip() or None if i < len(starts) else None
-        task.end_time = ends[i].strip() or None if i < len(ends) else None
-        task.planned_duration_min = _f(durations[i]) if i < len(durations) else None
-        task.note = notes[i].strip() if i < len(notes) else ""
+    task = session.get(BrewDayTask, task_id)
+    if task and task.batch_id == batch_id:
+        task.start_time = form.get("start_time", "").strip() or None
+        task.end_time = form.get("end_time", "").strip() or None
+        task.planned_duration_min = _f(form.get("duration_min"))
+        task.note = form.get("note", "").strip()
         session.add(task)
-    session.commit()
+        session.commit()
     return RedirectResponse(f"/batches/{batch_id}", status_code=303)
 
 
