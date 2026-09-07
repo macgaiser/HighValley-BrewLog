@@ -254,14 +254,14 @@
     <div class="section-title-row"><h2>Stopfhopfen</h2><button class="btn btn-small" data-add-row="dryhop">+ Zeile</button></div>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Hopfen</th><th>Zeitpunkt</th><th>Menge (g)</th><th>Lagerartikel</th><th></th></tr></thead>
+      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Zeitpunkt (Tag)</th><th>Menge (g)</th><th></th></tr></thead>
       <tbody data-rows="dryhop">
         {% for d in (batch.dry_hop_additions if batch else []) %}
         <tr>
+          <td>{{ inv_select('hopfen', inventory.hopfen, d.inventory_item_id, 'dryhop_inventory_id') }}</td>
           <td><input type="text" name="dryhop_name" value="{{ d.hop_name }}"></td>
           <td><input type="text" name="dryhop_timing" value="{{ d.timing_label }}"></td>
           <td><input type="number" step="0.1" name="dryhop_amount_g" value="{{ d.amount_g }}"></td>
-          <td>{{ inv_select('hopfen', inventory.hopfen, d.inventory_item_id, 'dryhop_inventory_id') }}</td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
         </tr>
         {% endfor %}
@@ -270,10 +270,10 @@
     </div>
     <template data-row-template="dryhop">
       <tr>
+        <td>{{ inv_select('hopfen', inventory.hopfen, None, 'dryhop_inventory_id') }}</td>
         <td><input type="text" name="dryhop_name"></td>
         <td><input type="text" name="dryhop_timing"></td>
         <td><input type="number" step="0.1" name="dryhop_amount_g"></td>
-        <td>{{ inv_select('hopfen', inventory.hopfen, None, 'dryhop_inventory_id') }}</td>
         <td><button class="btn btn-small" data-remove-row>✕</button></td>
       </tr>
     </template>

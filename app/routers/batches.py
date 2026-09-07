@@ -424,6 +424,9 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
             "hop_names_size": hop_names_size,
             "label_count": range(9),
             "brand_name": settings.label_brand_name,
+            "brand_line1": settings.label_brand_line1,
+            "brand_line1_size": settings.label_brand_line1_size,
+            "brand_line2_size": settings.label_brand_line2_size,
             "logo_url": logo_url,
         },
         # Ohne das hier landet nach einem Logo-Wechsel in den Einstellungen

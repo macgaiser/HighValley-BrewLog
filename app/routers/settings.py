@@ -41,6 +41,9 @@ async def settings_save(request: Request, session: Session = Depends(get_session
     s.wort_correction_factor = float(form.get("wort_correction_factor") or 1.03)
     s.mash_efficiency_correction_factor = float(form.get("mash_efficiency_correction_factor") or 100) / 100
     s.label_brand_name = form.get("label_brand_name", "").strip() or "HIGH VALLEY Brew Co."
+    s.label_brand_line1 = form.get("label_brand_line1", "").strip()
+    s.label_brand_line1_size = float(form.get("label_brand_line1_size") or 0.7)
+    s.label_brand_line2_size = float(form.get("label_brand_line2_size") or 1.6)
     session.add(s)
     session.commit()
     return RedirectResponse("/settings", status_code=303)
