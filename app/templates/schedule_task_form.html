@@ -7,18 +7,18 @@
   <div class="field-row">
     <div>
       <label>Beginn</label>
-      <input type="text" name="start_time" value="{{ task.start_time or '' }}" placeholder="HH:MM" inputmode="numeric" maxlength="5" data-time-input data-schedule-start>
+      <input type="time" name="start_time" value="{{ task.start_time or '' }}" data-schedule-start>
     </div>
     <div>
       <label>Ende</label>
-      <input type="text" name="end_time" value="{{ task.end_time or '' }}" placeholder="HH:MM" inputmode="numeric" maxlength="5" data-time-input data-schedule-end>
+      <input type="time" name="end_time" value="{{ task.end_time or '' }}" data-schedule-end>
     </div>
     <div>
       <label>Dauer (min)</label>
       <input type="number" step="1" name="duration_min" value="{{ task.planned_duration_min if task.planned_duration_min is not none else '' }}" data-schedule-duration>
     </div>
   </div>
-  <p class="hint">Bei Beginn + Ende wird die Dauer automatisch berechnet - alternativ direkt eine Dauer in Minuten eintragen. Zeiten im 24h-Format (z.B. 14:30).</p>
+  <p class="hint">Bei Beginn + Ende wird die Dauer automatisch berechnet - alternativ direkt eine Dauer in Minuten eintragen.</p>
 
   <label>Notiz</label>
   <textarea name="note" rows="4">{{ task.note }}</textarea>

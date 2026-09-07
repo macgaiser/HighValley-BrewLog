@@ -42,6 +42,7 @@ class Settings(SQLModel, table=True):
     label_brand_line1_size: float = 0.7
     label_brand_line2_size: float = 1.6
     active_logo_id: Optional[int] = Field(default=None, foreign_key="logo.id")
+    default_logo_scale: float = 82.0  # Fuellgrad des eingebauten Standard-Logos in % der Logo-Box
 
 
 class Logo(SQLModel, table=True):
@@ -54,6 +55,11 @@ class Logo(SQLModel, table=True):
     filename: str  # Dateiname auf der Platte, unter DATA_DIR/logos
     original_filename: str = ""
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+    # Manuell einstellbarer Fuellgrad des Logos in der Logo-Box auf dem
+    # Etikett (in %) - je nach Logo unterschiedlich sinnvoll (ein Logo mit
+    # viel eigenem Weissraum braucht einen groesseren Wert als eines, das
+    # bereits bis an den Rand geht).
+    scale_percent: float = 82.0
 
 
 class DefaultBrewDayTask(SQLModel, table=True):
