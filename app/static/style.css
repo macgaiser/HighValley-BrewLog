@@ -727,7 +727,7 @@ h1, h2, h3 {
 
 .logo-gallery { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
 .logo-gallery-item {
-  width: 110px;
+  width: 130px;
   border: 1.5px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem;
@@ -740,7 +740,8 @@ h1, h2, h3 {
 .logo-gallery-item.active { border-color: var(--green); }
 .logo-gallery-item img { width: 100%; height: 70px; object-fit: contain; }
 .badge-active { font-size: 0.75rem; color: var(--green); font-weight: 600; }
-.logo-scale-form { display: flex; gap: 0.3rem; }
+.logo-scale-form { display: flex; flex-direction: column; align-items: stretch; gap: 0.3rem; width: 100%; }
+.logo-scale-input-row { display: flex; align-items: center; justify-content: center; gap: 0.3rem; }
 .logo-scale-form input { width: 3.2rem; padding: 0.25rem; border: 1px solid var(--border); border-radius: 6px; }
 
 .comment-add-form { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; align-items: flex-start; }
