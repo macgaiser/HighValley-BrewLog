@@ -692,8 +692,50 @@ h1, h2, h3 {
      urspruenglichen, nie beanstandeten ca. 31,96mm (200mm * 15,9804%,
      wie auf dem Bildschirm) - Eckquadrate und Hopfenranke brauchen so
      auch im Druck keine eigene Breiten-Anpassung. */
-  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 287.65mm; margin: 5mm auto 0; border: none; }
+  /* EXPERIMENTELL: 10 Etiketten a 28mm statt 9 a ca. 31,96mm - im Gegensatz
+     zum letzten (verworfenen) Versuch bleibt die Hopfenranke unangetastet
+     (weder Breite noch Hoehe), stattdessen wird der Inhalt selbst kleiner/
+     kompakter (Datum, EBC/Fass-Position, Zeilenabstaende) skaliert, um
+     innerhalb der kleineren Streifen Abstand zur Ranke zu behalten. */
+  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 280mm; margin: 5mm auto 0; border: none; }
   .label-strip { page-break-inside: avoid; }
+  .label-left-square, .label-frame-cell { flex-basis: 14%; }
+
+  /* Abfuelldatum: verkleinert, damit bei zentrierter Position (top:50%)
+     mindestens 0.75mm Abstand zu Ranke oben UND unten bleibt. */
+  .label-batch-date { font-size: 0.74rem; }
+
+  /* EBC-Bierkrug und Fass (Sud-Nummer): nach unten verschoben (0.5mm+
+     Abstand zur oberen Ranke, vorher auf Kontakt) UND verkleinert (44.5%
+     statt 54.6% Hoehe), um unterhalb noch Platz fuer zwei Hopfenzeilen zu
+     lassen, bevor die untere Hopfenranke beginnt. Anschliessend nochmal um
+     0.5mm oben UND 0.5mm unten vergroessert (auf Wunsch) - das frisst fast
+     den kompletten oberen Ranken-Abstand wieder auf (siehe Kommentar unten
+     bei .label-hops zur unteren Seite). */
+  .label-mug-wrap, .label-batch-icon-wrap { top: 14.95%; bottom: 36.44%; }
+  .label-right-row-stats .label-stat { top: 18.35%; }
+
+  /* Hopfensorten-Zeile: Oberkante knapp unter der neuen Unterkante von
+     EBC/Fass (17%+44.5%=61.5%), Unterkante bleibt unveraendert bei
+     bottom:0.85rem (fester Abstand zur unteren Hopfenranke). */
+  .label-hops { top: 64.5%; }
+
+  /* Restliche Schriftgroessen im rechten Infobereich proportional
+     verkleinert (Faktor 28/31,96 ~ 0,876), damit im Verhaeltnis zur
+     kleineren Streifenhoehe alles wieder zueinander passt. */
+  .label-val-value { font-size: 1.14rem; }
+  .label-val-unit { font-size: 0.51rem; }
+  .label-batch-value { font-size: 6px; }
+  .label-mug-value { font-size: 5.4px; }
+  .label-mug-unit { font-size: 3px; }
+  /* Bei nur noch ca. 5.1mm Boxhoehe fuer 2 Zeilen muss die Schrift deutlich
+     kleiner sein als bei den ca. 31,9mm-Streifen (max. sicher passende
+     Groesse fuer 2 Zeilen bei 1.18 Zeilenabstand liegt bei ca. 0.51rem -
+     alle vier Stufen bleiben bewusst darunter, auch Stufe 1). */
+  .label-hops-size-1 { font-size: 0.5rem; }
+  .label-hops-size-2 { font-size: 0.46rem; }
+  .label-hops-size-3 { font-size: 0.42rem; }
+  .label-hops-size-4 { font-size: 0.38rem; }
 }
 
 @page { size: A4; margin: 0; }
