@@ -297,6 +297,49 @@ h1, h2, h3 {
 }
 .table thead th { color: var(--muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
 .clickable-row { cursor: pointer; }
+.col-name { min-width: 200px; }
+.col-actions { text-align: center; }
+.btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.1rem; height: 2.1rem; padding: 0; }
+.btn-icon svg { width: 1.1rem; height: 1.1rem; }
+
+.compare-select-cell { text-align: center; cursor: pointer; }
+.compare-select-cell input[type="checkbox"] { width: auto; cursor: pointer; }
+tr.row-selected { background: rgba(240, 190, 51, 0.22); }
+tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
+
+.compare-selection-summary { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0 1rem; }
+.compare-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.35rem 0.5rem 0.35rem 0.9rem;
+  font-size: 0.85rem;
+}
+.compare-chip-remove {
+  color: var(--muted);
+  text-decoration: none;
+  border-radius: 50%;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+.compare-chip-remove:hover { background: var(--border); color: var(--text); }
+.compare-table { min-width: 640px; }
+.compare-table th:first-child, .compare-table td:first-child { white-space: nowrap; color: var(--muted); }
+.compare-section-row td {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 2px solid var(--border);
+  padding-top: 1.3rem;
+}
 .clickable-row:hover { background: #f2ecd8; }
 
 .card {
@@ -663,6 +706,11 @@ h1, h2, h3 {
 .label-vine-edge-top { clip-path: inset(50% 0 0 0); }
 .label-vine-edge-bottom { clip-path: inset(0 0 50% 0); }
 
+/* Schneidmarken fuers Zurechtschneiden des ganzen A4-Blatts (nicht zu
+   verwechseln mit den gestrichelten Linien zwischen den Etiketten) - nur
+   im Druck sichtbar, auf dem Bildschirm ausgeblendet. */
+.crop-marks { display: none; }
+
 @media print {
   /* Browser drucken Hintergrundfarben/-bilder standardmaessig nicht (auch
      nicht immer ueber die Option "Hintergrundgrafiken" im Druckdialog,
@@ -697,7 +745,7 @@ h1, h2, h3 {
      (weder Breite noch Hoehe), stattdessen wird der Inhalt selbst kleiner/
      kompakter (Datum, EBC/Fass-Position, Zeilenabstaende) skaliert, um
      innerhalb der kleineren Streifen Abstand zur Ranke zu behalten. */
-  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 280mm; margin: 5mm auto 0; border: none; }
+  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 285mm; margin: 5mm auto 0; border: none; }
   .label-strip { page-break-inside: avoid; }
   .label-left-square, .label-frame-cell { flex-basis: 14%; }
 
@@ -731,11 +779,36 @@ h1, h2, h3 {
   /* Bei nur noch ca. 5.1mm Boxhoehe fuer 2 Zeilen muss die Schrift deutlich
      kleiner sein als bei den ca. 31,9mm-Streifen (max. sicher passende
      Groesse fuer 2 Zeilen bei 1.18 Zeilenabstand liegt bei ca. 0.51rem -
-     alle vier Stufen bleiben bewusst darunter, auch Stufe 1). */
-  .label-hops-size-1 { font-size: 0.5rem; }
-  .label-hops-size-2 { font-size: 0.46rem; }
-  .label-hops-size-3 { font-size: 0.42rem; }
-  .label-hops-size-4 { font-size: 0.38rem; }
+     alle vier Stufen bleiben bewusst darunter, auch Stufe 1). Durch die um
+     0,5mm groesseren Streifen (285mm/10 statt 280mm/10) und mehr Luft fuer
+     die Hopfensorten-Zeile im Speziellen wieder etwas angehoben. */
+  .label-hops-size-1 { font-size: 0.58rem; }
+  .label-hops-size-2 { font-size: 0.53rem; }
+  .label-hops-size-3 { font-size: 0.48rem; }
+  .label-hops-size-4 { font-size: 0.44rem; }
+
+  /* Schneidmarken zum Zurechtschneiden des kompletten A4-Blatts. Position
+     relativ zur Blattkante (position:fixed bezieht sich im Druck auf die
+     Seite, nicht das Etikettenblatt) - je Ecke eine waagerechte und eine
+     senkrechte Linie, die exakt auf Hoehe/Breite der Etikettenblatt-Kante
+     (.label-sheet: 5mm Rand oben/links/rechts, 7mm unten bei 200x285mm
+     auf A4) liegt und moeglichst weit nach aussen zeigt: 0,5mm
+     Sicherheitsabstand zur physischen Blattkante (mehr geht bei den
+     meisten Druckern ohnehin nicht randlos), 1mm Abstand zur bedruckten
+     Flaeche, dazwischen eine 3,5mm lange Linie. */
+  .crop-marks { display: block; }
+  .crop-mark { position: fixed; background: #000; }
+  .crop-mark-tl-h, .crop-mark-tr-h, .crop-mark-bl-h, .crop-mark-br-h { width: 3.5mm; height: 0.3mm; }
+  .crop-mark-tl-v, .crop-mark-tr-v, .crop-mark-bl-v, .crop-mark-br-v { width: 0.3mm; height: 3.5mm; }
+
+  .crop-mark-tl-h { top: 4.85mm; left: 0.5mm; }
+  .crop-mark-tl-v { top: 0.5mm; left: 4.85mm; }
+  .crop-mark-tr-h { top: 4.85mm; right: 0.5mm; }
+  .crop-mark-tr-v { top: 0.5mm; right: 4.85mm; }
+  .crop-mark-bl-h { bottom: 6.85mm; left: 0.5mm; }
+  .crop-mark-bl-v { bottom: 0.5mm; left: 4.85mm; }
+  .crop-mark-br-h { bottom: 6.85mm; right: 0.5mm; }
+  .crop-mark-br-v { bottom: 0.5mm; right: 4.85mm; }
 }
 
 @page { size: A4; margin: 0; }

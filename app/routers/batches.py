@@ -10,6 +10,7 @@ from app.inventory import sync_batch_deductions
 from app.models import (
     Batch,
     BatchComment,
+    BeerStyle,
     BrewDayTask,
     CarbonationEntry,
     DefaultBrewDayTask,
@@ -167,6 +168,8 @@ def batch_list(
     settings = session.get(Settings, 1)
     og_display: dict[int, float] = {}
     color_hex: dict[int, str] = {}
+    ibu_display: dict[int, float] = {}
+    abv_display: dict[int, str] = {}
     for b in batches:
         if b.post_boil_brix:
             og_display[b.id] = round(b.post_boil_brix / settings.wort_correction_factor, 1)
@@ -175,6 +178,11 @@ def batch_list(
         hex_value = resolve_color_hex(b)
         if hex_value:
             color_hex[b.id] = hex_value
+        metrics = compute_metrics(b, settings)
+        if metrics.ibu_total:
+            ibu_display[b.id] = metrics.ibu_total
+        if metrics.abv_display:
+            abv_display[b.id] = metrics.abv_display
 
     return templates.TemplateResponse(
         "batch_list.html",
@@ -187,6 +195,46 @@ def batch_list(
             "inventory": _inventory_options(session),
             "og_display": og_display,
             "color_hex": color_hex,
+            "ibu_display": ibu_display,
+            "abv_display": abv_display,
+        },
+    )
+
+
+@router.get("/compare")
+def batch_compare(request: Request, ids: list[int] = Query(default=[]), session: Session = Depends(get_session)):
+    # Muss vor der "/{batch_id}"-Route stehen (sonst versucht FastAPI
+    # "compare" als batch_id zu parsen und liefert einen 422-Fehler statt
+    # diese Route zu treffen).
+    # Auswahl passiert auf der Sud-Übersicht selbst (Checkbox je Zeile, dort
+    # auch Suche/Filter verfuegbar) - diese Route bekommt nur noch die
+    # ausgewaehlten IDs und muss nicht mehr alle Sude laden.
+    selected_ids = set(ids)
+    selected = []
+    if selected_ids:
+        by_id = {b.id: b for b in session.exec(select(Batch).where(Batch.id.in_(selected_ids))).all()}
+        # Reihenfolge/Deduplizierung anhand der Query-Parameter-Reihenfolge,
+        # nicht anhand der DB-Reihenfolge.
+        seen: set[int] = set()
+        for i in ids:
+            if i in by_id and i not in seen:
+                selected.append(by_id[i])
+                seen.add(i)
+    max_counts = {
+        "grain": max((len(b.grain_additions) for b in selected), default=0),
+        "mash": max((len(b.mash_steps) for b in selected), default=0),
+        "hops": max((len(b.hop_additions) for b in selected), default=0),
+        "yeast": max((len(b.yeast_additions) for b in selected), default=0),
+        "dryhop": max((len(b.dry_hop_additions) for b in selected), default=0),
+        "carb": max((len(b.carbonation_entries) for b in selected), default=0),
+        "schedule": max((len(b.brew_day_tasks) for b in selected), default=0),
+    }
+    return templates.TemplateResponse(
+        "batch_compare.html",
+        {
+            "request": request,
+            "selected": selected,
+            "max_counts": max_counts,
         },
     )
 
@@ -195,6 +243,7 @@ def batch_list(
 def batch_new_form(request: Request, session: Session = Depends(get_session)):
     next_number = (session.exec(select(Batch.batch_number).order_by(Batch.batch_number.desc())).first() or 0) + 1
     default_tasks = session.exec(select(DefaultBrewDayTask).order_by(DefaultBrewDayTask.position)).all()
+    beer_styles = session.exec(select(BeerStyle).order_by(BeerStyle.position)).all()
     return templates.TemplateResponse(
         "batch_form.html",
         {
@@ -205,6 +254,7 @@ def batch_new_form(request: Request, session: Session = Depends(get_session)):
             "mash_step_names": MASH_STEP_NAMES,
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
+            "beer_styles": beer_styles,
         },
     )
 
@@ -484,6 +534,7 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
 @router.get("/{batch_id}/edit")
 def batch_edit_form(batch_id: int, request: Request, session: Session = Depends(get_session)):
     batch = session.get(Batch, batch_id)
+    beer_styles = session.exec(select(BeerStyle).order_by(BeerStyle.position)).all()
     return templates.TemplateResponse(
         "batch_form.html",
         {
@@ -493,6 +544,7 @@ def batch_edit_form(batch_id: int, request: Request, session: Session = Depends(
             "mash_step_names": MASH_STEP_NAMES,
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
+            "beer_styles": beer_styles,
         },
     )
 
