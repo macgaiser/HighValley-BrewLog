@@ -60,6 +60,25 @@ document.addEventListener("input", (event) => {
   row.querySelector("[data-schedule-duration]").value = minutes;
 });
 
+// Sud-Übersicht: Checkbox "Vergleichen" je Zeile - hebt die Zeile farblich
+// hervor und haelt den Zaehler/Aktivierungszustand des "Vergleichen"-Buttons
+// oben im Seitenkopf synchron (Button ist per form="compare-form" mit den
+// verstreuten Checkboxen verbunden, siehe batch_list.html).
+function updateCompareButton() {
+  const btn = document.getElementById("compare-submit");
+  if (!btn) return;
+  const count = document.querySelectorAll("[data-compare-checkbox]:checked").length;
+  btn.disabled = count === 0;
+  btn.textContent = count > 0 ? `Vergleichen (${count})` : "Vergleichen";
+}
+document.addEventListener("change", (event) => {
+  const checkbox = event.target.closest("[data-compare-checkbox]");
+  if (!checkbox) return;
+  checkbox.closest("tr").classList.toggle("row-selected", checkbox.checked);
+  updateCompareButton();
+});
+updateCompareButton();
+
 // Datumsfelder zeigen ihr Format sonst je nach Browser-/Systemsprache an
 // (z.B. mm/dd/yyyy) statt einheitlich dd.mm.yyyy - flatpickr übernimmt die
 // Anzeige, das eigentliche Feld sendet weiterhin ISO-Format (yyyy-mm-dd).

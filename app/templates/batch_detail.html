@@ -51,7 +51,7 @@
   <section class="card">
     <h2><span>Schüttung ({{ m.total_grain_kg|fmt }} kg)</span><img class="step-icon" src="/static/img/step-schroten.png" alt=""></h2>
     <table class="mini-table">
-      {% for g in batch.grain_additions %}
+      {% for g in batch.grain_additions|sort(attribute="amount_kg", reverse=True) %}
       <tr><td>{{ g.malt_name }}</td><td>{{ g.amount_kg|fmt }} kg</td></tr>
       {% else %}
       <tr><td colspan="2">–</td></tr>

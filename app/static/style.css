@@ -297,6 +297,49 @@ h1, h2, h3 {
 }
 .table thead th { color: var(--muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
 .clickable-row { cursor: pointer; }
+.col-name { min-width: 200px; }
+.col-actions { text-align: center; }
+.btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.1rem; height: 2.1rem; padding: 0; }
+.btn-icon svg { width: 1.1rem; height: 1.1rem; }
+
+.compare-select-cell { text-align: center; cursor: pointer; }
+.compare-select-cell input[type="checkbox"] { width: auto; cursor: pointer; }
+tr.row-selected { background: rgba(240, 190, 51, 0.22); }
+tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
+
+.compare-selection-summary { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0 1rem; }
+.compare-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.35rem 0.5rem 0.35rem 0.9rem;
+  font-size: 0.85rem;
+}
+.compare-chip-remove {
+  color: var(--muted);
+  text-decoration: none;
+  border-radius: 50%;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+.compare-chip-remove:hover { background: var(--border); color: var(--text); }
+.compare-table { min-width: 640px; }
+.compare-table th:first-child, .compare-table td:first-child { white-space: nowrap; color: var(--muted); }
+.compare-section-row td {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 2px solid var(--border);
+  padding-top: 1.3rem;
+}
 .clickable-row:hover { background: #f2ecd8; }
 
 .card {
@@ -388,7 +431,11 @@ h1, h2, h3 {
   --icon-2: var(--border);
 }
 .table .beer-color-icon { width: 1.5rem; height: 1.5rem; margin-left: 0; }
-.stat .beer-color-icon { width: 1.7rem; height: 1.7rem; }
+/* 50% groesser als die Basisgroesse UND per translateY nach oben gerueckt -
+   "vertical-align:middle" zentriert an der Schriftmitte, aber durch den
+   leeren/nur umrissenen Schaum oben wirkt das Icon-eigene Gewicht tiefer
+   als sein Kasten, dadurch sass es zu tief neben "120 EBC". */
+.stat .beer-color-icon { width: 2.55rem; height: 2.55rem; transform: translateY(-0.375rem); }
 
 /* Etikettengenerator - schmale Wickel-Etiketten, ganze Seitenbreite, 9
    uebereinander ohne Abstand (zum Ausschneiden/Zusammenkleben zu einem
@@ -571,7 +618,7 @@ h1, h2, h3 {
 .label-batch-value {
   font-family: "Ranchers", "Segoe UI", sans-serif;
   fill: var(--label-green);
-  font-size: 6.8px;
+  font-size: 9.79px;
   paint-order: stroke;
   stroke: var(--label-bg);
   stroke-width: 1.8px;
@@ -604,8 +651,45 @@ h1, h2, h3 {
   aspect-ratio: 1;
 }
 .label-mug { display: block; width: 100%; height: 100%; --icon-1: var(--label-green); }
-.label-mug-value { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 6.2px; }
-.label-mug-unit { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 3.4px; }
+/* Feste gruene Textfarbe statt (wie zuvor) abhaengig von der Bierfarbe
+   zwischen schwarz/weiss umzuschalten - die helle Umrandung um die Zahl
+   sorgt bereits auf jeder Bierfarbe fuer genug Kontrast, dadurch bleibt
+   die Zahl farblich konsistent mit den uebrigen Werten auf dem Etikett. */
+/* Duennere Umrandung als beim Fass (1.8px) - genug fuer Kontrast auf jeder
+   Bierfarbe, ohne auf dem eher kleinen Krug-Symbol zu viel von der
+   eigentlichen Bierfarbe drumherum zu verdecken. */
+.label-mug-value {
+  fill: var(--label-green);
+  paint-order: stroke;
+  stroke: var(--label-bg);
+  stroke-width: 0.9px;
+  stroke-linejoin: round;
+  font-family: "Ranchers", "Segoe UI", sans-serif;
+  font-size: 7px;
+}
+/* "EBC" steht jetzt links neben dem Krug statt als zweite Zeile darin (mehr
+   Platz fuer eine groessere EBC-Zahl) - als Ganzes um 90 Grad gedreht (ein
+   Wort, keine gestapelten Einzelbuchstaben). Vertikal nicht auf die Mitte
+   des ganzen Krugs, sondern exakt auf die Zeile des EBC-Werts ausgerichtet
+   (top:66.05% - gemessen als Position der Zahl "120" innerhalb der 28
+   Einheiten hohen Krug-Grafik, siehe .label-mug-value x/y in label.html).
+   Bewusst um die eigene Breite nach rechts verschoben (negativer
+   margin-right = alte rechte Kante minus Breite) - die linke Kante des
+   Schriftzugs steht jetzt dort, wo vorher die rechte Kante war, dadurch
+   ueberlappt es bewusst mit dem linken Rand des Krug-Symbols. */
+.label-mug-caption {
+  position: absolute;
+  right: 100%;
+  top: 66.05%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  margin-right: -0.85em;
+  font-family: "Ranchers", "Segoe UI", sans-serif;
+  color: var(--label-green);
+  font-size: 0.95rem;
+  line-height: 1;
+  white-space: nowrap;
+}
 .label-val-value { font-size: 1.3rem; }
 .label-val-unit { font-size: 0.58rem; }
 /* Mittig zwischen der Unterkante des Bierkrugs/Fasses (64,1%) und der von
@@ -663,6 +747,11 @@ h1, h2, h3 {
 .label-vine-edge-top { clip-path: inset(50% 0 0 0); }
 .label-vine-edge-bottom { clip-path: inset(0 0 50% 0); }
 
+/* Schneidmarken fuers Zurechtschneiden des ganzen A4-Blatts (nicht zu
+   verwechseln mit den gestrichelten Linien zwischen den Etiketten) - nur
+   im Druck sichtbar, auf dem Bildschirm ausgeblendet. */
+.crop-marks { display: none; }
+
 @media print {
   /* Browser drucken Hintergrundfarben/-bilder standardmaessig nicht (auch
      nicht immer ueber die Option "Hintergrundgrafiken" im Druckdialog,
@@ -692,8 +781,79 @@ h1, h2, h3 {
      urspruenglichen, nie beanstandeten ca. 31,96mm (200mm * 15,9804%,
      wie auf dem Bildschirm) - Eckquadrate und Hopfenranke brauchen so
      auch im Druck keine eigene Breiten-Anpassung. */
-  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 287.65mm; margin: 5mm auto 0; border: none; }
+  /* EXPERIMENTELL: 10 Etiketten a 28mm statt 9 a ca. 31,96mm - im Gegensatz
+     zum letzten (verworfenen) Versuch bleibt die Hopfenranke unangetastet
+     (weder Breite noch Hoehe), stattdessen wird der Inhalt selbst kleiner/
+     kompakter (Datum, EBC/Fass-Position, Zeilenabstaende) skaliert, um
+     innerhalb der kleineren Streifen Abstand zur Ranke zu behalten. */
+  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 285mm; margin: 5mm auto 0; border: none; }
   .label-strip { page-break-inside: avoid; }
+  .label-left-square, .label-frame-cell { flex-basis: 14%; }
+
+  /* Abfuelldatum: verkleinert, damit bei zentrierter Position (top:50%)
+     mindestens 0.75mm Abstand zu Ranke oben UND unten bleibt. */
+  .label-batch-date { font-size: 0.74rem; }
+
+  /* EBC-Bierkrug und Fass (Sud-Nummer): nach unten verschoben (0.5mm+
+     Abstand zur oberen Ranke, vorher auf Kontakt) UND verkleinert (44.5%
+     statt 54.6% Hoehe), um unterhalb noch Platz fuer zwei Hopfenzeilen zu
+     lassen, bevor die untere Hopfenranke beginnt. Anschliessend nochmal um
+     0.5mm oben UND 0.5mm unten vergroessert (auf Wunsch) - das frisst fast
+     den kompletten oberen Ranken-Abstand wieder auf (siehe Kommentar unten
+     bei .label-hops zur unteren Seite). Nach dem Wechsel auf die neuen
+     Icon-Grafiken nochmal vergroessert - diesmal NUR nach unten (oben ist
+     der Abstand zur Ranke bereits bei ca. 0,09mm, da ist kein Platz mehr),
+     bottom von 36.44% auf 35.72% (~0.18mm mehr Hoehe, ca. 0.05mm Rest-
+     abstand zu den Hopfensorten darunter). */
+  .label-mug-wrap, .label-batch-icon-wrap { top: 14.95%; bottom: 35.72%; }
+  .label-right-row-stats .label-stat { top: 18.35%; }
+
+  /* Hopfensorten-Zeile: Oberkante knapp unter der neuen Unterkante von
+     EBC/Fass (17%+44.5%=61.5%), Unterkante bleibt unveraendert bei
+     bottom:0.85rem (fester Abstand zur unteren Hopfenranke). */
+  .label-hops { top: 64.5%; }
+
+  /* Restliche Schriftgroessen im rechten Infobereich proportional
+     verkleinert (Faktor 28/31,96 ~ 0,876), damit im Verhaeltnis zur
+     kleineren Streifenhoehe alles wieder zueinander passt. */
+  .label-val-value { font-size: 1.14rem; }
+  .label-val-unit { font-size: 0.51rem; }
+  .label-batch-value { font-size: 8.64px; }
+  .label-mug-value { font-size: 6.1px; }
+  .label-mug-caption { font-size: 0.69rem; }
+  /* Bei nur noch ca. 5.1mm Boxhoehe fuer 2 Zeilen muss die Schrift deutlich
+     kleiner sein als bei den ca. 31,9mm-Streifen (max. sicher passende
+     Groesse fuer 2 Zeilen bei 1.18 Zeilenabstand liegt bei ca. 0.51rem -
+     alle vier Stufen bleiben bewusst darunter, auch Stufe 1). Durch die um
+     0,5mm groesseren Streifen (285mm/10 statt 280mm/10) und mehr Luft fuer
+     die Hopfensorten-Zeile im Speziellen wieder etwas angehoben. */
+  .label-hops-size-1 { font-size: 0.58rem; }
+  .label-hops-size-2 { font-size: 0.53rem; }
+  .label-hops-size-3 { font-size: 0.48rem; }
+  .label-hops-size-4 { font-size: 0.44rem; }
+
+  /* Schneidmarken zum Zurechtschneiden des kompletten A4-Blatts. Position
+     relativ zur Blattkante (position:fixed bezieht sich im Druck auf die
+     Seite, nicht das Etikettenblatt) - je Ecke eine waagerechte und eine
+     senkrechte Linie, die exakt auf Hoehe/Breite der Etikettenblatt-Kante
+     (.label-sheet: 5mm Rand oben/links/rechts, 7mm unten bei 200x285mm
+     auf A4) liegt und moeglichst weit nach aussen zeigt: 0,5mm
+     Sicherheitsabstand zur physischen Blattkante (mehr geht bei den
+     meisten Druckern ohnehin nicht randlos), 1mm Abstand zur bedruckten
+     Flaeche, dazwischen eine 3,5mm lange Linie. */
+  .crop-marks { display: block; }
+  .crop-mark { position: fixed; background: #000; }
+  .crop-mark-tl-h, .crop-mark-tr-h, .crop-mark-bl-h, .crop-mark-br-h { width: 3.5mm; height: 0.3mm; }
+  .crop-mark-tl-v, .crop-mark-tr-v, .crop-mark-bl-v, .crop-mark-br-v { width: 0.3mm; height: 3.5mm; }
+
+  .crop-mark-tl-h { top: 4.85mm; left: 0.5mm; }
+  .crop-mark-tl-v { top: 0.5mm; left: 4.85mm; }
+  .crop-mark-tr-h { top: 4.85mm; right: 0.5mm; }
+  .crop-mark-tr-v { top: 0.5mm; right: 4.85mm; }
+  .crop-mark-bl-h { bottom: 6.85mm; left: 0.5mm; }
+  .crop-mark-bl-v { bottom: 0.5mm; left: 4.85mm; }
+  .crop-mark-br-h { bottom: 6.85mm; right: 0.5mm; }
+  .crop-mark-br-v { bottom: 0.5mm; right: 4.85mm; }
 }
 
 @page { size: A4; margin: 0; }

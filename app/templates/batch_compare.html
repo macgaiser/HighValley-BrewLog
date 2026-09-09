@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Sude vergleichen – HighValley BrewLog{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Sude vergleichen</h1>
+  <a class="btn" href="/batches">Zur Sud-Übersicht (Auswahl ändern)</a>
+</div>
+
+{% if selected %}
+<div class="compare-selection-summary">
+  {% for b in selected %}
+  <span class="compare-chip">
+    #{{ b.batch_number }} {{ b.name }}
+    <a href="/batches/compare?{% for o in selected if o.id != b.id %}ids={{ o.id }}&{% endfor %}" title="Aus dem Vergleich entfernen" class="compare-chip-remove">✕</a>
+  </span>
+  {% endfor %}
+</div>
+{% else %}
+<p class="hint">Noch keine Sude ausgewählt. Auf der <a href="/batches">Sud-Übersicht</a> bei den gewünschten Suden „Vergleichen" anhaken.</p>
+{% endif %}
+
+{% if selected %}
+<div class="table-scroll">
+<table class="table compare-table">
+  <thead>
+    <tr><th>Position</th>{% for b in selected %}<th>#{{ b.batch_number }} {{ b.name }}</th>{% endfor %}</tr>
+  </thead>
+  <tbody>
+    <tr class="compare-section-row"><td colspan="{{ selected|length + 1 }}">Wasser</td></tr>
+    <tr><td>Hauptguss</td>{% for b in selected %}<td>{{ b.main_water_l|fmt }} l</td>{% endfor %}</tr>
+    <tr><td>Nachguss</td>{% for b in selected %}<td>{{ b.sparge_water_l|fmt }} l</td>{% endfor %}</tr>
+    <tr><td>Milchsäure 80%</td>{% for b in selected %}<td>{{ b.lactic_acid_80_ml|fmt(0) }} ml</td>{% endfor %}</tr>
+
+    <tr class="compare-section-row"><td colspan="{{ selected|length + 1 }}">Schüttung</td></tr>
+    {% for i in range(max_counts.grain) %}
+    <tr>
+      <td>Malz {{ i + 1 }}</td>
+      {% for b in selected %}
+      {% set grains = b.grain_additions|sort(attribute="amount_kg", reverse=True) %}
+      <td>{% if i < grains|length %}{{ grains[i].malt_name }} – {{ grains[i].amount_kg|fmt }} kg{% else %}–{% endif %}</td>
+      {% endfor %}
+    </tr>
+    {% else %}
+    <tr><td colspan="{{ selected|length + 1 }}">–</td></tr>
+    {% endfor %}
+
+    <tr class="compare-section-row"><td colspan="{{ selected|length + 1 }}">Maischplan</td></tr>
+    {% for i in range(max_counts.mash) %}
+    <tr>
+      <td>Rast {{ i + 1 }}</td>
+      {% for b in selected %}
+      <td>{% if i < b.mash_steps|length %}{{ b.mash_steps[i].name }} – {{ b.mash_steps[i].temperature_c|fmt(0) }} °C – {{ b.mash_steps[i].duration_min|fmt(0) }} min{% else %}–{% endif %}</td>
+      {% endfor %}
+    </tr>
+    {% else %}
+    <tr><td colspan="{{ selected|length + 1 }}">–</td></tr>
+    {% endfor %}
+
+    <tr class="compare-section-row"><td colspan="{{ selected|length + 1 }}">Würzekochen</td></tr>
+    {% for i in range(max_counts.hops) %}
+    <tr>
+      <td>Hopfengabe {{ i + 1 }}</td>
+      {% for b in selected %}
+      <td>{% if i < b.hop_additions|length %}{{ b.hop_additions[i].hop_name }} – {{ b.hop_additions[i].amount_g|fmt(0) }} g – {{ b.hop_additions[i].time_min|fmt(0) }} min ({{ b.hop_additions[i].addition_type.value }}){% else %}–{% endif %}</td>
+      {% endfor %}
+    </tr>
+    {% else %}
+    <tr><td colspan="{{ selected|length + 1 }}">–</td></tr>
+    {% endfor %}
+
+    <tr class="compare-section-row"><td colspan="{{ selected|length + 1 }}">Hefegabe</td></tr>
+    {% for i in range(max_counts.yeast) %}
+    <tr>
+      <td>Hefegabe {{ i + 1 }}</td>
+      {% for b in selected %}
+      <td>{% if i < b.yeast_additions|length %}{{ b.yeast_additions[i].yeast_name }}{% if b.yeast_additions[i].generation_label %} ({{ b.yeast_additions[i].generation_label }}){% endif %} – {{ b.yeast_additions[i].amount|fmt(0) }} {{ b.yeast_additions[i].unit }}{% else %}–{% endif %}</td>
+      {% endfor %}
+    </tr>
+    {% else %}
+    <tr><td colspan="{{ selected|length + 1 }}">–</td></tr>
+    {% endfor %}
+
+    <tr class="compare-section-row"><td colspan="{{ selected|length + 1 }}">Stopfhopfen</td></tr>
+    {% for i in range(max_counts.dryhop) %}
+    <tr>
+      <td>Stopfhopfen {{ i + 1 }}</td>
+      {% for b in selected %}
+      <td>{% if i < b.dry_hop_additions|length %}{{ b.dry_hop_additions[i].hop_name }}{% if b.dry_hop_additions[i].timing_label %} ({{ b.dry_hop_additions[i].timing_label }}){% endif %} – {{ b.dry_hop_additions[i].amount_g|fmt(0) }} g{% else %}–{% endif %}</td>
+      {% endfor %}
+    </tr>
+    {% else %}
+    <tr><td colspan="{{ selected|length + 1 }}">–</td></tr>
+    {% endfor %}
+
+    <tr class="compare-section-row"><td colspan="{{ selected|length + 1 }}">Karbonisierung</td></tr>
+    {% for i in range(max_counts.carb) %}
+    <tr>
+      <td>Position {{ i + 1 }}</td>
+      {% for b in selected %}
+      <td>{% if i < b.carbonation_entries|length %}{{ b.carbonation_entries[i].label }} – {{ b.carbonation_entries[i].sugar_g|fmt(1) }} g je {{ b.carbonation_entries[i].bottle_volume_l|fmt(2) }} l{% else %}–{% endif %}</td>
+      {% endfor %}
+    </tr>
+    {% else %}
+    <tr><td colspan="{{ selected|length + 1 }}">–</td></tr>
+    {% endfor %}
+
+    <tr class="compare-section-row"><td colspan="{{ selected|length + 1 }}">Brautag-Zeitplan</td></tr>
+    {% for i in range(max_counts.schedule) %}
+    <tr>
+      <td>Position {{ i + 1 }}</td>
+      {% for b in selected %}
+      <td>{% if i < b.brew_day_tasks|length %}{{ b.brew_day_tasks[i].task_name }} – {{ b.brew_day_tasks[i].start_time or "–" }}–{{ b.brew_day_tasks[i].end_time or "–" }} ({{ b.brew_day_tasks[i].planned_duration_min|fmt(0) }} min){% else %}–{% endif %}</td>
+      {% endfor %}
+    </tr>
+    {% else %}
+    <tr><td colspan="{{ selected|length + 1 }}">–</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

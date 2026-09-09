@@ -3,8 +3,12 @@
 {% block content %}
 <div class="page-header">
   <h1>Sude</h1>
-  <a class="btn btn-primary" href="/batches/new">+ Neuer Sud</a>
+  <div class="actions">
+    <button class="btn" type="submit" form="compare-form" id="compare-submit" disabled>Vergleichen</button>
+    <a class="btn btn-primary" href="/batches/new">+ Neuer Sud</a>
+  </div>
 </div>
+<form id="compare-form" method="get" action="/batches/compare"></form>
 
 <form class="searchbar" method="get" action="/batches">
   <input type="text" name="q" placeholder="Suche nach Nummer, Name, Stil, Malz, Hopfen, Hefe…" value="{{ q }}">
@@ -55,11 +59,15 @@
     <tr>
       <th>#</th>
       <th>Datum</th>
-      <th>Biertyp</th>
+      <th class="col-name">Sud Name</th>
       <th>Stil</th>
-      <th>Stammwürze (°P)</th>
+      <th>Gärart</th>
+      <th>Stammwürze</th>
+      <th>IBU</th>
       <th>Farbe</th>
-      <th></th>
+      <th>Alkohol</th>
+      <th title="Vergleichen">Vgl.</th>
+      <th class="col-actions"></th>
     </tr>
   </thead>
   <tbody>
@@ -67,14 +75,18 @@
     <tr onclick="window.location='/batches/{{ b.id }}'" class="clickable-row">
       <td>#{{ b.batch_number }}</td>
       <td>{{ b.brew_date|de_date }}</td>
-      <td>{{ b.name }}</td>
-      <td>{{ b.fermentation_type }}</td>
-      <td>{{ og_display.get(b.id, "–") }}</td>
+      <td class="col-name">{{ b.name }}</td>
+      <td>{{ b.style or "–" }}</td>
+      <td>{{ b.fermentation_type or "–" }}</td>
+      <td>{{ og_display.get(b.id, "–") }} °P</td>
+      <td>{{ ibu_display.get(b.id)|fmt(0) if ibu_display.get(b.id) is not none else "–" }}</td>
       <td>{% if color_hex.get(b.id) %}<svg class="beer-color-icon" viewBox="0 0 28 28" style="--icon-2: {{ color_hex.get(b.id) }}"><use href="#icon-stein"/></svg>{% endif %}</td>
-      <td><a class="btn btn-small" href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()">Bearbeiten</a></td>
+      <td>{{ abv_display.get(b.id, "–") }}</td>
+      <td class="compare-select-cell" onclick="event.stopPropagation()"><input type="checkbox" name="ids" value="{{ b.id }}" form="compare-form" data-compare-checkbox aria-label="Sud #{{ b.batch_number }} zum Vergleich auswählen"></td>
+      <td class="col-actions"><a class="btn btn-small btn-icon" href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()" title="Bearbeiten" aria-label="Sud #{{ b.batch_number }} bearbeiten"><svg viewBox="0 0 28 28"><use href="#icon-edit"/></svg></a></td>
     </tr>
     {% else %}
-    <tr><td colspan="7">Noch keine Sude erfasst.</td></tr>
+    <tr><td colspan="11">Noch keine Sude erfasst.</td></tr>
     {% endfor %}
   </tbody>
 </table>

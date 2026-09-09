@@ -73,6 +73,19 @@ class DefaultBrewDayTask(SQLModel, table=True):
     note: str = ""
 
 
+class BeerStyle(SQLModel, table=True):
+    """Verwaltete Liste der Bierstile (Einstellungen > Bierstile), als
+    Auswahl beim Anlegen/Bearbeiten eines Suds. Der Sud selbst speichert
+    den Stil weiterhin als reinen Text (Batch.style) - über "Sonstige" +
+    Freitext bleibt so auch ein nicht gelisteter Stil möglich, ohne dass
+    beim späteren Entfernen eines Listeneintrags bereits gespeicherte Sude
+    ihren Stil verlieren."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    position: int = 0
+    name: str
+
+
 class Batch(SQLModel, table=True):
     """Ein Sud (entspricht einem Tab in der Excel-Vorlage)."""
 
