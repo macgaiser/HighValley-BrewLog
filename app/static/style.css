@@ -431,7 +431,11 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
   --icon-2: var(--border);
 }
 .table .beer-color-icon { width: 1.5rem; height: 1.5rem; margin-left: 0; }
-.stat .beer-color-icon { width: 1.7rem; height: 1.7rem; }
+/* 50% groesser als die Basisgroesse UND per translateY nach oben gerueckt -
+   "vertical-align:middle" zentriert an der Schriftmitte, aber durch den
+   leeren/nur umrissenen Schaum oben wirkt das Icon-eigene Gewicht tiefer
+   als sein Kasten, dadurch sass es zu tief neben "120 EBC". */
+.stat .beer-color-icon { width: 2.55rem; height: 2.55rem; transform: translateY(-0.375rem); }
 
 /* Etikettengenerator - schmale Wickel-Etiketten, ganze Seitenbreite, 9
    uebereinander ohne Abstand (zum Ausschneiden/Zusammenkleben zu einem
