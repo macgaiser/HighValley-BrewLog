@@ -60,6 +60,27 @@ def _add_missing_columns() -> None:
                 conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{column.name}" {col_type}{default_sql}'))
 
 
+_DEFAULT_BEER_STYLES = [
+    "Helles",
+    "Pils",
+    "Export",
+    "Märzen/Festbier",
+    "Weizen (Hefeweizen)",
+    "Kölsch",
+    "Alt",
+    "Bockbier",
+    "Dunkles/Schwarzbier",
+    "IPA",
+    "Pale Ale",
+    "APA",
+    "NEIPA",
+    "Stout/Porter",
+    "Barleywine",
+    "Saison",
+    "Sauerbier (Berliner Weisse/Gose)",
+]
+
+
 _DEFAULT_BREW_DAY_TASKS = [
     ("Vorbereiten + Schroten", 20, ""),
     ("Eingemeischt", 25, ""),
@@ -81,7 +102,7 @@ def init_db() -> None:
     SQLModel.metadata.create_all(engine)
     _add_missing_columns()
     with Session(engine) as session:
-        from app.models import DefaultBrewDayTask, Settings
+        from app.models import BeerStyle, DefaultBrewDayTask, Settings
 
         if session.get(Settings, 1) is None:
             session.add(Settings(id=1))
@@ -92,6 +113,11 @@ def init_db() -> None:
                 session.add(
                     DefaultBrewDayTask(position=i, task_name=name, planned_duration_min=duration, note=note)
                 )
+            session.commit()
+
+        if session.exec(select(BeerStyle)).first() is None:
+            for i, name in enumerate(_DEFAULT_BEER_STYLES):
+                session.add(BeerStyle(position=i, name=name))
             session.commit()
 
 

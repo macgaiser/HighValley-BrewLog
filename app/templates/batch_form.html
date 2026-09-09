@@ -19,7 +19,7 @@
     <h2>Stammdaten</h2>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Sud-Nr.</th><th>Brautag</th><th>Abfülldatum</th><th>Sud Name</th><th>Gärart</th><th>Stil / Notiz</th></tr></thead>
+      <thead><tr><th>Sud-Nr.</th><th>Brautag</th><th>Abfülldatum</th><th>Sud Name</th><th>Gärart</th><th>Stil</th></tr></thead>
       <tbody>
         <tr>
           <td><input type="number" name="batch_number" value="{{ batch.batch_number if batch else next_number }}" required></td>
@@ -33,7 +33,18 @@
               <option value="Untergärig" {% if batch and batch.fermentation_type=="Untergärig" %}selected{% endif %}>Untergärig</option>
             </select>
           </td>
-          <td><input type="text" name="style" value="{{ batch.style if batch else '' }}"></td>
+          <td>
+            {% set style_names = beer_styles|map(attribute="name")|list %}
+            <select name="style">
+              <option value="">–</option>
+              {% if batch and batch.style and batch.style not in style_names %}
+              <option value="{{ batch.style }}" selected>{{ batch.style }} (nicht mehr in der Liste)</option>
+              {% endif %}
+              {% for st in beer_styles %}
+              <option value="{{ st.name }}" {% if batch and batch.style==st.name %}selected{% endif %}>{{ st.name }}</option>
+              {% endfor %}
+            </select>
+          </td>
         </tr>
       </tbody>
     </table>

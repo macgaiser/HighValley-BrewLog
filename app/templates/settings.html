@@ -101,6 +101,37 @@
   <p class="hint">Größe: wie viel Fläche das Logo in seinem Feld auf dem Etikett füllt (in %) - lässt sich je Logo einzeln einstellen, z.B. wenn ein Logo bereits viel eigenen Rand mitbringt.</p>
 </section>
 
+<form method="post" action="/settings/beer-styles">
+  <section class="card">
+    <div class="section-title-row"><h2>Bierstile</h2><button class="btn btn-small" data-add-row="beerstyle">+ Zeile</button></div>
+    <p class="hint">Auswahl beim Anlegen/Bearbeiten eines Suds. Ein bereits verwendeter Stil bleibt bei den betroffenen Suden gespeichert, auch wenn er hier später entfernt wird.</p>
+    <div class="table-scroll">
+    <table class="form-table">
+      <thead><tr><th></th><th>Bierstil</th><th></th></tr></thead>
+      <tbody data-rows="beerstyle">
+        {% for st in beer_styles %}
+        <tr>
+          <td class="row-move"><button class="btn btn-small" type="button" data-move-up title="Nach oben">▲</button><button class="btn btn-small" type="button" data-move-down title="Nach unten">▼</button></td>
+          <td><input type="text" name="style_name" value="{{ st.name }}"></td>
+          <td><button class="btn btn-small" data-remove-row>✕</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <template data-row-template="beerstyle">
+      <tr>
+        <td class="row-move"><button class="btn btn-small" type="button" data-move-up title="Nach oben">▲</button><button class="btn btn-small" type="button" data-move-down title="Nach unten">▼</button></td>
+        <td><input type="text" name="style_name"></td>
+        <td><button class="btn btn-small" data-remove-row>✕</button></td>
+      </tr>
+    </template>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Speichern</button>
+    </div>
+  </section>
+</form>
+
 <form method="post" action="/settings/brew-day-tasks">
   <section class="card">
     <div class="section-title-row"><h2>Standard Brautag-Zeitplan</h2><button class="btn btn-small" data-add-row="task">+ Zeile</button></div>
