@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
 
 from app.database import LOGO_DIR, get_session
-from app.models import DefaultBrewDayTask, Logo, Settings
+from app.models import BeerStyle, DefaultBrewDayTask, Logo, Settings
 from app.templating import templates
 
 router = APIRouter(prefix="/settings", tags=["settings"])
@@ -25,8 +25,10 @@ def settings_form(request: Request, session: Session = Depends(get_session)):
     s = session.get(Settings, 1)
     default_tasks = session.exec(select(DefaultBrewDayTask).order_by(DefaultBrewDayTask.position)).all()
     logos = session.exec(select(Logo).order_by(Logo.uploaded_at.desc())).all()
+    beer_styles = session.exec(select(BeerStyle).order_by(BeerStyle.position)).all()
     return templates.TemplateResponse(
-        "settings.html", {"request": request, "s": s, "default_tasks": default_tasks, "logos": logos}
+        "settings.html",
+        {"request": request, "s": s, "default_tasks": default_tasks, "logos": logos, "beer_styles": beer_styles},
     )
 
 
@@ -45,6 +47,26 @@ async def settings_save(request: Request, session: Session = Depends(get_session
     s.label_brand_line1_size = float(form.get("label_brand_line1_size") or 0.7)
     s.label_brand_line2_size = float(form.get("label_brand_line2_size") or 1.6)
     session.add(s)
+    session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.post("/beer-styles")
+async def settings_beer_styles_save(request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+
+    for existing in session.exec(select(BeerStyle)).all():
+        session.delete(existing)
+    session.flush()
+
+    names = form.getlist("style_name")
+    position = 0
+    for name in names:
+        if not name.strip():
+            continue
+        session.add(BeerStyle(position=position, name=name.strip()))
+        position += 1
+
     session.commit()
     return RedirectResponse("/settings", status_code=303)
 
