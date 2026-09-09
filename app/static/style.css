@@ -614,7 +614,7 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
 .label-batch-value {
   font-family: "Ranchers", "Segoe UI", sans-serif;
   fill: var(--label-green);
-  font-size: 6.8px;
+  font-size: 9.79px;
   paint-order: stroke;
   stroke: var(--label-bg);
   stroke-width: 1.8px;
@@ -647,8 +647,45 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
   aspect-ratio: 1;
 }
 .label-mug { display: block; width: 100%; height: 100%; --icon-1: var(--label-green); }
-.label-mug-value { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 6.2px; }
-.label-mug-unit { font-family: "Ranchers", "Segoe UI", sans-serif; font-size: 3.4px; }
+/* Feste gruene Textfarbe statt (wie zuvor) abhaengig von der Bierfarbe
+   zwischen schwarz/weiss umzuschalten - die helle Umrandung um die Zahl
+   sorgt bereits auf jeder Bierfarbe fuer genug Kontrast, dadurch bleibt
+   die Zahl farblich konsistent mit den uebrigen Werten auf dem Etikett. */
+/* Duennere Umrandung als beim Fass (1.8px) - genug fuer Kontrast auf jeder
+   Bierfarbe, ohne auf dem eher kleinen Krug-Symbol zu viel von der
+   eigentlichen Bierfarbe drumherum zu verdecken. */
+.label-mug-value {
+  fill: var(--label-green);
+  paint-order: stroke;
+  stroke: var(--label-bg);
+  stroke-width: 0.9px;
+  stroke-linejoin: round;
+  font-family: "Ranchers", "Segoe UI", sans-serif;
+  font-size: 7px;
+}
+/* "EBC" steht jetzt links neben dem Krug statt als zweite Zeile darin (mehr
+   Platz fuer eine groessere EBC-Zahl) - als Ganzes um 90 Grad gedreht (ein
+   Wort, keine gestapelten Einzelbuchstaben). Vertikal nicht auf die Mitte
+   des ganzen Krugs, sondern exakt auf die Zeile des EBC-Werts ausgerichtet
+   (top:66.05% - gemessen als Position der Zahl "120" innerhalb der 28
+   Einheiten hohen Krug-Grafik, siehe .label-mug-value x/y in label.html).
+   Bewusst um die eigene Breite nach rechts verschoben (negativer
+   margin-right = alte rechte Kante minus Breite) - die linke Kante des
+   Schriftzugs steht jetzt dort, wo vorher die rechte Kante war, dadurch
+   ueberlappt es bewusst mit dem linken Rand des Krug-Symbols. */
+.label-mug-caption {
+  position: absolute;
+  right: 100%;
+  top: 66.05%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  margin-right: -0.85em;
+  font-family: "Ranchers", "Segoe UI", sans-serif;
+  color: var(--label-green);
+  font-size: 0.95rem;
+  line-height: 1;
+  white-space: nowrap;
+}
 .label-val-value { font-size: 1.3rem; }
 .label-val-unit { font-size: 0.58rem; }
 /* Mittig zwischen der Unterkante des Bierkrugs/Fasses (64,1%) und der von
@@ -759,8 +796,12 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
      lassen, bevor die untere Hopfenranke beginnt. Anschliessend nochmal um
      0.5mm oben UND 0.5mm unten vergroessert (auf Wunsch) - das frisst fast
      den kompletten oberen Ranken-Abstand wieder auf (siehe Kommentar unten
-     bei .label-hops zur unteren Seite). */
-  .label-mug-wrap, .label-batch-icon-wrap { top: 14.95%; bottom: 36.44%; }
+     bei .label-hops zur unteren Seite). Nach dem Wechsel auf die neuen
+     Icon-Grafiken nochmal vergroessert - diesmal NUR nach unten (oben ist
+     der Abstand zur Ranke bereits bei ca. 0,09mm, da ist kein Platz mehr),
+     bottom von 36.44% auf 35.72% (~0.18mm mehr Hoehe, ca. 0.05mm Rest-
+     abstand zu den Hopfensorten darunter). */
+  .label-mug-wrap, .label-batch-icon-wrap { top: 14.95%; bottom: 35.72%; }
   .label-right-row-stats .label-stat { top: 18.35%; }
 
   /* Hopfensorten-Zeile: Oberkante knapp unter der neuen Unterkante von
@@ -773,9 +814,9 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
      kleineren Streifenhoehe alles wieder zueinander passt. */
   .label-val-value { font-size: 1.14rem; }
   .label-val-unit { font-size: 0.51rem; }
-  .label-batch-value { font-size: 6px; }
-  .label-mug-value { font-size: 5.4px; }
-  .label-mug-unit { font-size: 3px; }
+  .label-batch-value { font-size: 8.64px; }
+  .label-mug-value { font-size: 6.1px; }
+  .label-mug-caption { font-size: 0.69rem; }
   /* Bei nur noch ca. 5.1mm Boxhoehe fuer 2 Zeilen muss die Schrift deutlich
      kleiner sein als bei den ca. 31,9mm-Streifen (max. sicher passende
      Groesse fuer 2 Zeilen bei 1.18 Zeilenabstand liegt bei ca. 0.51rem -
