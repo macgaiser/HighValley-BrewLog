@@ -99,6 +99,37 @@
     {% endfor %}
   </div>
   <p class="hint">Größe: wie viel Fläche das Logo in seinem Feld auf dem Etikett füllt (in %) - lässt sich je Logo einzeln einstellen, z.B. wenn ein Logo bereits viel eigenen Rand mitbringt.</p>
+
+  <h2>Rahmengrafik (Ranke)</h2>
+  <p class="hint">Ziert den oberen/unteren Rand jedes Etiketts. Es ist bewusst keine Grafik vorinstalliert (z.B. eine Hopfenranke unterliegt in der Regel einer eigenen Bildlizenz) - lade hier deine eigene, lizenzierte Grafik hoch. Am besten ein sehr breites, niedriges Bild mit transparentem Hintergrund (die Grafik wird automatisch auf die volle Etikettenbreite skaliert, die Höhe ergibt sich aus ihrem Seitenverhältnis - ein Format um die 580×85px bzw. ca. 6,8:1 passt gut zum restlichen Layout).</p>
+  <form method="post" action="/settings/border-graphics" enctype="multipart/form-data" class="inline-form">
+    <input type="file" name="file" accept="image/*" required>
+    <button class="btn btn-primary" type="submit">Hochladen &amp; verwenden</button>
+  </form>
+  <div class="logo-gallery">
+    <div class="logo-gallery-item {{ 'active' if not s.active_border_graphic_id }}">
+      <span class="hint" style="display:flex; align-items:center; justify-content:center; height:70px;">Kein Bild</span>
+      {% if not s.active_border_graphic_id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/border-graphics/reset">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% for graphic in border_graphics %}
+    <div class="logo-gallery-item {{ 'active' if s.active_border_graphic_id == graphic.id }}">
+      <img src="/border-graphics/{{ graphic.filename }}" alt="{{ graphic.original_filename }}">
+      {% if s.active_border_graphic_id == graphic.id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/border-graphics/{{ graphic.id }}/activate">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
 </section>
 
 <form method="post" action="/settings/beer-styles">

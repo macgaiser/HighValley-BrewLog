@@ -11,6 +11,7 @@ from app.models import (
     Batch,
     BatchComment,
     BeerStyle,
+    BorderGraphic,
     BrewDayTask,
     CarbonationEntry,
     DefaultBrewDayTask,
@@ -506,6 +507,17 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
         if logo:
             logo_url = f"/logos/{logo.filename}"
             logo_scale = logo.scale_percent
+
+    # Keine eingebaute Standardgrafik (frueher eine Hopfenranke) - die war
+    # lizenzpflichtig und darf im oeffentlich verfuegbaren Code nicht mit
+    # ausgeliefert werden. Ohne eigenen Upload unter Einstellungen bleibt
+    # der Rahmen oben/unten schlicht leer.
+    border_graphic_url = None
+    if settings.active_border_graphic_id:
+        graphic = session.get(BorderGraphic, settings.active_border_graphic_id)
+        if graphic:
+            border_graphic_url = f"/border-graphics/{graphic.filename}"
+
     return templates.TemplateResponse(
         "label.html",
         {
@@ -521,6 +533,7 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
             "brand_line2_size": settings.label_brand_line2_size,
             "logo_url": logo_url,
             "logo_scale": logo_scale,
+            "border_graphic_url": border_graphic_url,
         },
         # Ohne das hier landet nach einem Logo-Wechsel in den Einstellungen
         # (oder ueber die Browser-Historie/das Back-Forward-Cache) leicht
