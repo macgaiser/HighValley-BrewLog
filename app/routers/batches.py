@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import RedirectResponse
@@ -31,6 +31,12 @@ from app.models import (
 from app.templating import templates
 
 router = APIRouter(prefix="/batches", tags=["batches"])
+
+# Ab diesem Alter des Brautags wird "Lagerbuchung sperren" im Bearbeiten-
+# Formular vorausgewaehlt (aendert nichts an bereits gespeicherten Suden,
+# nur ein Vorschlag beim naechsten Oeffnen - wird erst mit dem Speichern
+# wirksam und laesst sich vorher jederzeit wieder abwaehlen).
+INVENTORY_LOCK_SUGGESTION_AGE_DAYS = 90
 
 MASH_STEP_NAMES = [
     "Einmaischen",
@@ -550,6 +556,18 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
 def batch_edit_form(batch_id: int, request: Request, session: Session = Depends(get_session)):
     batch = session.get(Batch, batch_id)
     beer_styles = session.exec(select(BeerStyle).order_by(BeerStyle.position)).all()
+    # Nur ein Vorschlag fuers Formular, kein Automatismus in der DB: bei
+    # Suden mit altem Brautag, deren Lagerbuchung noch nicht gesperrt ist,
+    # ist die Checkbox beim Oeffnen des Formulars schon angehakt (siehe
+    # INVENTORY_LOCK_SUGGESTION_AGE_DAYS oben) - wirksam wird das erst,
+    # wenn tatsaechlich gespeichert wird, und laesst sich vorher jederzeit
+    # wieder abwaehlen.
+    suggest_inventory_lock = bool(
+        batch
+        and not batch.inventory_deduction_locked
+        and batch.brew_date
+        and batch.brew_date < date.today() - timedelta(days=INVENTORY_LOCK_SUGGESTION_AGE_DAYS)
+    )
     return templates.TemplateResponse(
         "batch_form.html",
         {
@@ -560,6 +578,7 @@ def batch_edit_form(batch_id: int, request: Request, session: Session = Depends(
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
             "beer_styles": beer_styles,
+            "suggest_inventory_lock": suggest_inventory_lock,
         },
     )
 

@@ -50,9 +50,12 @@
       <div><label>Kochzeit (min)</label><input type="number" step="1" name="boil_time_min" value="{{ batch.boil_time_min if batch else '' }}"></div>
     </div>
     <label class="field-checkbox">
-      <input type="checkbox" name="inventory_deduction_locked" {% if batch and batch.inventory_deduction_locked %}checked{% endif %}>
+      <input type="checkbox" name="inventory_deduction_locked" {% if batch and (batch.inventory_deduction_locked or suggest_inventory_lock) %}checked{% endif %}>
       Lagerbuchung für diesen Sud sperren (keine automatische Ab-/Rückbuchung beim Speichern – für historische, bereits abgeschlossene Sude)
     </label>
+    {% if suggest_inventory_lock %}
+    <p class="hint">Automatisch vorausgewählt, da der Brautag mehr als 3 Monate zurückliegt (wirksam erst beim Speichern – bei Bedarf vorher wieder abwählbar).</p>
+    {% endif %}
   </section>
 
   <section class="card">
