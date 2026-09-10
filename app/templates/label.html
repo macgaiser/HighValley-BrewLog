@@ -14,6 +14,7 @@
 </div>
 <p class="subtitle no-print">Vorschau für ein A4-Blatt mit 10 übereinander angeordneten Wickel-Etiketten. Ausschneiden entlang der gestrichelten Linien, dann zu einem Ring zusammenkleben. Zum Drucken oder als PDF speichern den Button oben nutzen (Browser-Druckdialog).</p>
 
+<div class="label-sheet-scale-wrap" id="label-sheet-scale-wrap">
 <div class="label-sheet" id="label-sheet" style="--label-accent-light: {{ label_accent_light }}; --label-accent-dark: {{ label_accent_dark }};">
   {% for _ in label_count %}
   <div class="label-strip">
@@ -65,6 +66,7 @@
   </div>
   {% endfor %}
 </div>
+</div>
 <div class="crop-marks" aria-hidden="true">
   <span class="crop-mark crop-mark-tl-h"></span>
   <span class="crop-mark crop-mark-tl-v"></span>
@@ -81,5 +83,26 @@
   document.getElementById('label-dark-toggle').addEventListener('change', function (e) {
     document.getElementById('label-sheet').classList.toggle('label-sheet--dark', e.target.checked);
   });
+
+  // Bildschirmvorschau: .label-sheet hat eine feste Referenzbreite
+  // (780px, siehe style.css) - auf schmalen Bildschirmen (Handy) wird sie
+  // hier per CSS-Transform gleichmaessig herunterskaliert, statt einzelne
+  // Schriftgroessen/Positionen neu zu berechnen. Das haelt die fein
+  // abgestimmten Proportionen exakt erhalten, weil ein Transform die
+  // Kind-Elemente nicht anders layouten laesst als bei voller Breite.
+  function fitLabelSheet() {
+    var wrap = document.getElementById('label-sheet-scale-wrap');
+    var sheet = document.getElementById('label-sheet');
+    if (!wrap || !sheet) return;
+    var naturalWidth = sheet.offsetWidth;
+    var naturalHeight = sheet.offsetHeight;
+    if (!naturalWidth || !naturalHeight) return;
+    var scale = Math.min(1, wrap.clientWidth / naturalWidth);
+    sheet.style.transform = scale < 1 ? "scale(" + scale + ")" : "";
+    wrap.style.height = (naturalHeight * scale) + "px";
+  }
+  window.addEventListener("resize", fitLabelSheet);
+  window.addEventListener("load", fitLabelSheet);
+  fitLabelSheet();
 </script>
 {% endblock %}

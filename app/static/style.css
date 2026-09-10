@@ -194,6 +194,9 @@ h1, h2, h3 {
   .topbar nav {
     width: 100%; justify-content: flex-end; flex-wrap: nowrap;
     overflow-x: auto; /* Sicherheitsnetz: lieber scrollbar als abgeschnitten, falls es doch mal eng wird */
+    /* Kleiner Puffer hinter dem letzten Tab (Einstellungen), damit dessen
+       Icon auf sehr schmalen Bildschirmen nicht optisch am Rand klebt. */
+    padding-right: 0.3rem;
   }
   .tab-nav { padding: 0.4rem 0.6rem 0.3rem; font-size: 0.85rem; gap: 0.35rem; flex-shrink: 0; }
   .tab-nav-icon { width: 22px; height: 22px; }
@@ -464,7 +467,17 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
   --label-green: var(--label-accent-light, #1a6b1a);
   --label-bg: var(--bg);
   position: relative;
-  max-width: 780px;
+  /* Feste statt maximale Breite: alle Kind-Elemente (Schriftgroessen in
+     rem, prozentual positionierte Icons usw.) sind auf dieses Mass
+     abgestimmt. Auf schmalen Bildschirmen wuerde ein reines max-width das
+     Etikett zwar schmaler machen, aber die Schrift NICHT mitverkleinern -
+     das fuehrte zu ueberlappendem Text/Icons (siehe .label-sheet-scale-
+     wrap in label.html: der eigentliche Skalierungseffekt fuer schmale
+     Bildschirme kommt von dort per CSS-Transform, das die fertige,
+     korrekt proportionierte Seite als Ganzes verkleinert statt einzelne
+     Werte neu zu berechnen). */
+  width: 780px;
+  flex-shrink: 0;
   margin: 0 auto;
   border: 1px solid var(--border);
   display: flex;
@@ -475,7 +488,15 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
      moeglichen Zirkelbezug mit den quadratischen Rand-Feldern (die ihre
      Breite per aspect-ratio aus der Etikettenhoehe ableiten). */
   aspect-ratio: 204 / 293.4;
+  transform-origin: top left;
 }
+/* Umschliesst .label-sheet fuer die Bildschirmvorschau: haelt die volle
+   verfuegbare Breite, damit JS (siehe label.html) daran den noetigen
+   Skalierungsfaktor ablesen kann. Hoehe wird per JS exakt auf die
+   tatsaechlich skalierte Hoehe von .label-sheet gesetzt (ein Transform
+   aendert nicht dessen Platzbedarf im Layout, ohne das bliebe sonst ein
+   leerer Bereich in der urspruenglichen, unskalierten Hoehe stehen). */
+.label-sheet-scale-wrap { width: 100%; max-width: 780px; margin: 0 auto; overflow: hidden; }
 /* Dunkle Variante (z.B. fuer Stout-Etiketten): helles Gold statt Gruen
    fuer ausreichend Kontrast auf fast schwarzem Grund. Die Bierkrug-Farbe
    selbst (EBC-abhaengig) und ihre Textfarbe bleiben unveraendert, da sie
@@ -806,7 +827,14 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
      (weder Breite noch Hoehe), stattdessen wird der Inhalt selbst kleiner/
      kompakter (Datum, EBC/Fass-Position, Zeilenabstaende) skaliert, um
      innerhalb der kleineren Streifen Abstand zur Ranke zu behalten. */
-  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 285mm; margin: 5mm auto 0; border: none; }
+  /* transform:none überschreibt den JS-gesetzten Verkleinerungs-Faktor der
+     Bildschirmvorschau (siehe .label-sheet-scale-wrap in label.html) -
+     beim Drucken zaehlt ausschliesslich die physische mm-Groesse. */
+  /* !important noetig: JS setzt den Skalierungsfaktor der Bildschirm-
+     vorschau als Inline-Style, das schlaegt eine normale @media-print-
+     Regel sonst unabhaengig von der Media Query. */
+  .label-sheet { max-width: none; width: 200mm; aspect-ratio: unset; height: 285mm; margin: 5mm auto 0; border: none; transform: none !important; }
+  .label-sheet-scale-wrap { height: auto !important; }
   .label-strip { page-break-inside: avoid; }
   .label-left-square, .label-frame-cell { flex-basis: 14%; }
 
