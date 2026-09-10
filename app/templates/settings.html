@@ -51,12 +51,16 @@
     </select>
   </div>
 
-  <label>Akzentfarbe (helles Etikett)</label>
-  <p class="hint">Betrifft alles auf dem Etikett einheitlich - Rahmen, Schrift, Symbole, Schnittlinie. Keine separaten Farben pro Element nötig.</p>
-  <input type="color" name="label_accent_light" value="{{ s.label_accent_light }}" form="settings-form">
-
-  <label>Akzentfarbe (dunkles Etikett, z.B. für Stout)</label>
-  <input type="color" name="label_accent_dark" value="{{ s.label_accent_dark }}" form="settings-form">
+  <h2>Akzentfarbe</h2>
+  <p class="hint">Betrifft alles auf dem Etikett einheitlich - Rahmen, Schrift, Symbole, Schnittlinie. Keine separaten Farben pro Element nötig. Das dunkle Etikett lässt sich über den Schalter "Dunkler Hintergrund" beim Drucken aktivieren (z.B. für Stout).</p>
+  <div class="color-field-row">
+    <label for="label_accent_light">Akzentfarbe helles Etikett</label>
+    <input type="color" id="label_accent_light" name="label_accent_light" value="{{ s.label_accent_light }}" form="settings-form">
+  </div>
+  <div class="color-field-row">
+    <label for="label_accent_dark">Akzentfarbe dunkles Etikett</label>
+    <input type="color" id="label_accent_dark" name="label_accent_dark" value="{{ s.label_accent_dark }}" form="settings-form">
+  </div>
 
   <div class="form-actions">
     <button class="btn btn-primary" type="submit" form="settings-form">Speichern</button>
