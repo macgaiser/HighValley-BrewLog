@@ -682,35 +682,21 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
                 label=c.label,
             )
         )
-    # Zeitplan-Positionen werden übernommen, aber ohne Zeitwerte - die neuen
-    # Zeiten hängen vom tatsächlichen Ablauf des neuen Brautags ab. Hatte der
-    # Quell-Sud noch gar keinen Zeitplan (z.B. importierte oder alte Sude),
-    # wird stattdessen wie bei einem neu angelegten Sud die Standard-Vorlage
-    # aus den Einstellungen übernommen - eine Kopie soll nie ganz ohne
-    # Zeitplan dastehen, nur weil die Vorlage zufällig leer war.
-    if source.brew_day_tasks:
-        for t in source.brew_day_tasks:
-            session.add(
-                BrewDayTask(
-                    batch_id=copy.id,
-                    position=t.position,
-                    task_name=t.task_name,
-                    planned_duration_min=None,
-                    note=t.note,
-                )
+    # Zeitplan wird nicht vom Quell-Sud uebernommen, sondern immer (wie bei
+    # "Neuer Sud") aus der Standard-Vorlage der Einstellungen neu befuellt -
+    # der individuelle Zeitplan eines Suds (Zeiten, Notizen) gehoert zu genau
+    # diesem Brautag und soll bei einer Kopie nicht mit uebernommen werden.
+    default_tasks = session.exec(select(DefaultBrewDayTask).order_by(DefaultBrewDayTask.position)).all()
+    for dt in default_tasks:
+        session.add(
+            BrewDayTask(
+                batch_id=copy.id,
+                position=dt.position,
+                task_name=dt.task_name,
+                planned_duration_min=dt.planned_duration_min,
+                note=dt.note,
             )
-    else:
-        default_tasks = session.exec(select(DefaultBrewDayTask).order_by(DefaultBrewDayTask.position)).all()
-        for dt in default_tasks:
-            session.add(
-                BrewDayTask(
-                    batch_id=copy.id,
-                    position=dt.position,
-                    task_name=dt.task_name,
-                    planned_duration_min=dt.planned_duration_min,
-                    note=dt.note,
-                )
-            )
+        )
     # Gärverlauf und Kommentare sind sud-spezifisch und werden bewusst nicht
     # übernommen.
 
