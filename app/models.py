@@ -44,6 +44,12 @@ class Settings(SQLModel, table=True):
     active_logo_id: Optional[int] = Field(default=None, foreign_key="logo.id")
     default_logo_scale: float = 82.0  # Fuellgrad des eingebauten Standard-Logos in % der Logo-Box
     active_border_graphic_id: Optional[int] = Field(default=None, foreign_key="bordergraphic.id")
+    # Einzige Akzentfarbe des Etiketts (Rahmen, Schrift, Icon-Umrandungen -
+    # alles, was aktuell gruen bzw. im Dunkelmodus gold ist), je Modus separat
+    # einstellbar statt pro Element - steuert ueber --label-accent-light/-dark
+    # (siehe label.html) die bestehende --label-green-Variable in style.css.
+    label_accent_light: str = "#1a6b1a"
+    label_accent_dark: str = "#f3c750"
 
 
 class Logo(SQLModel, table=True):

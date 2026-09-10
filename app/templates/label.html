@@ -14,7 +14,7 @@
 </div>
 <p class="subtitle no-print">Vorschau für ein A4-Blatt mit 10 übereinander angeordneten Wickel-Etiketten. Ausschneiden entlang der gestrichelten Linien, dann zu einem Ring zusammenkleben. Zum Drucken oder als PDF speichern den Button oben nutzen (Browser-Druckdialog).</p>
 
-<div class="label-sheet" id="label-sheet">
+<div class="label-sheet" id="label-sheet" style="--label-accent-light: {{ label_accent_light }}; --label-accent-dark: {{ label_accent_dark }};">
   {% for _ in label_count %}
   <div class="label-strip">
     <div class="label-cell label-left-square"><img class="label-logo-img" src="{{ logo_url }}" style="width: {{ logo_scale }}%; height: {{ logo_scale }}%;" alt=""></div>

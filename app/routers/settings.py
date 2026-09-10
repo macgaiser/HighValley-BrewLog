@@ -1,3 +1,4 @@
+import re
 import uuid
 from pathlib import Path
 
@@ -19,6 +20,14 @@ def _f(value: str | None) -> float | None:
     if value is None or value.strip() == "":
         return None
     return float(value.replace(",", "."))
+
+
+_HEX_COLOR_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+
+def _hex_color(value: str | None, default: str) -> str:
+    value = (value or "").strip()
+    return value if _HEX_COLOR_RE.match(value) else default
 
 
 @router.get("")
@@ -55,6 +64,8 @@ async def settings_save(request: Request, session: Session = Depends(get_session
     s.label_brand_line1 = form.get("label_brand_line1", "").strip()
     s.label_brand_line1_size = float(form.get("label_brand_line1_size") or 0.7)
     s.label_brand_line2_size = float(form.get("label_brand_line2_size") or 1.6)
+    s.label_accent_light = _hex_color(form.get("label_accent_light"), "#1a6b1a")
+    s.label_accent_dark = _hex_color(form.get("label_accent_dark"), "#f3c750")
     session.add(s)
     session.commit()
     return RedirectResponse("/settings", status_code=303)
