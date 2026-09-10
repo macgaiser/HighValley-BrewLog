@@ -385,8 +385,15 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
    zu Nachbarelementen mit - als direktes Grid-Kind wuerde das aber die
    Stretch-Hoehe verfaelschen (die margin-Box zaehlt mit, ein .card mit
    margin waere dadurch bei gleicher Stretch-Zielhoehe kleiner als eines
-   ohne). Der Abstand kommt bei .grid-2 daher vom Grid-Container selbst. */
-.grid-2 > .card { margin: 0; }
+   ohne). Der Abstand kommt bei .grid-2 daher vom Grid-Container selbst.
+   min-width:0 verhindert, dass Grid-Kinder sich an ihrem eigenen breitesten
+   Inhalt (z.B. einer Tabelle mit vielen Spalten) aufblaehen, statt sich
+   (wie gewollt) auf die verfuegbare Spaltenbreite zu beschraenken - genau
+   das Breiten-Gegenstueck zum min-height:0-Trick weiter unten bei
+   .card-stack. Ohne das waren auf schmalen Bildschirmen ausgerechnet die
+   Karten mit breiteren Tabellen (Hefegabe, Stopfhopfen, Karbonisierung,
+   Brautag-Zeitplan) sichtbar breiter als der Rest der Seite. */
+.grid-2 > .card { margin: 0; min-width: 0; }
 /* .grid-2 stretcht seine beiden Kinder (diesen Stack und die Zeitplan-
    Karte daneben) per Default schon auf gleiche Hoehe - hier zusaetzlich
    dafuer sorgen, dass die drei gestapelten Karten die dadurch entstehende
@@ -402,6 +409,11 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
      als noetig statt sich sauber auf die Hoehe der Zeitplan-Karte
      daneben stretchen zu lassen. */
   min-height: 0;
+  /* Analog in der Breite: ohne das wuerde sich dieser Flex-Container (als
+     Grid-Kind von .grid-2) an der breitesten seiner drei Karten aufblaehen
+     (implizites min-width:auto), statt sich auf die verfuegbare
+     Spaltenbreite zu beschraenken. */
+  min-width: 0;
 }
 /* flex-grow:1 mit flex-basis:auto (statt 0) verteilt nur die UEBRIGE
    Hoehe gleichmaessig auf die 3 Karten, oben auf ihre jeweils eigene
@@ -409,7 +421,7 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
    gleich GROSS gestartet und ggf. unter ihre eigene Content-Hoehe
    gequetscht (sichtbar als ueber den Kartenrand hinauslaufender Inhalt).
    flex-shrink:0 verhindert das Quetschen zusaetzlich explizit. */
-.card-stack > .card { flex: 1 0 auto; margin: 0; }
+.card-stack > .card { flex: 1 0 auto; margin: 0; min-width: 0; }
 
 .stat-grid {
   display: grid;
