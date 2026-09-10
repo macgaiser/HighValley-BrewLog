@@ -138,6 +138,37 @@
     </div>
     {% endfor %}
   </div>
+
+  <h2>Hintergrundbild (Tal)</h2>
+  <p class="hint">Dasselbe Bild für den App-Hintergrund (jede Seite) und das Marken-Feld auf dem Etikett. Das eingebaute Bild bleibt als Standard erhalten - hier kannst du es optional durch ein eigenes ersetzen. Am besten ein breites Querformat (das eingebaute Bild: 1712×624px, ca. 2,7:1).</p>
+  <form method="post" action="/settings/background-images" enctype="multipart/form-data" class="inline-form">
+    <input type="file" name="file" accept="image/*" required>
+    <button class="btn btn-primary" type="submit">Hochladen &amp; verwenden</button>
+  </form>
+  <div class="logo-gallery">
+    <div class="logo-gallery-item {{ 'active' if not s.active_background_image_id }}">
+      <img src="/static/img/bg-valley.png" alt="Standard-Hintergrund">
+      {% if not s.active_background_image_id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/background-images/reset">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% for image in background_images %}
+    <div class="logo-gallery-item {{ 'active' if s.active_background_image_id == image.id }}">
+      <img src="/background-images/{{ image.filename }}" alt="{{ image.original_filename }}">
+      {% if s.active_background_image_id == image.id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/background-images/{{ image.id }}/activate">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
 </section>
 
 <form method="post" action="/settings/beer-styles">

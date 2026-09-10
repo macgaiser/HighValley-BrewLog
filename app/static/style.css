@@ -66,7 +66,7 @@ body::before {
   height: 36.45vw;
   min-height: 240px;
   max-height: 1050px;
-  background-image: url("/static/img/bg-valley.png");
+  background-image: var(--bg-valley-url);
   background-repeat: no-repeat;
   background-position: bottom center;
   background-size: cover;
@@ -559,7 +559,7 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
   bottom: 17%;
   left: 0;
   right: 0;
-  background-image: url("/static/img/bg-valley.png");
+  background-image: var(--bg-valley-url);
   background-repeat: no-repeat;
   background-position: bottom center;
   background-size: cover;

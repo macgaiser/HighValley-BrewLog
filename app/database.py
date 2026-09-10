@@ -22,6 +22,9 @@ LOGO_DIR.mkdir(parents=True, exist_ok=True)
 BORDER_GRAPHIC_DIR = DATA_DIR / "border_graphics"
 BORDER_GRAPHIC_DIR.mkdir(parents=True, exist_ok=True)
 
+BACKGROUND_IMAGE_DIR = DATA_DIR / "background_images"
+BACKGROUND_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+
 engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread": False})
 
 
