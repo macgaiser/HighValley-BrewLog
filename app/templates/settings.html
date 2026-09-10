@@ -50,6 +50,14 @@
       {% endfor %}
     </select>
   </div>
+
+  <label>Akzentfarbe (helles Etikett)</label>
+  <p class="hint">Betrifft alles auf dem Etikett einheitlich - Rahmen, Schrift, Symbole, Schnittlinie. Keine separaten Farben pro Element nötig.</p>
+  <input type="color" name="label_accent_light" value="{{ s.label_accent_light }}" form="settings-form">
+
+  <label>Akzentfarbe (dunkles Etikett, z.B. für Stout)</label>
+  <input type="color" name="label_accent_dark" value="{{ s.label_accent_dark }}" form="settings-form">
+
   <div class="form-actions">
     <button class="btn btn-primary" type="submit" form="settings-form">Speichern</button>
   </div>
@@ -99,6 +107,68 @@
     {% endfor %}
   </div>
   <p class="hint">Größe: wie viel Fläche das Logo in seinem Feld auf dem Etikett füllt (in %) - lässt sich je Logo einzeln einstellen, z.B. wenn ein Logo bereits viel eigenen Rand mitbringt.</p>
+
+  <h2>Rahmengrafik (Ranke)</h2>
+  <p class="hint">Ziert den oberen/unteren Rand jedes Etiketts. Es ist bewusst keine Grafik vorinstalliert (z.B. eine Hopfenranke unterliegt in der Regel einer eigenen Bildlizenz) - lade hier deine eigene, lizenzierte Grafik hoch. Am besten ein sehr breites, niedriges Bild mit transparentem Hintergrund (die Grafik wird automatisch auf die volle Etikettenbreite skaliert, die Höhe ergibt sich aus ihrem Seitenverhältnis - ein Format um die 580×85px bzw. ca. 6,8:1 passt gut zum restlichen Layout).</p>
+  <form method="post" action="/settings/border-graphics" enctype="multipart/form-data" class="inline-form">
+    <input type="file" name="file" accept="image/*" required>
+    <button class="btn btn-primary" type="submit">Hochladen &amp; verwenden</button>
+  </form>
+  <div class="logo-gallery">
+    <div class="logo-gallery-item {{ 'active' if not s.active_border_graphic_id }}">
+      <span class="hint" style="display:flex; align-items:center; justify-content:center; height:70px;">Kein Bild</span>
+      {% if not s.active_border_graphic_id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/border-graphics/reset">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% for graphic in border_graphics %}
+    <div class="logo-gallery-item {{ 'active' if s.active_border_graphic_id == graphic.id }}">
+      <img src="/border-graphics/{{ graphic.filename }}" alt="{{ graphic.original_filename }}">
+      {% if s.active_border_graphic_id == graphic.id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/border-graphics/{{ graphic.id }}/activate">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2>Hintergrundbild (Tal)</h2>
+  <p class="hint">Dasselbe Bild für den App-Hintergrund (jede Seite) und das Marken-Feld auf dem Etikett. Das eingebaute Bild bleibt als Standard erhalten - hier kannst du es optional durch ein eigenes ersetzen. Am besten ein breites Querformat (das eingebaute Bild: 1712×624px, ca. 2,7:1).</p>
+  <form method="post" action="/settings/background-images" enctype="multipart/form-data" class="inline-form">
+    <input type="file" name="file" accept="image/*" required>
+    <button class="btn btn-primary" type="submit">Hochladen &amp; verwenden</button>
+  </form>
+  <div class="logo-gallery">
+    <div class="logo-gallery-item {{ 'active' if not s.active_background_image_id }}">
+      <img src="/static/img/bg-valley.png" alt="Standard-Hintergrund">
+      {% if not s.active_background_image_id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/background-images/reset">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% for image in background_images %}
+    <div class="logo-gallery-item {{ 'active' if s.active_background_image_id == image.id }}">
+      <img src="/background-images/{{ image.filename }}" alt="{{ image.original_filename }}">
+      {% if s.active_background_image_id == image.id %}
+      <span class="badge-active">Aktiv</span>
+      {% else %}
+      <form method="post" action="/settings/background-images/{{ image.id }}/activate">
+        <button class="btn btn-small" type="submit">Verwenden</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
 </section>
 
 <form method="post" action="/settings/beer-styles">

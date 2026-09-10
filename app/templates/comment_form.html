@@ -13,6 +13,8 @@
   <div class="form-actions">
     <button class="btn btn-primary" type="submit">Speichern</button>
     <a class="btn" href="/batches/{{ batch.id }}">Abbrechen</a>
+    <button class="btn btn-danger" type="submit" form="comment-delete-form">Löschen</button>
   </div>
 </form>
+<form id="comment-delete-form" method="post" action="/batches/{{ batch.id }}/comments/{{ comment.id }}/delete" onsubmit="return confirm('Diesen Kommentar wirklich löschen?')"></form>
 {% endblock %}

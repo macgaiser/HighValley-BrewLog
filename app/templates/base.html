@@ -7,9 +7,9 @@
   <link rel="icon" type="image/png" href="/static/favicon-64.png">
   <link rel="icon" href="/static/favicon.ico" sizes="any">
   <link rel="stylesheet" href="/static/vendor/flatpickr/flatpickr.min.css">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css{{ static_version('style.css') }}">
 </head>
-<body>
+<body style="--bg-valley-url: url('{{ background_image_url() }}');">
   <svg width="0" height="0" style="position:absolute">
     <defs>
       <g id="icon-stein">
@@ -190,7 +190,7 @@ m-1870 -266 c9 -11 11 -37 7 -91 -3 -41 -12 -158 -21 -260 -38 -482 -39 -1448
   </main>
   <script src="/static/vendor/flatpickr/flatpickr.min.js"></script>
   <script src="/static/vendor/flatpickr/de.js"></script>
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js{{ static_version('app.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -43,6 +43,14 @@ class Settings(SQLModel, table=True):
     label_brand_line2_size: float = 1.6
     active_logo_id: Optional[int] = Field(default=None, foreign_key="logo.id")
     default_logo_scale: float = 82.0  # Fuellgrad des eingebauten Standard-Logos in % der Logo-Box
+    active_border_graphic_id: Optional[int] = Field(default=None, foreign_key="bordergraphic.id")
+    # Einzige Akzentfarbe des Etiketts (Rahmen, Schrift, Icon-Umrandungen -
+    # alles, was aktuell gruen bzw. im Dunkelmodus gold ist), je Modus separat
+    # einstellbar statt pro Element - steuert ueber --label-accent-light/-dark
+    # (siehe label.html) die bestehende --label-green-Variable in style.css.
+    label_accent_light: str = "#1a6b1a"
+    label_accent_dark: str = "#f3c750"
+    active_background_image_id: Optional[int] = Field(default=None, foreign_key="backgroundimage.id")
 
 
 class Logo(SQLModel, table=True):
@@ -60,6 +68,35 @@ class Logo(SQLModel, table=True):
     # viel eigenem Weissraum braucht einen groesseren Wert als eines, das
     # bereits bis an den Rand geht).
     scale_percent: float = 82.0
+
+
+class BorderGraphic(SQLModel, table=True):
+    """Eine hochgeladene Rahmengrafik (z.B. Hopfenranke) fuer den oberen/
+    unteren Rand des Etiketts. Anders als beim Logo gibt es keine
+    eingebaute Standardgrafik - die App liefert dafuer keine mit aus
+    (Lizenzgruende), das Feld bleibt leer, bis ein eigenes Bild hochgeladen
+    wird. Skaliert sich automatisch: die Grafik wird ueber die volle
+    Etikettenbreite gestreckt, die Hoehe ergibt sich aus ihrem eigenen
+    Seitenverhaeltnis (siehe .label-vine-img in style.css)."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    filename: str  # Dateiname auf der Platte, unter DATA_DIR/border_graphics
+    original_filename: str = ""
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class BackgroundImage(SQLModel, table=True):
+    """Ein hochgeladenes Hintergrundbild ("Tal") - ersetzt das eingebaute
+    bg-valley.png sowohl im App-Hintergrund (jede Seite) als auch im
+    Marken-Feld des Etiketts (dieselbe Datei fuer beide, siehe
+    background_image_url() in templating.py). Anders als bei der
+    Rahmengrafik bleibt das eingebaute Bild hier als Standard erhalten -
+    nur bei aktivem Wunsch nach einem eigenen wird es ersetzt."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    filename: str  # Dateiname auf der Platte, unter DATA_DIR/background_images
+    original_filename: str = ""
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class DefaultBrewDayTask(SQLModel, table=True):

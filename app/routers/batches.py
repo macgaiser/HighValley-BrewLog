@@ -11,6 +11,7 @@ from app.models import (
     Batch,
     BatchComment,
     BeerStyle,
+    BorderGraphic,
     BrewDayTask,
     CarbonationEntry,
     DefaultBrewDayTask,
@@ -506,6 +507,17 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
         if logo:
             logo_url = f"/logos/{logo.filename}"
             logo_scale = logo.scale_percent
+
+    # Keine eingebaute Standardgrafik (frueher eine Hopfenranke) - die war
+    # lizenzpflichtig und darf im oeffentlich verfuegbaren Code nicht mit
+    # ausgeliefert werden. Ohne eigenen Upload unter Einstellungen bleibt
+    # der Rahmen oben/unten schlicht leer.
+    border_graphic_url = None
+    if settings.active_border_graphic_id:
+        graphic = session.get(BorderGraphic, settings.active_border_graphic_id)
+        if graphic:
+            border_graphic_url = f"/border-graphics/{graphic.filename}"
+
     return templates.TemplateResponse(
         "label.html",
         {
@@ -521,6 +533,9 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
             "brand_line2_size": settings.label_brand_line2_size,
             "logo_url": logo_url,
             "logo_scale": logo_scale,
+            "border_graphic_url": border_graphic_url,
+            "label_accent_light": settings.label_accent_light,
+            "label_accent_dark": settings.label_accent_dark,
         },
         # Ohne das hier landet nach einem Logo-Wechsel in den Einstellungen
         # (oder ueber die Browser-Historie/das Back-Forward-Cache) leicht
@@ -775,6 +790,15 @@ async def fermentation_entry_update(batch_id: int, entry_id: int, request: Reque
     return RedirectResponse(f"/batches/{batch_id}", status_code=303)
 
 
+@router.post("/{batch_id}/fermentation/{entry_id}/delete")
+def fermentation_entry_delete(batch_id: int, entry_id: int, session: Session = Depends(get_session)):
+    entry = session.get(FermentationLogEntry, entry_id)
+    if entry:
+        session.delete(entry)
+        session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
+
+
 @router.post("/{batch_id}/comments")
 async def add_comment(batch_id: int, request: Request, session: Session = Depends(get_session)):
     form = await request.form()
@@ -812,4 +836,13 @@ async def comment_update(batch_id: int, comment_id: int, request: Request, sessi
     comment.text = form.get("text", "").strip()
     session.add(comment)
     session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
+
+
+@router.post("/{batch_id}/comments/{comment_id}/delete")
+def comment_delete(batch_id: int, comment_id: int, session: Session = Depends(get_session)):
+    comment = session.get(BatchComment, comment_id)
+    if comment:
+        session.delete(comment)
+        session.commit()
     return RedirectResponse(f"/batches/{batch_id}", status_code=303)
