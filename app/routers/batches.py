@@ -534,6 +534,8 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
             "logo_url": logo_url,
             "logo_scale": logo_scale,
             "border_graphic_url": border_graphic_url,
+            "label_accent_light": settings.label_accent_light,
+            "label_accent_dark": settings.label_accent_dark,
         },
         # Ohne das hier landet nach einem Logo-Wechsel in den Einstellungen
         # (oder ueber die Browser-Historie/das Back-Forward-Cache) leicht

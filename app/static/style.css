@@ -450,7 +450,13 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
    (haelftig je Etikett), viermal ueber die Breite des mittleren Teils
    gekachelt. */
 .label-sheet {
-  --label-green: #1a6b1a;
+  /* --label-accent-light/-dark kommen als Inline-Custom-Properties von
+     label.html (aus den Einstellungen, statt hier fest verdrahtet) - der
+     Fallback-Wert nach dem Komma greift nur, falls dort mal nichts gesetzt
+     ist. --label-green bleibt der einzige Name, den der Rest dieser Datei
+     tatsaechlich verwendet (Rahmen, Schrift, Icons, Schnittlinie), damit
+     eine Aenderung in den Einstellungen wirklich ausnahmslos alles betrifft. */
+  --label-green: var(--label-accent-light, #1a6b1a);
   --label-bg: var(--bg);
   position: relative;
   max-width: 780px;
@@ -470,7 +476,7 @@ tr.row-selected:hover { background: rgba(240, 190, 51, 0.3); }
    selbst (EBC-abhaengig) und ihre Textfarbe bleiben unveraendert, da sie
    sich bereits eigenstaendig nach der jeweiligen Bierfarbe richten. */
 .label-sheet--dark {
-  --label-green: #f3c750;
+  --label-green: var(--label-accent-dark, #f3c750);
   --label-bg: #100e0a;
 }
 .label-sheet--dark .label-brand::before { opacity: 0.5; }

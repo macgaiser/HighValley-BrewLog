@@ -50,6 +50,14 @@
       {% endfor %}
     </select>
   </div>
+
+  <label>Akzentfarbe (helles Etikett)</label>
+  <p class="hint">Betrifft alles auf dem Etikett einheitlich - Rahmen, Schrift, Symbole, Schnittlinie. Keine separaten Farben pro Element nötig.</p>
+  <input type="color" name="label_accent_light" value="{{ s.label_accent_light }}" form="settings-form">
+
+  <label>Akzentfarbe (dunkles Etikett, z.B. für Stout)</label>
+  <input type="color" name="label_accent_dark" value="{{ s.label_accent_dark }}" form="settings-form">
+
   <div class="form-actions">
     <button class="btn btn-primary" type="submit" form="settings-form">Speichern</button>
   </div>
