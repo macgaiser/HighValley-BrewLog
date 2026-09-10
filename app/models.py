@@ -50,6 +50,7 @@ class Settings(SQLModel, table=True):
     # (siehe label.html) die bestehende --label-green-Variable in style.css.
     label_accent_light: str = "#1a6b1a"
     label_accent_dark: str = "#f3c750"
+    active_background_image_id: Optional[int] = Field(default=None, foreign_key="backgroundimage.id")
 
 
 class Logo(SQLModel, table=True):
@@ -80,6 +81,20 @@ class BorderGraphic(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     filename: str  # Dateiname auf der Platte, unter DATA_DIR/border_graphics
+    original_filename: str = ""
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class BackgroundImage(SQLModel, table=True):
+    """Ein hochgeladenes Hintergrundbild ("Tal") - ersetzt das eingebaute
+    bg-valley.png sowohl im App-Hintergrund (jede Seite) als auch im
+    Marken-Feld des Etiketts (dieselbe Datei fuer beide, siehe
+    background_image_url() in templating.py). Anders als bei der
+    Rahmengrafik bleibt das eingebaute Bild hier als Standard erhalten -
+    nur bei aktivem Wunsch nach einem eigenen wird es ersetzt."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    filename: str  # Dateiname auf der Platte, unter DATA_DIR/background_images
     original_filename: str = ""
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 

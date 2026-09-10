@@ -3,13 +3,14 @@ from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.auth import get_current_user
-from app.database import BORDER_GRAPHIC_DIR, LOGO_DIR, init_db
+from app.database import BACKGROUND_IMAGE_DIR, BORDER_GRAPHIC_DIR, LOGO_DIR, init_db
 from app.routers import batches, inventory, settings
 
 app = FastAPI(title="HighValley BrewLog")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.mount("/logos", StaticFiles(directory=LOGO_DIR), name="logos")
 app.mount("/border-graphics", StaticFiles(directory=BORDER_GRAPHIC_DIR), name="border-graphics")
+app.mount("/background-images", StaticFiles(directory=BACKGROUND_IMAGE_DIR), name="background-images")
 
 
 @app.on_event("startup")

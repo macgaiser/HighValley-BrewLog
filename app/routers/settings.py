@@ -6,14 +6,15 @@ from fastapi import APIRouter, Depends, File, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
 
-from app.database import BORDER_GRAPHIC_DIR, LOGO_DIR, get_session
-from app.models import BeerStyle, BorderGraphic, DefaultBrewDayTask, Logo, Settings
+from app.database import BACKGROUND_IMAGE_DIR, BORDER_GRAPHIC_DIR, LOGO_DIR, get_session
+from app.models import BackgroundImage, BeerStyle, BorderGraphic, DefaultBrewDayTask, Logo, Settings
 from app.templating import templates
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
 ALLOWED_LOGO_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
 ALLOWED_BORDER_GRAPHIC_EXT = ALLOWED_LOGO_EXT
+ALLOWED_BACKGROUND_IMAGE_EXT = ALLOWED_LOGO_EXT
 
 
 def _f(value: str | None) -> float | None:
@@ -37,6 +38,7 @@ def settings_form(request: Request, session: Session = Depends(get_session)):
     logos = session.exec(select(Logo).order_by(Logo.uploaded_at.desc())).all()
     beer_styles = session.exec(select(BeerStyle).order_by(BeerStyle.position)).all()
     border_graphics = session.exec(select(BorderGraphic).order_by(BorderGraphic.uploaded_at.desc())).all()
+    background_images = session.exec(select(BackgroundImage).order_by(BackgroundImage.uploaded_at.desc())).all()
     return templates.TemplateResponse(
         "settings.html",
         {
@@ -46,6 +48,7 @@ def settings_form(request: Request, session: Session = Depends(get_session)):
             "logos": logos,
             "beer_styles": beer_styles,
             "border_graphics": border_graphics,
+            "background_images": background_images,
         },
     )
 
@@ -205,6 +208,52 @@ def settings_border_graphic_activate(graphic_id: int, session: Session = Depends
 def settings_border_graphic_reset(session: Session = Depends(get_session)):
     s = session.get(Settings, 1)
     s.active_border_graphic_id = None
+    session.add(s)
+    session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.post("/background-images")
+async def settings_background_image_upload(session: Session = Depends(get_session), file: UploadFile = File(...)):
+    """Neues Hintergrundbild ("Tal") hochladen - ersetzt das eingebaute
+    bg-valley.png sowohl im App-Hintergrund als auch im Marken-Feld des
+    Etiketts (dieselbe Datei fuer beide, siehe background_image_url() in
+    templating.py). Anders als bei der Rahmengrafik bleibt das eingebaute
+    Bild als Standard erhalten und wird nur bei aktivem Wunsch ersetzt."""
+    if not file.filename:
+        return RedirectResponse("/settings", status_code=303)
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_BACKGROUND_IMAGE_EXT:
+        ext = ".png"
+    stored_name = f"{uuid.uuid4().hex}{ext}"
+    data = await file.read()
+    (BACKGROUND_IMAGE_DIR / stored_name).write_bytes(data)
+
+    image = BackgroundImage(filename=stored_name, original_filename=file.filename)
+    session.add(image)
+    session.flush()
+    s = session.get(Settings, 1)
+    s.active_background_image_id = image.id
+    session.add(s)
+    session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.post("/background-images/{image_id}/activate")
+def settings_background_image_activate(image_id: int, session: Session = Depends(get_session)):
+    image = session.get(BackgroundImage, image_id)
+    if image:
+        s = session.get(Settings, 1)
+        s.active_background_image_id = image.id
+        session.add(s)
+        session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.post("/background-images/reset")
+def settings_background_image_reset(session: Session = Depends(get_session)):
+    s = session.get(Settings, 1)
+    s.active_background_image_id = None
     session.add(s)
     session.commit()
     return RedirectResponse("/settings", status_code=303)
