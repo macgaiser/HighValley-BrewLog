@@ -790,6 +790,15 @@ async def fermentation_entry_update(batch_id: int, entry_id: int, request: Reque
     return RedirectResponse(f"/batches/{batch_id}", status_code=303)
 
 
+@router.post("/{batch_id}/fermentation/{entry_id}/delete")
+def fermentation_entry_delete(batch_id: int, entry_id: int, session: Session = Depends(get_session)):
+    entry = session.get(FermentationLogEntry, entry_id)
+    if entry:
+        session.delete(entry)
+        session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
+
+
 @router.post("/{batch_id}/comments")
 async def add_comment(batch_id: int, request: Request, session: Session = Depends(get_session)):
     form = await request.form()
@@ -827,4 +836,13 @@ async def comment_update(batch_id: int, comment_id: int, request: Request, sessi
     comment.text = form.get("text", "").strip()
     session.add(comment)
     session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
+
+
+@router.post("/{batch_id}/comments/{comment_id}/delete")
+def comment_delete(batch_id: int, comment_id: int, session: Session = Depends(get_session)):
+    comment = session.get(BatchComment, comment_id)
+    if comment:
+        session.delete(comment)
+        session.commit()
     return RedirectResponse(f"/batches/{batch_id}", status_code=303)
