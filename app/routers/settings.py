@@ -5,13 +5,14 @@ from fastapi import APIRouter, Depends, File, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
 
-from app.database import LOGO_DIR, get_session
-from app.models import BeerStyle, DefaultBrewDayTask, Logo, Settings
+from app.database import BORDER_GRAPHIC_DIR, LOGO_DIR, get_session
+from app.models import BeerStyle, BorderGraphic, DefaultBrewDayTask, Logo, Settings
 from app.templating import templates
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
 ALLOWED_LOGO_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
+ALLOWED_BORDER_GRAPHIC_EXT = ALLOWED_LOGO_EXT
 
 
 def _f(value: str | None) -> float | None:
@@ -26,9 +27,17 @@ def settings_form(request: Request, session: Session = Depends(get_session)):
     default_tasks = session.exec(select(DefaultBrewDayTask).order_by(DefaultBrewDayTask.position)).all()
     logos = session.exec(select(Logo).order_by(Logo.uploaded_at.desc())).all()
     beer_styles = session.exec(select(BeerStyle).order_by(BeerStyle.position)).all()
+    border_graphics = session.exec(select(BorderGraphic).order_by(BorderGraphic.uploaded_at.desc())).all()
     return templates.TemplateResponse(
         "settings.html",
-        {"request": request, "s": s, "default_tasks": default_tasks, "logos": logos, "beer_styles": beer_styles},
+        {
+            "request": request,
+            "s": s,
+            "default_tasks": default_tasks,
+            "logos": logos,
+            "beer_styles": beer_styles,
+            "border_graphics": border_graphics,
+        },
     )
 
 
@@ -136,6 +145,55 @@ async def settings_default_logo_scale(request: Request, session: Session = Depen
 def settings_logo_reset(session: Session = Depends(get_session)):
     s = session.get(Settings, 1)
     s.active_logo_id = None
+    session.add(s)
+    session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.post("/border-graphics")
+async def settings_border_graphic_upload(session: Session = Depends(get_session), file: UploadFile = File(...)):
+    """Neue Rahmengrafik hochladen (Ersatz fuer die frueher eingebaute,
+    lizenzpflichtige Hopfenranke - die App liefert dafuer bewusst keine
+    eigene Standardgrafik mehr mit). Wird auf Platte unter
+    DATA_DIR/border_graphics abgelegt und direkt aktiv gesetzt. Skaliert
+    sich auf dem Etikett automatisch ueber die volle Breite, Hoehe je nach
+    Seitenverhaeltnis der Datei - am besten passt ein sehr breites,
+    niedriges Bild (die eingebaute Hopfenranke war z.B. 583x86px, ca. 6.8:1)
+    mit transparentem Hintergrund."""
+    if not file.filename:
+        return RedirectResponse("/settings", status_code=303)
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_BORDER_GRAPHIC_EXT:
+        ext = ".png"
+    stored_name = f"{uuid.uuid4().hex}{ext}"
+    data = await file.read()
+    (BORDER_GRAPHIC_DIR / stored_name).write_bytes(data)
+
+    graphic = BorderGraphic(filename=stored_name, original_filename=file.filename)
+    session.add(graphic)
+    session.flush()
+    s = session.get(Settings, 1)
+    s.active_border_graphic_id = graphic.id
+    session.add(s)
+    session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.post("/border-graphics/{graphic_id}/activate")
+def settings_border_graphic_activate(graphic_id: int, session: Session = Depends(get_session)):
+    graphic = session.get(BorderGraphic, graphic_id)
+    if graphic:
+        s = session.get(Settings, 1)
+        s.active_border_graphic_id = graphic.id
+        session.add(s)
+        session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.post("/border-graphics/reset")
+def settings_border_graphic_reset(session: Session = Depends(get_session)):
+    s = session.get(Settings, 1)
+    s.active_border_graphic_id = None
     session.add(s)
     session.commit()
     return RedirectResponse("/settings", status_code=303)

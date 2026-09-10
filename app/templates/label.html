@@ -19,10 +19,12 @@
   <div class="label-strip">
     <div class="label-cell label-left-square"><img class="label-logo-img" src="{{ logo_url }}" style="width: {{ logo_scale }}%; height: {{ logo_scale }}%;" alt=""></div>
     <div class="label-maincontent">
+      {% if border_graphic_url %}
       <div class="label-vine{% if loop.first %} label-vine-edge-top{% endif %}">
-        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
-        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+        <img class="label-vine-img" src="{{ border_graphic_url }}" alt="">
+        <img class="label-vine-img" src="{{ border_graphic_url }}" alt="">
       </div>
+      {% endif %}
       <div class="label-cell label-brand">
         {% if brand_line1 %}
         <span class="label-brand-name" style="font-size: {{ brand_line1_size }}rem;">{{ brand_line1 }}</span>
@@ -52,10 +54,10 @@
           </svg>
         </div>
       </div>
-      {% if loop.last %}
+      {% if loop.last and border_graphic_url %}
       <div class="label-vine label-vine-bottom label-vine-edge-bottom">
-        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
-        <img class="label-vine-img" src="/static/img/label-hopvine.png" alt="">
+        <img class="label-vine-img" src="{{ border_graphic_url }}" alt="">
+        <img class="label-vine-img" src="{{ border_graphic_url }}" alt="">
       </div>
       {% endif %}
     </div>

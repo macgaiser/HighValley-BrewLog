@@ -43,6 +43,7 @@ class Settings(SQLModel, table=True):
     label_brand_line2_size: float = 1.6
     active_logo_id: Optional[int] = Field(default=None, foreign_key="logo.id")
     default_logo_scale: float = 82.0  # Fuellgrad des eingebauten Standard-Logos in % der Logo-Box
+    active_border_graphic_id: Optional[int] = Field(default=None, foreign_key="bordergraphic.id")
 
 
 class Logo(SQLModel, table=True):
@@ -60,6 +61,21 @@ class Logo(SQLModel, table=True):
     # viel eigenem Weissraum braucht einen groesseren Wert als eines, das
     # bereits bis an den Rand geht).
     scale_percent: float = 82.0
+
+
+class BorderGraphic(SQLModel, table=True):
+    """Eine hochgeladene Rahmengrafik (z.B. Hopfenranke) fuer den oberen/
+    unteren Rand des Etiketts. Anders als beim Logo gibt es keine
+    eingebaute Standardgrafik - die App liefert dafuer keine mit aus
+    (Lizenzgruende), das Feld bleibt leer, bis ein eigenes Bild hochgeladen
+    wird. Skaliert sich automatisch: die Grafik wird ueber die volle
+    Etikettenbreite gestreckt, die Hoehe ergibt sich aus ihrem eigenen
+    Seitenverhaeltnis (siehe .label-vine-img in style.css)."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    filename: str  # Dateiname auf der Platte, unter DATA_DIR/border_graphics
+    original_filename: str = ""
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class DefaultBrewDayTask(SQLModel, table=True):
