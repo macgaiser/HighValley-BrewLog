@@ -41,15 +41,18 @@
 <div class="grid-2">
   <section class="card">
     <h2>Wasser</h2>
+    <div class="table-scroll">
     <table class="mini-table">
       <tr><td>Hauptguss</td><td>{{ batch.main_water_l|fmt }} l</td></tr>
       <tr><td>Nachguss</td><td>{{ batch.sparge_water_l|fmt }} l</td></tr>
       <tr><td>Milchsäure 80%</td><td>{{ batch.lactic_acid_80_ml|fmt(0) }} ml</td></tr>
     </table>
+    </div>
   </section>
 
   <section class="card">
     <h2><span>Schüttung ({{ m.total_grain_kg|fmt }} kg)</span><img class="step-icon" src="/static/img/step-schroten.png" alt=""></h2>
+    <div class="table-scroll">
     <table class="mini-table">
       {% for g in batch.grain_additions|sort(attribute="amount_kg", reverse=True) %}
       <tr><td>{{ g.malt_name }}</td><td>{{ g.amount_kg|fmt }} kg</td></tr>
@@ -57,11 +60,13 @@
       <tr><td colspan="2">–</td></tr>
       {% endfor %}
     </table>
+    </div>
   </section>
 </div>
 
 <section class="card">
   <h2><span>Maischplan</span><img class="step-icon" src="/static/img/step-maischen.png" alt=""></h2>
+  <div class="table-scroll">
   <table class="mini-table">
     <thead><tr><th>Rast</th><th>Temperatur</th><th>Dauer</th><th>Kommentar</th></tr></thead>
     <tbody>
@@ -74,11 +79,13 @@
     {% endfor %}
     </tbody>
   </table>
+  </div>
   <p class="hint">Auf eine Zeile klicken, um den Kommentar zu bearbeiten.</p>
 </section>
 
 <section class="card">
   <h2><span>Würzekochen {% if batch.boil_time_min %}({{ batch.boil_time_min|fmt(0) }} min){% endif %}</span><img class="step-icon" src="/static/img/step-kochen.png" alt=""></h2>
+  <div class="table-scroll">
   <table class="mini-table">
     <thead><tr><th>Hopfen</th><th>Alpha</th><th>Menge</th><th>Zeit</th><th>Typ</th><th>IBU</th></tr></thead>
     {% for h in batch.hop_additions %}
@@ -94,12 +101,14 @@
     <tr><td colspan="6">–</td></tr>
     {% endfor %}
   </table>
+  </div>
 </section>
 
 <div class="grid-2">
   <div class="card-stack">
     <section class="card">
       <h2><span>Hefegabe</span><img class="step-icon" src="/static/img/step-kuehlen.png" alt=""></h2>
+      <div class="table-scroll">
       <table class="mini-table">
         {% for y in batch.yeast_additions %}
         <tr><td>{{ y.yeast_name }}</td><td>{{ y.generation_label }}</td><td>{{ y.amount|fmt(0) }} {{ y.unit }}</td><td>{{ y.pitch_temperature_c|fmt(0) }} °C</td><td>{{ y.comment }}</td></tr>
@@ -107,10 +116,12 @@
         <tr><td colspan="5">–</td></tr>
         {% endfor %}
       </table>
+      </div>
     </section>
 
     <section class="card">
       <h2>Stopfhopfen</h2>
+      <div class="table-scroll">
       <table class="mini-table">
         {% for d in batch.dry_hop_additions %}
         <tr><td>{{ d.hop_name }}</td><td>{{ d.timing_label }}</td><td>{{ d.amount_g|fmt(0) }} g</td></tr>
@@ -118,10 +129,12 @@
         <tr><td colspan="3">–</td></tr>
         {% endfor %}
       </table>
+      </div>
     </section>
 
     <section class="card">
       <h2><span>Karbonisierung</span><img class="step-icon" src="/static/img/step-abfuellen.png" alt=""></h2>
+      <div class="table-scroll">
       <table class="mini-table">
         {% for c in batch.carbonation_entries %}
         <tr><td>{{ c.label }}</td><td>{{ c.sugar_g|fmt(1) }} g</td><td>je {{ c.bottle_volume_l|fmt(2) }} l Flasche</td></tr>
@@ -129,11 +142,13 @@
         <tr><td colspan="3">–</td></tr>
         {% endfor %}
       </table>
+      </div>
     </section>
   </div>
 
   <section class="card">
     <h2>Brautag-Zeitplan</h2>
+    <div class="table-scroll">
     <table class="mini-table">
       <thead><tr><th>Tätigkeit</th><th>Beginn</th><th>Ende</th><th>Dauer</th><th>Notiz</th></tr></thead>
       <tbody>
@@ -150,12 +165,14 @@
       {% endfor %}
       </tbody>
     </table>
+    </div>
     <p class="hint">Auf eine Zeile klicken, um Beginn, Ende und Notiz einzutragen.</p>
   </section>
 </div>
 
 <section class="card">
   <h2><span>Gärverlauf</span><img class="step-icon" src="/static/img/step-gaeren.png" alt=""></h2>
+  <div class="table-scroll">
   <table class="mini-table">
     <thead><tr><th>Datum</th><th>Brix</th><th>Kommentar</th></tr></thead>
     <tbody>
@@ -170,6 +187,7 @@
     {% endfor %}
     </tbody>
   </table>
+  </div>
   <p class="hint">Vergärungsgrad und Alkohol oben in der Übersicht werden aus der jeweils aktuellsten Messung berechnet (Sean-Terrill-Refraktometerkorrektur). Auf eine Zeile klicken, um sie zu bearbeiten.</p>
   <form class="inline-form" method="post" action="/batches/{{ batch.id }}/fermentation">
     <input type="date" name="entry_date" value="{{ today }}" required>
@@ -181,6 +199,7 @@
 
 <section class="card">
   <h2>Kommentare</h2>
+  <div class="table-scroll">
   <table class="mini-table">
     <thead><tr><th>Datum</th><th>Kommentar</th></tr></thead>
     <tbody>
@@ -194,6 +213,7 @@
     {% endfor %}
     </tbody>
   </table>
+  </div>
   <p class="hint">Auf eine Zeile klicken, um sie zu bearbeiten.</p>
   <form class="comment-add-form" method="post" action="/batches/{{ batch.id }}/comments">
     <input type="date" name="entry_date" value="{{ today }}" required>
