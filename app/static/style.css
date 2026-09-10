@@ -1003,6 +1003,21 @@ form.card input, form.card select, form.card textarea {
   font-family: inherit;
 }
 .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.8rem; }
+/* Eigene Label-/Input-Gestaltung statt sich auf "form.card label" zu
+   verlassen: .field-row wird auch innerhalb von <section class="card">
+   unter einem <form> ohne eigene .card-Klasse verwendet (z.B. Stammdaten
+   in batch_form.html), wo diese Regel sonst nicht greifen wuerde. Werte
+   bewusst identisch zu "form.card label"/"form.card input, select", damit
+   es in beiden Kontexten gleich aussieht. */
+.field-row label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.2rem; }
+.field-row input, .field-row select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
 
 form.card label.field-checkbox {
   display: flex;

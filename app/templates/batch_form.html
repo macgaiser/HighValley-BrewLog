@@ -17,47 +17,37 @@
 
   <section class="card">
     <h2>Stammdaten</h2>
-    <div class="table-scroll">
-    <table class="form-table">
-      <thead><tr><th>Sud-Nr.</th><th>Brautag</th><th>Abfülldatum</th><th>Sud Name</th><th>Gärart</th><th>Stil</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><input type="number" name="batch_number" value="{{ batch.batch_number if batch else next_number }}" required></td>
-          <td><input type="date" name="brew_date" value="{{ batch.brew_date if batch and batch.brew_date else '' }}"></td>
-          <td><input type="date" name="bottling_date" value="{{ batch.bottling_date if batch and batch.bottling_date else '' }}"></td>
-          <td><input type="text" name="name" value="{{ batch.name if batch else '' }}"></td>
-          <td>
-            <select name="fermentation_type">
-              <option value="">–</option>
-              <option value="Obergärig" {% if batch and batch.fermentation_type=="Obergärig" %}selected{% endif %}>Obergärig</option>
-              <option value="Untergärig" {% if batch and batch.fermentation_type=="Untergärig" %}selected{% endif %}>Untergärig</option>
-            </select>
-          </td>
-          <td>
-            {% set style_names = beer_styles|map(attribute="name")|list %}
-            <select name="style">
-              <option value="">–</option>
-              {% if batch and batch.style and batch.style not in style_names %}
-              <option value="{{ batch.style }}" selected>{{ batch.style }} (nicht mehr in der Liste)</option>
-              {% endif %}
-              {% for st in beer_styles %}
-              <option value="{{ st.name }}" {% if batch and batch.style==st.name %}selected{% endif %}>{{ st.name }}</option>
-              {% endfor %}
-            </select>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <table class="form-table">
-      <thead><tr><th>Ausschlagwürze (l)</th><th>Farbe (EBC)</th><th>Kochzeit (min)</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><input type="number" step="0.1" name="target_volume_l" value="{{ batch.target_volume_l if batch else '' }}"></td>
-          <td><input type="number" step="0.1" name="color_ebc" value="{{ batch.color_ebc if batch else '' }}"></td>
-          <td><input type="number" step="1" name="boil_time_min" value="{{ batch.boil_time_min if batch else '' }}"></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="field-row">
+      <div><label>Sud-Nr.</label><input type="number" name="batch_number" value="{{ batch.batch_number if batch else next_number }}" required></div>
+      <div><label>Brautag</label><input type="date" name="brew_date" value="{{ batch.brew_date if batch and batch.brew_date else '' }}"></div>
+      <div><label>Abfülldatum</label><input type="date" name="bottling_date" value="{{ batch.bottling_date if batch and batch.bottling_date else '' }}"></div>
+      <div><label>Sud Name</label><input type="text" name="name" value="{{ batch.name if batch else '' }}"></div>
+      <div>
+        <label>Gärart</label>
+        <select name="fermentation_type">
+          <option value="">–</option>
+          <option value="Obergärig" {% if batch and batch.fermentation_type=="Obergärig" %}selected{% endif %}>Obergärig</option>
+          <option value="Untergärig" {% if batch and batch.fermentation_type=="Untergärig" %}selected{% endif %}>Untergärig</option>
+        </select>
+      </div>
+      <div>
+        <label>Stil</label>
+        {% set style_names = beer_styles|map(attribute="name")|list %}
+        <select name="style">
+          <option value="">–</option>
+          {% if batch and batch.style and batch.style not in style_names %}
+          <option value="{{ batch.style }}" selected>{{ batch.style }} (nicht mehr in der Liste)</option>
+          {% endif %}
+          {% for st in beer_styles %}
+          <option value="{{ st.name }}" {% if batch and batch.style==st.name %}selected{% endif %}>{{ st.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="field-row" style="margin-top: 0.8rem;">
+      <div><label>Ausschlagwürze (l)</label><input type="number" step="0.1" name="target_volume_l" value="{{ batch.target_volume_l if batch else '' }}"></div>
+      <div><label>Farbe (EBC)</label><input type="number" step="0.1" name="color_ebc" value="{{ batch.color_ebc if batch else '' }}"></div>
+      <div><label>Kochzeit (min)</label><input type="number" step="1" name="boil_time_min" value="{{ batch.boil_time_min if batch else '' }}"></div>
     </div>
     <label class="field-checkbox">
       <input type="checkbox" name="inventory_deduction_locked" {% if batch and batch.inventory_deduction_locked %}checked{% endif %}>
