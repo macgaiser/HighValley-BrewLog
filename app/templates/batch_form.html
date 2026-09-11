@@ -2,12 +2,19 @@
 {% block title %}{{ "Sud bearbeiten" if batch else "Neuer Sud" }} – HighValley BrewLog{% endblock %}
 {% block content %}
 
-{% macro inv_select(list_name, options, selected_id, row_name) %}
+{% macro inv_select(list_name, options, selected_id, row_name, misc_options=None) %}
 <select name="{{ row_name }}">
   <option value="">– kein Lagerartikel –</option>
   {% for opt in options %}
   <option value="{{ opt.id }}" {% if selected_id==opt.id %}selected{% endif %}>{{ opt.name }} ({{ opt.amount|round(2) }} {{ opt.unit }})</option>
   {% endfor %}
+  {% if misc_options %}
+  <optgroup label="Sonstige Zutaten">
+    {% for opt in misc_options %}
+    <option value="{{ opt.id }}" {% if selected_id==opt.id %}selected{% endif %}>{{ opt.name }} ({{ opt.amount|round(2) }} {{ opt.unit }})</option>
+    {% endfor %}
+  </optgroup>
+  {% endif %}
 </select>
 {% endmacro %}
 
@@ -150,7 +157,7 @@
       <tbody data-rows="hop">
         {% for h in (batch.hop_additions if batch else []) %}
         <tr>
-          <td>{{ inv_select('hopfen', inventory.hopfen, h.inventory_item_id, 'hop_inventory_id') }}</td>
+          <td>{{ inv_select('hopfen', inventory.hopfen, h.inventory_item_id, 'hop_inventory_id', inventory.sonstiges) }}</td>
           <td><input type="text" name="hop_name" value="{{ h.hop_name }}"></td>
           <td><input type="number" step="0.1" name="hop_alpha" value="{{ h.alpha_acid_percent|round(1) if h.alpha_acid_percent is not none else '' }}"></td>
           <td><input type="number" step="0.1" name="hop_amount_g" value="{{ h.amount_g }}"></td>
@@ -173,7 +180,7 @@
     </div>
     <template data-row-template="hop">
       <tr>
-        <td>{{ inv_select('hopfen', inventory.hopfen, None, 'hop_inventory_id') }}</td>
+        <td>{{ inv_select('hopfen', inventory.hopfen, None, 'hop_inventory_id', inventory.sonstiges) }}</td>
         <td><input type="text" name="hop_name"></td>
         <td><input type="number" step="0.1" name="hop_alpha"></td>
         <td><input type="number" step="0.1" name="hop_amount_g"></td>

@@ -91,6 +91,7 @@ def _inventory_options(session: Session) -> dict[str, list[InventoryItem]]:
         "malz": [i for i in items if i.category == InventoryCategory.malz],
         "hopfen": [i for i in items if i.category == InventoryCategory.hopfen],
         "hefe": [i for i in items if i.category == InventoryCategory.hefe],
+        "sonstiges": [i for i in items if i.category == InventoryCategory.sonstiges],
     }
 
 

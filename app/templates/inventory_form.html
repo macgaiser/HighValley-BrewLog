@@ -48,12 +48,12 @@
 {% endblock %}
 {% block scripts %}
 <script>
-  var FIXED_UNITS = {malz: 'kg', hopfen: 'g'};
+  var FIXED_UNITS = {malz: 'kg', hopfen: 'g', sonstiges: 'g'};
   function updateInventoryFields() {
     var category = document.getElementById('inv-category').value;
     document.getElementById('inv-field-spec').hidden = (category !== 'hopfen');
     document.getElementById('inv-field-color-ebc').hidden = (category !== 'malz');
-    document.getElementById('inv-field-unit').hidden = (category === 'malz' || category === 'hopfen');
+    document.getElementById('inv-field-unit').hidden = (category === 'malz' || category === 'hopfen' || category === 'sonstiges');
     var amountUnit = document.getElementById('inv-amount-unit');
     if (amountUnit) {
       amountUnit.textContent = FIXED_UNITS[category] || document.getElementById('inv-unit-input').value || '';

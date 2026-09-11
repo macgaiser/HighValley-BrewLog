@@ -12,14 +12,16 @@ from app.templating import templates
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
 
-_FIXED_UNITS = {InventoryCategory.malz: "kg", InventoryCategory.hopfen: "g"}
+_FIXED_UNITS = {InventoryCategory.malz: "kg", InventoryCategory.hopfen: "g", InventoryCategory.sonstiges: "g"}
 
 
 def _resolve_unit(category: InventoryCategory, form_unit: str) -> str:
     """Malz und Hopfen gehen fest in kg bzw. g in die EBC-/IBU-Berechnung
     und die automatische Lagerabbuchung ein (ohne jede Umrechnung) - die
-    Einheit ist dafuer nicht frei waehlbar, sondern liegt fest. Nur bei
-    Hefe bleibt sie frei editierbar (z.B. fuer ml bei Fluessighefe)."""
+    Einheit ist dafuer nicht frei waehlbar, sondern liegt fest. Sonstige
+    Zutaten sind ebenfalls fest in g, da sie ueber dieselbe Menge(g)-Spalte
+    im Würzekochen erfasst werden wie Hopfengaben. Nur bei Hefe bleibt sie
+    frei editierbar (z.B. fuer ml bei Fluessighefe)."""
     fixed = _FIXED_UNITS.get(category)
     if fixed:
         return fixed

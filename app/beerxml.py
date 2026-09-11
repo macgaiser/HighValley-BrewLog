@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 from app.batch_calc import BatchMetrics
-from app.models import Batch, HopAdditionType, Settings
+from app.models import Batch, HopAdditionType, InventoryCategory, Settings
 
 _HOP_USE = {
     HopAdditionType.kochen: "Boil",
@@ -83,8 +83,23 @@ def build_recipe_xml(batch: Batch, settings: Settings, metrics: BatchMetrics) ->
         _sub(el, "COLOR", _ebc_to_srm(ebc) if ebc else 0)
 
     hops = ET.SubElement(recipe, "HOPS")
+    miscs = ET.SubElement(recipe, "MISCS")
     for h in batch.hop_additions:
         if not h.hop_name:
+            continue
+        # Ueber den Hopfengaben-Dialog koennen auch Lagerartikel der
+        # Kategorie "Sonstiges" ausgewaehlt werden (Klaermittel, Wasser-
+        # zusaetze usw.) - die landen hier nicht als <HOP>, sondern korrekt
+        # als <MISC>.
+        if h.inventory_item and h.inventory_item.category == InventoryCategory.sonstiges:
+            el = ET.SubElement(miscs, "MISC")
+            _sub(el, "NAME", h.hop_name)
+            _sub(el, "VERSION", 1)
+            _sub(el, "TYPE", "Other")
+            _sub(el, "USE", "Boil" if h.addition_type == HopAdditionType.kochen else "Secondary")
+            _sub(el, "TIME", round(h.time_min or 0, 1))
+            _sub(el, "AMOUNT", round((h.amount_g or 0) / 1000, 4))
+            _sub(el, "AMOUNT_IS_WEIGHT", "TRUE")
             continue
         el = ET.SubElement(hops, "HOP")
         _sub(el, "NAME", h.hop_name)

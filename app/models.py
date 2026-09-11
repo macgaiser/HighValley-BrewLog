@@ -18,6 +18,7 @@ class InventoryCategory(str, Enum):
     malz = "malz"
     hopfen = "hopfen"
     hefe = "hefe"
+    sonstiges = "sonstiges"
 
 
 class HopAdditionType(str, Enum):
@@ -263,6 +264,7 @@ class HopAddition(SQLModel, table=True):
     show_on_label: bool = True  # ob diese Gabe in der Hopfensorten-Zeile des Etiketts auftaucht
 
     batch: Batch = Relationship(back_populates="hop_additions")
+    inventory_item: Optional["InventoryItem"] = Relationship()
 
 
 class YeastAddition(SQLModel, table=True):
