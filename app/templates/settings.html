@@ -51,8 +51,8 @@
     </select>
   </div>
 
-  <h2>Akzentfarbe</h2>
-  <p class="hint">Betrifft alles auf dem Etikett einheitlich - Rahmen, Schrift, Symbole, Schnittlinie. Keine separaten Farben pro Element nötig. Das dunkle Etikett lässt sich über den Schalter "Dunkler Hintergrund" beim Drucken aktivieren (z.B. für Stout).</p>
+  <h2>Akzentfarbe <button type="button" class="info-btn" data-info-toggle="accent-color-hint" title="Info anzeigen" aria-label="Info anzeigen">i</button></h2>
+  <p class="hint" id="accent-color-hint" hidden>Betrifft alles auf dem Etikett einheitlich - Rahmen, Schrift, Symbole, Schnittlinie. Keine separaten Farben pro Element nötig. Das dunkle Etikett lässt sich über den Schalter "Dunkler Hintergrund" beim Drucken aktivieren (z.B. für Stout).</p>
   <div class="color-field-row">
     <label for="label_accent_light">Akzentfarbe helles Etikett</label>
     <input type="color" id="label_accent_light" name="label_accent_light" value="{{ s.label_accent_light }}" form="settings-form">
@@ -112,8 +112,8 @@
   </div>
   <p class="hint">Größe: wie viel Fläche das Logo in seinem Feld auf dem Etikett füllt (in %) - lässt sich je Logo einzeln einstellen, z.B. wenn ein Logo bereits viel eigenen Rand mitbringt.</p>
 
-  <h2>Rahmengrafik (Ranke)</h2>
-  <p class="hint">Ziert den oberen/unteren Rand jedes Etiketts. Es ist bewusst keine Grafik vorinstalliert (z.B. eine Hopfenranke unterliegt in der Regel einer eigenen Bildlizenz) - lade hier deine eigene, lizenzierte Grafik hoch. Am besten ein sehr breites, niedriges Bild mit transparentem Hintergrund (die Grafik wird automatisch auf die volle Etikettenbreite skaliert, die Höhe ergibt sich aus ihrem Seitenverhältnis - ein Format um die 580×85px bzw. ca. 6,8:1 passt gut zum restlichen Layout).</p>
+  <h2>Rahmengrafik (Ranke) <button type="button" class="info-btn" data-info-toggle="border-graphic-hint" title="Info anzeigen" aria-label="Info anzeigen">i</button></h2>
+  <p class="hint" id="border-graphic-hint" hidden>Ziert den oberen/unteren Rand jedes Etiketts. Es ist bewusst keine Grafik vorinstalliert (z.B. eine Hopfenranke unterliegt in der Regel einer eigenen Bildlizenz) - lade hier deine eigene, lizenzierte Grafik hoch. Am besten ein sehr breites, niedriges Bild mit transparentem Hintergrund (die Grafik wird automatisch auf die volle Etikettenbreite skaliert, die Höhe ergibt sich aus ihrem Seitenverhältnis - ein Format um die 580×85px bzw. ca. 6,8:1 passt gut zum restlichen Layout).</p>
   <form method="post" action="/settings/border-graphics" enctype="multipart/form-data" class="inline-form">
     <input type="file" name="file" accept="image/*" required>
     <button class="btn btn-primary" type="submit">Hochladen &amp; verwenden</button>
@@ -143,8 +143,8 @@
     {% endfor %}
   </div>
 
-  <h2>Hintergrundbild (Tal)</h2>
-  <p class="hint">Dasselbe Bild für den App-Hintergrund (jede Seite) und das Marken-Feld auf dem Etikett. Das eingebaute Bild bleibt als Standard erhalten - hier kannst du es optional durch ein eigenes ersetzen. Am besten ein breites Querformat (das eingebaute Bild: 1712×624px, ca. 2,7:1).</p>
+  <h2>Hintergrundbild (Tal) <button type="button" class="info-btn" data-info-toggle="bg-image-hint" title="Info anzeigen" aria-label="Info anzeigen">i</button></h2>
+  <p class="hint" id="bg-image-hint" hidden>Dasselbe Bild für den App-Hintergrund (jede Seite) und das Marken-Feld auf dem Etikett. Das eingebaute Bild bleibt als Standard erhalten - hier kannst du es optional durch ein eigenes ersetzen. Am besten ein breites Querformat (das eingebaute Bild: 1712×624px, ca. 2,7:1).</p>
   <form method="post" action="/settings/background-images" enctype="multipart/form-data" class="inline-form">
     <input type="file" name="file" accept="image/*" required>
     <button class="btn btn-primary" type="submit">Hochladen &amp; verwenden</button>

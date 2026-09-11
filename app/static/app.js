@@ -1,3 +1,14 @@
+// Generische Info-Buttons: ein <button class="info-btn" data-info-toggle="ID">i</button>
+// blendet den Hinweistext im Element mit dieser ID ein/aus, statt ihn
+// dauerhaft anzuzeigen - fuer laengere Erklaerungen, die nicht staendig im
+// Weg stehen sollen, aber bei Bedarf griffbereit sind.
+document.addEventListener("click", (event) => {
+  const infoBtn = event.target.closest("[data-info-toggle]");
+  if (!infoBtn) return;
+  const target = document.getElementById(infoBtn.getAttribute("data-info-toggle"));
+  if (target) target.hidden = !target.hidden;
+});
+
 // Generische Zeilen-Verwaltung für die dynamischen Tabellen im Sud-Formular.
 // Jede Sektion hat: ein <tbody data-rows="NAME">, ein <template data-row-template="NAME">
 // und einen Button [data-add-row="NAME"].
@@ -104,12 +115,6 @@ function updateColorEbcAutoState() {
 }
 document.addEventListener("change", (event) => {
   if (event.target.closest("[data-grain-select]")) updateColorEbcAutoState();
-});
-document.addEventListener("click", (event) => {
-  if (event.target.closest("#color-ebc-info-btn")) {
-    const hint = document.getElementById("color-ebc-auto-hint");
-    hint.hidden = !hint.hidden;
-  }
 });
 updateColorEbcAutoState();
 
