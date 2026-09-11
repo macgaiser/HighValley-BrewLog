@@ -89,12 +89,17 @@
   <h2><span>Läuterung</span><img class="step-icon" src="/static/img/step-laeutern.png" alt=""></h2>
   <div class="table-scroll">
   <table class="mini-table">
-    <tr onclick="window.location='/batches/{{ batch.id }}/measurements/lautering'" class="clickable-row"><td>vor Läutern</td><td>{{ batch.pre_lauter_brix|fmt(1) }} °Brix</td></tr>
-    <tr onclick="window.location='/batches/{{ batch.id }}/measurements/lautering'" class="clickable-row"><td>nach Läutern</td><td>{{ batch.post_lauter_brix|fmt(1) }} °Brix</td></tr>
-    <tr onclick="window.location='/batches/{{ batch.id }}/measurements/lautering'" class="clickable-row"><td>Menge nach Läutern</td><td>{{ batch.post_lauter_volume_l|fmt(1) }} l</td></tr>
+    <thead><tr><th>vor Läutern</th><th>nach Läutern</th><th>Menge nach Läutern</th></tr></thead>
+    <tbody>
+      <tr onclick="window.location='/batches/{{ batch.id }}/measurements/lautering'" class="clickable-row">
+        <td>{{ batch.pre_lauter_brix|fmt(1) }} °Brix</td>
+        <td>{{ batch.post_lauter_brix|fmt(1) }} °Brix</td>
+        <td>{{ batch.post_lauter_volume_l|fmt(1) }} l</td>
+      </tr>
+    </tbody>
   </table>
   </div>
-  <p class="hint">Auf eine Zeile klicken, um die Werte zu bearbeiten.</p>
+  <p class="hint">Auf die Zeile klicken, um die Werte zu bearbeiten.</p>
 </section>
 
 <section class="card">
@@ -122,12 +127,17 @@
   <h2>Nach dem Kochen</h2>
   <div class="table-scroll">
   <table class="mini-table">
-    <tr onclick="window.location='/batches/{{ batch.id }}/measurements/boil'" class="clickable-row"><td>Wasserausgleich</td><td>{{ batch.water_adjustment_l|fmt(1) }} l</td></tr>
-    <tr onclick="window.location='/batches/{{ batch.id }}/measurements/boil'" class="clickable-row"><td>nach Kochen/Kühlung</td><td>{{ batch.post_boil_brix|fmt(1) }} °Brix</td></tr>
-    <tr onclick="window.location='/batches/{{ batch.id }}/measurements/boil'" class="clickable-row"><td>Menge nach Kochen</td><td>{{ batch.post_boil_volume_l|fmt(1) }} l</td></tr>
+    <thead><tr><th>Wasserausgleich</th><th>nach Kochen/Kühlung</th><th>Menge nach Kochen</th></tr></thead>
+    <tbody>
+      <tr onclick="window.location='/batches/{{ batch.id }}/measurements/boil'" class="clickable-row">
+        <td>{{ batch.water_adjustment_l|fmt(1) }} l</td>
+        <td>{{ batch.post_boil_brix|fmt(1) }} °Brix</td>
+        <td>{{ batch.post_boil_volume_l|fmt(1) }} l</td>
+      </tr>
+    </tbody>
   </table>
   </div>
-  <p class="hint">Auf eine Zeile klicken, um die Werte zu bearbeiten. "nach Kochen/Kühlung" ersetzt die geplante Stammwürze für alle Berechnungen, sobald ein Wert eingetragen ist.</p>
+  <p class="hint">Auf die Zeile klicken, um die Werte zu bearbeiten. "nach Kochen/Kühlung" ersetzt die geplante Stammwürze für alle Berechnungen, sobald ein Wert eingetragen ist.</p>
 </section>
 
 <div class="grid-2">
