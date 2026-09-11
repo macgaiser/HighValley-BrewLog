@@ -120,24 +120,31 @@
     <tr><td colspan="6">–</td></tr>
     {% endfor %}
   </table>
+  <table class="mini-table">
+    <tbody>
+      <tr onclick="window.location='/batches/{{ batch.id }}/measurements/boil'" class="clickable-row">
+        <td>Wasserausgleich</td><td>{{ batch.water_adjustment_l|fmt(1) }} l</td>
+      </tr>
+    </tbody>
+  </table>
   </div>
+  <p class="hint">Auf die Zeile klicken, um den Wert zu bearbeiten.</p>
 </section>
 
 <section class="card">
-  <h2>Nach dem Kochen</h2>
+  <h2>Stammdaten Erfassung</h2>
   <div class="table-scroll">
   <table class="mini-table">
-    <thead><tr><th>Wasserausgleich</th><th>nach Kochen/Kühlung</th><th>Menge nach Kochen</th></tr></thead>
+    <thead><tr><th>Stammwürze</th><th>Finale Menge</th></tr></thead>
     <tbody>
       <tr onclick="window.location='/batches/{{ batch.id }}/measurements/boil'" class="clickable-row">
-        <td>{{ batch.water_adjustment_l|fmt(1) }} l</td>
         <td>{{ batch.post_boil_brix|fmt(1) }} °Brix</td>
         <td>{{ batch.post_boil_volume_l|fmt(1) }} l</td>
       </tr>
     </tbody>
   </table>
   </div>
-  <p class="hint">Auf die Zeile klicken, um die Werte zu bearbeiten. "nach Kochen/Kühlung" ersetzt die geplante Stammwürze für alle Berechnungen, sobald ein Wert eingetragen ist.</p>
+  <p class="hint">Auf die Zeile klicken, um die Werte zu bearbeiten. Die gemessene Stammwürze ersetzt die geplante Stammwürze für alle Berechnungen, sobald ein Wert eingetragen ist.</p>
 </section>
 
 <div class="grid-2">
