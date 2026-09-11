@@ -160,7 +160,7 @@
     <div class="section-title-row"><h2><span>Würzekochen / Hopfengaben</span><img class="step-icon" src="/static/img/step-kochen.png" alt=""></h2><button class="btn btn-small" data-add-row="hop">+ Zeile</button></div>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Alpha (%)</th><th>Menge (g)</th><th>Zeit (min)</th><th>Temp. (°C)</th><th>Typ</th><th>Auf Etikett</th><th></th></tr></thead>
+      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Alpha (%)</th><th>Menge (g)</th><th>Zeit (min)</th><th>Temp. (°C)</th><th>Typ</th><th>IBU</th><th>Auf Etikett</th><th></th></tr></thead>
       <tbody data-rows="hop">
         {% for h in (batch.hop_additions if batch else []) %}
         <tr>
@@ -175,6 +175,7 @@
               {% for t in hop_types %}<option value="{{ t.value }}" {% if h.addition_type==t %}selected{% endif %}>{{ t.value|capitalize }}</option>{% endfor %}
             </select>
           </td>
+          <td><span data-ibu-preview>–</span></td>
           <td>
             <input type="hidden" name="hop_show_on_label" value="false">
             <input type="checkbox" name="hop_show_on_label" value="true" {% if h.show_on_label %}checked{% endif %}>
@@ -185,6 +186,7 @@
       </tbody>
     </table>
     </div>
+    <p class="hint">IBU-Schätzung nach Tinseth, auf Basis der geplanten Stammwürze (Stammdaten) - aktualisiert sich live beim Eintragen der Werte.</p>
     <template data-row-template="hop">
       <tr>
         <td>{{ inv_select('hopfen', inventory.hopfen, None, 'hop_inventory_id', inventory.sonstiges) }}</td>
@@ -198,6 +200,7 @@
             {% for t in hop_types %}<option value="{{ t.value }}">{{ t.value|capitalize }}</option>{% endfor %}
           </select>
         </td>
+        <td><span data-ibu-preview>–</span></td>
         <td>
           <input type="hidden" name="hop_show_on_label" value="false">
           <input type="checkbox" name="hop_show_on_label" value="true" checked>

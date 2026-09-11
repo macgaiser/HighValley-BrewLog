@@ -20,10 +20,55 @@ document.addEventListener("change", (event) => {
   if (!select) return;
   const opt = select.options[select.selectedIndex];
   const alpha = opt ? opt.dataset.alpha : "";
-  if (!alpha) return;
-  const alphaInput = select.closest("tr").querySelector('input[name="hop_alpha"]');
-  if (alphaInput) alphaInput.value = alpha;
+  if (alpha) {
+    const alphaInput = select.closest("tr").querySelector('input[name="hop_alpha"]');
+    if (alphaInput) alphaInput.value = alpha;
+  }
+  updateIbuPreviews();
 });
+
+// Würzekochen: IBU-Beitrag je Zeile nach der Tinseth-Formel, live im
+// Bearbeiten-Formular berechnet (JS-Nachbau von formulas.tinseth_ibu) -
+// auf Basis der geplanten Stammwürze, da der gemessene Wert ("nach dem
+// Kochen") in diesem Formular gar nicht mehr gepflegt wird (eigener
+// Dialog auf der Sud-Detailseite).
+function platoToSg(plato) {
+  return 1 + plato / (258.6 - (plato / 258.2) * 227.1);
+}
+function tinsethIbu(weightG, alphaPercent, boilTimeMin, batchVolumeL, ogPlato) {
+  if (!(weightG > 0) || !(alphaPercent > 0) || !(batchVolumeL > 0) || !(ogPlato > 0)) return null;
+  const ogSg = platoToSg(ogPlato);
+  const bignessFactor = 1.65 * Math.pow(0.000125, ogSg - 1);
+  const boilTimeFactor = (1 - Math.exp(-0.04 * boilTimeMin)) / 4.15;
+  const utilization = bignessFactor * boilTimeFactor;
+  const aauMgPerL = (weightG * (alphaPercent / 100) * 1000) / batchVolumeL;
+  return Math.round(utilization * aauMgPerL * 10) / 10;
+}
+function updateIbuPreviews() {
+  const rows = document.querySelectorAll('tbody[data-rows="hop"] tr');
+  if (!rows.length) return;
+  const batchVolumeL = parseFloat(document.querySelector('input[name="target_volume_l"]')?.value);
+  const ogPlato = parseFloat(document.querySelector('input[name="target_og_plato"]')?.value);
+  rows.forEach((row) => {
+    const preview = row.querySelector("[data-ibu-preview]");
+    if (!preview) return;
+    const weightG = parseFloat(row.querySelector('input[name="hop_amount_g"]')?.value);
+    const alphaPercent = parseFloat(row.querySelector('input[name="hop_alpha"]')?.value);
+    const boilTimeMin = parseFloat(row.querySelector('input[name="hop_time_min"]')?.value) || 0;
+    const ibu = tinsethIbu(weightG, alphaPercent, boilTimeMin, batchVolumeL, ogPlato);
+    preview.textContent = ibu === null ? "–" : ibu.toFixed(1);
+  });
+}
+document.addEventListener("input", (event) => {
+  if (
+    event.target.matches(
+      'input[name="hop_amount_g"], input[name="hop_alpha"], input[name="hop_time_min"], input[name="target_volume_l"], input[name="target_og_plato"]'
+    )
+  ) {
+    updateIbuPreviews();
+  }
+});
+updateIbuPreviews();
 
 // Generische Zeilen-Verwaltung für die dynamischen Tabellen im Sud-Formular.
 // Jede Sektion hat: ein <tbody data-rows="NAME">, ein <template data-row-template="NAME">
@@ -41,6 +86,7 @@ document.addEventListener("click", (event) => {
       tbody.appendChild(clone);
     }
     updateColorEbcAutoState();
+    updateIbuPreviews();
     return;
   }
 
@@ -49,6 +95,7 @@ document.addEventListener("click", (event) => {
     event.preventDefault();
     removeBtn.closest("tr").remove();
     updateColorEbcAutoState();
+    updateIbuPreviews();
     return;
   }
 
