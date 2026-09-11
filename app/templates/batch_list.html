@@ -60,7 +60,7 @@
       <th>#</th>
       <th>Datum</th>
       <th class="col-name">Sud Name</th>
-      <th>Stil</th>
+      <th class="col-style">Stil</th>
       <th>Gärart</th>
       <th>Stammwürze</th>
       <th>IBU</th>
@@ -75,8 +75,8 @@
     <tr onclick="window.location='/batches/{{ b.id }}'" class="clickable-row">
       <td>#{{ b.batch_number }}</td>
       <td>{{ b.brew_date|de_date }}</td>
-      <td class="col-name">{{ b.name }}</td>
-      <td>{{ b.style or "–" }}</td>
+      <td class="col-name" title="{{ b.name }}">{{ b.name }}</td>
+      <td class="col-style" title="{{ b.style }}">{{ b.style or "–" }}</td>
       <td>{{ b.fermentation_type or "–" }}</td>
       <td>{{ og_display.get(b.id, "–") }} °P</td>
       <td>{{ ibu_display.get(b.id)|fmt(0) if ibu_display.get(b.id) is not none else "–" }}</td>
