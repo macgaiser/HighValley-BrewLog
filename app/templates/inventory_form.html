@@ -17,14 +17,14 @@
   <input type="text" name="brand" value="{{ item.brand if item else '' }}">
 
   <div id="inv-field-spec">
-    <label>Alphasäure</label>
-    <input type="text" name="spec" value="{{ item.spec if item else '' }}">
+    <label>Alphasäure (%)</label>
+    <input type="number" step="0.1" name="spec" value="{{ item.spec if item else '' }}">
   </div>
 
   <div id="inv-field-color-ebc">
-    <label>Eigenfarbe des Malzes in EBC</label>
+    <label>Eigenfarbe des Malzes in EBC <button type="button" class="info-btn" data-info-toggle="color-ebc-item-hint" title="Info anzeigen" aria-label="Info anzeigen">i</button></label>
     <input type="text" inputmode="decimal" name="color_ebc" placeholder="z.B. 4-6" value="{{ item.color_ebc if item and item.color_ebc is not none else '' }}">
-    <p class="hint">Wird für die automatische Berechnung der Bierfarbe im Sud verwendet. Einzelwert oder Bereich wie auf dem Malz-Datenblatt (z.B. "4-6") - bei einem Bereich wird automatisch der Mittelwert genutzt.</p>
+    <p class="hint" id="color-ebc-item-hint" hidden>Wird für die automatische Berechnung der Bierfarbe im Sud verwendet. Einzelwert oder Bereich wie auf dem Malz-Datenblatt (z.B. "4-6") - bei einem Bereich wird automatisch der Mittelwert genutzt.</p>
   </div>
 
   <div id="inv-field-unit">

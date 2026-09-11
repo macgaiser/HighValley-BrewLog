@@ -126,6 +126,36 @@ def init_db() -> None:
                 session.add(BeerStyle(position=i, name=name))
             session.commit()
 
+        _fix_hop_alpha_fractions(session)
+
+
+def _fix_hop_alpha_fractions(session: Session) -> None:
+    """Einmalige Korrektur alter Lagerartikel-Daten: der ursprüngliche
+    Excel-Import hatte die Alphasäure von Hopfen als Bruch abgelegt (z.B.
+    "0,183" statt "18,3") in InventoryItem.spec. Werte, die eindeutig als
+    Bruch erkennbar sind (kleiner als 1 - eine Alphasäure unter 1% kommt in
+    der Praxis nicht vor), werden beim Start auf Prozent umgerechnet.
+    Idempotent: bereits korrigierte Werte (>= 1) bleiben unangetastet, ein
+    erneuter Lauf ändert dann nichts mehr."""
+    from app.models import InventoryCategory, InventoryItem
+
+    items = session.exec(select(InventoryItem).where(InventoryItem.category == InventoryCategory.hopfen)).all()
+    changed = False
+    for item in items:
+        raw = (item.spec or "").strip().replace(",", ".")
+        if not raw:
+            continue
+        try:
+            value = float(raw)
+        except ValueError:
+            continue
+        if 0 < value < 1:
+            item.spec = f"{value * 100:.1f}"
+            session.add(item)
+            changed = True
+    if changed:
+        session.commit()
+
 
 def get_session():
     with Session(engine) as session:

@@ -3,10 +3,10 @@
 {% block content %}
 
 {% macro inv_select(list_name, options, selected_id, row_name, misc_options=None) %}
-<select name="{{ row_name }}">
+<select name="{{ row_name }}" {% if list_name=='malz' %}data-grain-select{% endif %}>
   <option value="">– kein Lagerartikel –</option>
   {% for opt in options %}
-  <option value="{{ opt.id }}" {% if selected_id==opt.id %}selected{% endif %}>{{ opt.name }} ({{ opt.amount|round(2) }} {{ opt.unit }})</option>
+  <option value="{{ opt.id }}" data-ebc="{{ opt.color_ebc if opt.color_ebc is not none else '' }}" data-alpha="{{ opt.spec if opt.spec else '' }}" {% if selected_id==opt.id %}selected{% endif %}>{{ opt.name }} ({{ opt.amount|round(2) }} {{ opt.unit }})</option>
   {% endfor %}
   {% if misc_options %}
   <optgroup label="Sonstige Zutaten">
@@ -53,11 +53,18 @@
     </div>
     <div class="field-row" style="margin-top: 0.8rem;">
       <div><label>Ausschlagwürze (l)</label><input type="number" step="0.1" name="target_volume_l" value="{{ batch.target_volume_l if batch else '' }}"></div>
-      <div><label>Farbe (EBC)</label><input type="number" step="0.1" name="color_ebc" value="{{ batch.color_ebc if batch else '' }}"></div>
+      <div>
+        <label>Farbe (EBC) <button type="button" class="info-btn" id="color-ebc-info-btn" data-info-toggle="color-ebc-auto-hint" hidden title="Info anzeigen" aria-label="Info anzeigen">i</button></label>
+        <input type="number" step="0.1" name="color_ebc" id="color-ebc-input" value="{{ batch.color_ebc if batch else '' }}">
+        <p class="hint" id="color-ebc-auto-hint" hidden>Wird automatisch aus der Schüttung berechnet (alle Positionen sind mit einem Malz-Lagerartikel mit hinterlegter Eigenfarbe verknüpft) - diese manuelle Eingabe wird dafür nicht verwendet.</p>
+      </div>
       <div><label>Kochzeit (min)</label><input type="number" step="1" name="boil_time_min" value="{{ batch.boil_time_min if batch else '' }}"></div>
-      <div><label>Geplante Stammwürze (°Plato)</label><input type="number" step="0.1" name="target_og_plato" value="{{ batch.target_og_plato if batch else '' }}"></div>
+      <div>
+        <label>Geplante Stammwürze (°Plato) <button type="button" class="info-btn" data-info-toggle="target-og-hint" title="Info anzeigen" aria-label="Info anzeigen">i</button></label>
+        <input type="number" step="0.1" name="target_og_plato" value="{{ batch.target_og_plato if batch else '' }}">
+      </div>
     </div>
-    <p class="hint">Die geplante Stammwürze gilt als "Stammwürze" in der Sud-Übersicht, bis auf der Sud-Seite unter "Nach dem Kochen" ein gemessener Wert eingetragen ist - der ersetzt sie dann automatisch.</p>
+    <p class="hint" id="target-og-hint" hidden>Die geplante Stammwürze gilt als "Stammwürze" in der Sud-Übersicht, bis auf der Sud-Seite unter "Nach dem Kochen" ein gemessener Wert eingetragen ist - der ersetzt sie dann automatisch.</p>
     <label class="field-checkbox">
       <input type="checkbox" name="inventory_deduction_locked" {% if batch and (batch.inventory_deduction_locked or suggest_inventory_lock) %}checked{% endif %}>
       Lagerbuchung für diesen Sud sperren (keine automatische Ab-/Rückbuchung beim Speichern – für historische, bereits abgeschlossene Sude)
@@ -94,7 +101,7 @@
         {% for g in (batch.grain_additions if batch else []) %}
         <tr>
           <td>{{ inv_select('malz', inventory.malz, g.inventory_item_id, 'grain_inventory_id') }}</td>
-          <td><input type="text" name="grain_malt_name" value="{{ g.malt_name }}"></td>
+          <td><input type="text" name="grain_malt_name" value="{{ '' if g.inventory_item_id else g.malt_name }}"></td>
           <td><input type="number" step="0.01" name="grain_amount_kg" value="{{ g.amount_kg }}"></td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
         </tr>
@@ -153,12 +160,12 @@
     <div class="section-title-row"><h2><span>Würzekochen / Hopfengaben</span><img class="step-icon" src="/static/img/step-kochen.png" alt=""></h2><button class="btn btn-small" data-add-row="hop">+ Zeile</button></div>
     <div class="table-scroll">
     <table class="form-table">
-      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Alpha (%)</th><th>Menge (g)</th><th>Zeit (min)</th><th>Temp. (°C)</th><th>Typ</th><th>Auf Etikett</th><th></th></tr></thead>
+      <thead><tr><th>Lagerartikel</th><th>Alternative (nicht im Lager)</th><th>Alpha (%)</th><th>Menge (g)</th><th>Zeit (min)</th><th>Temp. (°C)</th><th>Typ</th><th>IBU</th><th>Auf Etikett</th><th></th></tr></thead>
       <tbody data-rows="hop">
         {% for h in (batch.hop_additions if batch else []) %}
         <tr>
           <td>{{ inv_select('hopfen', inventory.hopfen, h.inventory_item_id, 'hop_inventory_id', inventory.sonstiges) }}</td>
-          <td><input type="text" name="hop_name" value="{{ h.hop_name }}"></td>
+          <td><input type="text" name="hop_name" value="{{ '' if h.inventory_item_id else h.hop_name }}"></td>
           <td><input type="number" step="0.1" name="hop_alpha" value="{{ h.alpha_acid_percent|round(1) if h.alpha_acid_percent is not none else '' }}"></td>
           <td><input type="number" step="0.1" name="hop_amount_g" value="{{ h.amount_g }}"></td>
           <td><input type="number" step="1" name="hop_time_min" value="{{ h.time_min }}"></td>
@@ -168,6 +175,7 @@
               {% for t in hop_types %}<option value="{{ t.value }}" {% if h.addition_type==t %}selected{% endif %}>{{ t.value|capitalize }}</option>{% endfor %}
             </select>
           </td>
+          <td><span data-ibu-preview>–</span></td>
           <td>
             <input type="hidden" name="hop_show_on_label" value="false">
             <input type="checkbox" name="hop_show_on_label" value="true" {% if h.show_on_label %}checked{% endif %}>
@@ -178,6 +186,7 @@
       </tbody>
     </table>
     </div>
+    <p class="hint">IBU-Schätzung nach Tinseth, auf Basis der geplanten Stammwürze (Stammdaten) - aktualisiert sich live beim Eintragen der Werte.</p>
     <template data-row-template="hop">
       <tr>
         <td>{{ inv_select('hopfen', inventory.hopfen, None, 'hop_inventory_id', inventory.sonstiges) }}</td>
@@ -191,6 +200,7 @@
             {% for t in hop_types %}<option value="{{ t.value }}">{{ t.value|capitalize }}</option>{% endfor %}
           </select>
         </td>
+        <td><span data-ibu-preview>–</span></td>
         <td>
           <input type="hidden" name="hop_show_on_label" value="false">
           <input type="checkbox" name="hop_show_on_label" value="true" checked>
@@ -209,7 +219,7 @@
         {% for y in (batch.yeast_additions if batch else []) %}
         <tr>
           <td>{{ inv_select('hefe', inventory.hefe, y.inventory_item_id, 'yeast_inventory_id') }}</td>
-          <td><input type="text" name="yeast_name" value="{{ y.yeast_name }}"></td>
+          <td><input type="text" name="yeast_name" value="{{ '' if y.inventory_item_id else y.yeast_name }}"></td>
           <td>
             <select name="yeast_generation">
               <option value="">–</option>
@@ -254,7 +264,7 @@
         {% for d in (batch.dry_hop_additions if batch else []) %}
         <tr>
           <td>{{ inv_select('hopfen', inventory.hopfen, d.inventory_item_id, 'dryhop_inventory_id') }}</td>
-          <td><input type="text" name="dryhop_name" value="{{ d.hop_name }}"></td>
+          <td><input type="text" name="dryhop_name" value="{{ '' if d.inventory_item_id else d.hop_name }}"></td>
           <td><input type="text" name="dryhop_timing" value="{{ d.timing_label }}"></td>
           <td><input type="number" step="0.1" name="dryhop_amount_g" value="{{ d.amount_g }}"></td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
