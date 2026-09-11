@@ -109,19 +109,6 @@ def _resolve_ingredient_name(session: Session, manual_name: str, inventory_item_
     return manual_name.strip()
 
 
-def _resolve_hop_name(session: Session, manual_name: str, inventory_item_id: int | None) -> str:
-    """Wie _resolve_ingredient_name, aber bei Hopfen werden Lagerartikel UND
-    Alternative kombiniert, falls ausnahmsweise mal beide Felder gefuellt
-    sind (Normalfall bleibt: nur eines von beiden ist ausgefuellt) - so geht
-    z.B. auf dem Etikett keine der beiden Angaben verloren."""
-    manual = manual_name.strip()
-    if inventory_item_id:
-        item = session.get(InventoryItem, inventory_item_id)
-        if item:
-            return f"{item.name} + {manual}" if manual else item.name
-    return manual
-
-
 @router.get("")
 def batch_list(
     request: Request,
@@ -373,7 +360,7 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
             HopAddition(
                 batch_id=batch.id,
                 position=i,
-                hop_name=_resolve_hop_name(session, names[i], hop_inv_id),
+                hop_name=_resolve_ingredient_name(session, names[i], hop_inv_id),
                 alpha_acid_percent=round(alpha, 1) if alpha is not None else None,
                 amount_g=_f(hop_amounts[i]) or 0,
                 time_min=_f(times[i]) if i < len(times) else None,
@@ -413,17 +400,18 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     timings = form.getlist("dryhop_timing")
     dryhop_amounts = form.getlist("dryhop_amount_g")
     dryhop_inv_ids = form.getlist("dryhop_inventory_id")
-    for i, name in enumerate(names):
-        if not name.strip():
+    for i in range(len(names)):
+        dryhop_inv_id = int(dryhop_inv_ids[i]) if i < len(dryhop_inv_ids) and dryhop_inv_ids[i] else None
+        if not names[i].strip() and not dryhop_inv_id:
             continue
         session.add(
             DryHopAddition(
                 batch_id=batch.id,
                 position=i,
-                hop_name=name.strip(),
+                hop_name=_resolve_ingredient_name(session, names[i], dryhop_inv_id),
                 timing_label=timings[i].strip() if i < len(timings) else "",
                 amount_g=_f(dryhop_amounts[i]) or 0,
-                inventory_item_id=int(dryhop_inv_ids[i]) if i < len(dryhop_inv_ids) and dryhop_inv_ids[i] else None,
+                inventory_item_id=dryhop_inv_id,
             )
         )
 

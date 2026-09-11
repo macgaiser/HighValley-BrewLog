@@ -61,6 +61,29 @@ input[readonly] {
   color: var(--muted);
   cursor: not-allowed;
 }
+.info-btn:not([hidden]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.info-btn {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  border: 1px solid var(--muted);
+  background: var(--card-bg);
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-style: italic;
+  font-family: Georgia, serif;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  vertical-align: middle;
+}
+.info-btn:hover {
+  background: var(--border);
+}
 body::before {
   content: "";
   position: fixed;

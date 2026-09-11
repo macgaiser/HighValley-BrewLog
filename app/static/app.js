@@ -90,7 +90,8 @@ updateCompareButton();
 function updateColorEbcAutoState() {
   const input = document.getElementById("color-ebc-input");
   const hint = document.getElementById("color-ebc-auto-hint");
-  if (!input || !hint) return;
+  const infoBtn = document.getElementById("color-ebc-info-btn");
+  if (!input || !hint || !infoBtn) return;
   const linked = Array.from(document.querySelectorAll("[data-grain-select]")).map((select) => {
     if (!select.value) return false;
     const opt = select.options[select.selectedIndex];
@@ -98,10 +99,17 @@ function updateColorEbcAutoState() {
   });
   const auto = linked.length > 0 && linked.every(Boolean);
   input.readOnly = auto;
-  hint.hidden = !auto;
+  infoBtn.hidden = !auto;
+  if (!auto) hint.hidden = true; // Info-Button verschwindet -> Text mit zuklappen
 }
 document.addEventListener("change", (event) => {
   if (event.target.closest("[data-grain-select]")) updateColorEbcAutoState();
+});
+document.addEventListener("click", (event) => {
+  if (event.target.closest("#color-ebc-info-btn")) {
+    const hint = document.getElementById("color-ebc-auto-hint");
+    hint.hidden = !hint.hidden;
+  }
 });
 updateColorEbcAutoState();
 

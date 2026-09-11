@@ -54,7 +54,7 @@
     <div class="field-row" style="margin-top: 0.8rem;">
       <div><label>Ausschlagwürze (l)</label><input type="number" step="0.1" name="target_volume_l" value="{{ batch.target_volume_l if batch else '' }}"></div>
       <div>
-        <label>Farbe (EBC)</label>
+        <label>Farbe (EBC) <button type="button" class="info-btn" id="color-ebc-info-btn" hidden title="Info anzeigen" aria-label="Info anzeigen">i</button></label>
         <input type="number" step="0.1" name="color_ebc" id="color-ebc-input" value="{{ batch.color_ebc if batch else '' }}">
         <p class="hint" id="color-ebc-auto-hint" hidden>Wird automatisch aus der Schüttung berechnet (alle Positionen sind mit einem Malz-Lagerartikel mit hinterlegter Eigenfarbe verknüpft) - diese manuelle Eingabe wird dafür nicht verwendet.</p>
       </div>
@@ -98,7 +98,7 @@
         {% for g in (batch.grain_additions if batch else []) %}
         <tr>
           <td>{{ inv_select('malz', inventory.malz, g.inventory_item_id, 'grain_inventory_id') }}</td>
-          <td><input type="text" name="grain_malt_name" value="{{ g.malt_name }}"></td>
+          <td><input type="text" name="grain_malt_name" value="{{ '' if g.inventory_item_id else g.malt_name }}"></td>
           <td><input type="number" step="0.01" name="grain_amount_kg" value="{{ g.amount_kg }}"></td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
         </tr>
@@ -162,7 +162,7 @@
         {% for h in (batch.hop_additions if batch else []) %}
         <tr>
           <td>{{ inv_select('hopfen', inventory.hopfen, h.inventory_item_id, 'hop_inventory_id', inventory.sonstiges) }}</td>
-          <td><input type="text" name="hop_name" value="{{ h.hop_name }}"></td>
+          <td><input type="text" name="hop_name" value="{{ '' if h.inventory_item_id else h.hop_name }}"></td>
           <td><input type="number" step="0.1" name="hop_alpha" value="{{ h.alpha_acid_percent|round(1) if h.alpha_acid_percent is not none else '' }}"></td>
           <td><input type="number" step="0.1" name="hop_amount_g" value="{{ h.amount_g }}"></td>
           <td><input type="number" step="1" name="hop_time_min" value="{{ h.time_min }}"></td>
@@ -213,7 +213,7 @@
         {% for y in (batch.yeast_additions if batch else []) %}
         <tr>
           <td>{{ inv_select('hefe', inventory.hefe, y.inventory_item_id, 'yeast_inventory_id') }}</td>
-          <td><input type="text" name="yeast_name" value="{{ y.yeast_name }}"></td>
+          <td><input type="text" name="yeast_name" value="{{ '' if y.inventory_item_id else y.yeast_name }}"></td>
           <td>
             <select name="yeast_generation">
               <option value="">–</option>
@@ -258,7 +258,7 @@
         {% for d in (batch.dry_hop_additions if batch else []) %}
         <tr>
           <td>{{ inv_select('hopfen', inventory.hopfen, d.inventory_item_id, 'dryhop_inventory_id') }}</td>
-          <td><input type="text" name="dryhop_name" value="{{ d.hop_name }}"></td>
+          <td><input type="text" name="dryhop_name" value="{{ '' if d.inventory_item_id else d.hop_name }}"></td>
           <td><input type="text" name="dryhop_timing" value="{{ d.timing_label }}"></td>
           <td><input type="number" step="0.1" name="dryhop_amount_g" value="{{ d.amount_g }}"></td>
           <td><button class="btn btn-small" data-remove-row>✕</button></td>
