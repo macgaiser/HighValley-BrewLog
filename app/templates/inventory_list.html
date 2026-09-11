@@ -6,7 +6,7 @@
   <a class="btn btn-primary" href="/inventory/new">+ Neuer Artikel</a>
 </div>
 
-{% set labels = {"malz": "Malz", "hopfen": "Hopfen", "hefe": "Hefe"} %}
+{% set labels = {"malz": "Malz", "hopfen": "Hopfen", "hefe": "Hefe", "sonstiges": "Sonstiges"} %}
 {% for cat, items in grouped.items() %}
 <section class="card">
   <h2>{{ labels[cat] }}</h2>

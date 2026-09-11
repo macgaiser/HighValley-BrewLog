@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Nach dem Kochen bearbeiten – HighValley BrewLog{% endblock %}
+{% block content %}
+<h1>Nach dem Kochen bearbeiten</h1>
+<p class="subtitle">Sud #{{ batch.batch_number }} – {{ batch.name }}</p>
+<form class="card" method="post" action="/batches/{{ batch.id }}/measurements/boil">
+  <div class="field-row">
+    <div><label>Wasserausgleich (l)</label><input type="number" step="0.1" name="water_adjustment_l" value="{{ batch.water_adjustment_l if batch.water_adjustment_l is not none else '' }}"></div>
+    <div><label>nach Kochen/Kühlung (°Brix)</label><input type="number" step="0.1" name="post_boil_brix" value="{{ batch.post_boil_brix if batch.post_boil_brix is not none else '' }}"></div>
+    <div><label>Menge nach Kochen (l)</label><input type="number" step="0.1" name="post_boil_volume_l" value="{{ batch.post_boil_volume_l if batch.post_boil_volume_l is not none else '' }}"></div>
+  </div>
+  <p class="hint">"nach Kochen/Kühlung" wird (durch den Korrekturfaktor aus den Einstellungen geteilt) als Stammwürze für IBU-, Ausbeute- und Alkoholberechnung verwendet, sobald ein Wert eingetragen ist - bis dahin gilt die geplante Stammwürze aus den Stammdaten.</p>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Speichern</button>
+    <a class="btn" href="/batches/{{ batch.id }}">Abbrechen</a>
+  </div>
+</form>
+{% endblock %}

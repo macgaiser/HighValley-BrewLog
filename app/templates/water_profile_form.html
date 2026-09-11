@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ "Wasserprofil bearbeiten" if profile else "Neues Wasserprofil" }} – HighValley BrewLog{% endblock %}
+{% block content %}
+<h1>{{ "Wasserprofil bearbeiten" if profile else "Neues Wasserprofil" }}</h1>
+<form class="card" method="post" action="{{ '/settings/water-profiles/%d'|format(profile.id) if profile else '/settings/water-profiles/new' }}">
+  <label>Name</label>
+  <input type="text" name="name" value="{{ profile.name if profile else '' }}" required>
+
+  <div class="field-row" style="margin-top: 0.8rem;">
+    <div><label>Calcium Ca²⁺ (ppm)</label><input type="number" step="0.1" name="calcium_ppm" value="{{ profile.calcium_ppm if profile and profile.calcium_ppm is not none else '' }}"></div>
+    <div><label>Magnesium Mg²⁺ (ppm)</label><input type="number" step="0.1" name="magnesium_ppm" value="{{ profile.magnesium_ppm if profile and profile.magnesium_ppm is not none else '' }}"></div>
+    <div><label>Natrium Na⁺ (ppm)</label><input type="number" step="0.1" name="sodium_ppm" value="{{ profile.sodium_ppm if profile and profile.sodium_ppm is not none else '' }}"></div>
+  </div>
+  <div class="field-row" style="margin-top: 0.8rem;">
+    <div><label>Sulfat SO₄²⁻ (ppm)</label><input type="number" step="0.1" name="sulfate_ppm" value="{{ profile.sulfate_ppm if profile and profile.sulfate_ppm is not none else '' }}"></div>
+    <div><label>Chlorid Cl⁻ (ppm)</label><input type="number" step="0.1" name="chloride_ppm" value="{{ profile.chloride_ppm if profile and profile.chloride_ppm is not none else '' }}"></div>
+    <div><label>Bicarbonat HCO₃⁻ (ppm)</label><input type="number" step="0.1" name="bicarbonate_ppm" value="{{ profile.bicarbonate_ppm if profile and profile.bicarbonate_ppm is not none else '' }}"></div>
+    <div><label>pH-Wert</label><input type="number" step="0.01" name="ph" value="{{ profile.ph if profile and profile.ph is not none else '' }}"></div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Speichern</button>
+    <a class="btn" href="/settings">Abbrechen</a>
+  </div>
+</form>
+{% if profile %}
+<form method="post" action="/settings/water-profiles/{{ profile.id }}/delete" onsubmit="return confirm('Wasserprofil \'{{ profile.name }}\' wirklich löschen? Sude, die es verwenden, verlieren nur die Zuordnung.')" style="margin-top: 1rem;">
+  <button class="btn btn-danger" type="submit">Profil löschen</button>
+</form>
+{% endif %}
+{% endblock %}

@@ -1,10 +1,11 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from sqlmodel import Session, select
 
 from app.batch_calc import compute_metrics, resolve_color_hex
+from app.beerxml import build_recipe_xml
 from app.database import get_session
 from app.inventory import sync_batch_deductions
 from app.models import (
@@ -26,11 +27,18 @@ from app.models import (
     Logo,
     MashStep,
     Settings,
+    WaterProfile,
     YeastAddition,
 )
 from app.templating import templates
 
 router = APIRouter(prefix="/batches", tags=["batches"])
+
+# Ab diesem Alter des Brautags wird "Lagerbuchung sperren" im Bearbeiten-
+# Formular vorausgewaehlt (aendert nichts an bereits gespeicherten Suden,
+# nur ein Vorschlag beim naechsten Oeffnen - wird erst mit dem Speichern
+# wirksam und laesst sich vorher jederzeit wieder abwaehlen).
+INVENTORY_LOCK_SUGGESTION_AGE_DAYS = 90
 
 MASH_STEP_NAMES = [
     "Einmaischen",
@@ -83,6 +91,7 @@ def _inventory_options(session: Session) -> dict[str, list[InventoryItem]]:
         "malz": [i for i in items if i.category == InventoryCategory.malz],
         "hopfen": [i for i in items if i.category == InventoryCategory.hopfen],
         "hefe": [i for i in items if i.category == InventoryCategory.hefe],
+        "sonstiges": [i for i in items if i.category == InventoryCategory.sonstiges],
     }
 
 
@@ -245,6 +254,7 @@ def batch_new_form(request: Request, session: Session = Depends(get_session)):
     next_number = (session.exec(select(Batch.batch_number).order_by(Batch.batch_number.desc())).first() or 0) + 1
     default_tasks = session.exec(select(DefaultBrewDayTask).order_by(DefaultBrewDayTask.position)).all()
     beer_styles = session.exec(select(BeerStyle).order_by(BeerStyle.position)).all()
+    water_profiles = session.exec(select(WaterProfile).order_by(WaterProfile.name)).all()
     return templates.TemplateResponse(
         "batch_form.html",
         {
@@ -256,6 +266,7 @@ def batch_new_form(request: Request, session: Session = Depends(get_session)):
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
             "beer_styles": beer_styles,
+            "water_profiles": water_profiles,
         },
     )
 
@@ -273,14 +284,16 @@ async def _apply_form_to_batch(batch: Batch, form, session: Session) -> None:
     batch.main_water_l = _f(form.get("main_water_l"))
     batch.sparge_water_l = _f(form.get("sparge_water_l"))
     batch.lactic_acid_80_ml = _f(form.get("lactic_acid_80_ml"))
+    water_profile_id = form.get("water_profile_id")
+    batch.water_profile_id = int(water_profile_id) if water_profile_id else None
     batch.boil_time_min = _f(form.get("boil_time_min"))
     batch.target_og_plato = _f(form.get("target_og_plato"))
-    batch.pre_lauter_brix = _f(form.get("pre_lauter_brix"))
-    batch.post_lauter_brix = _f(form.get("post_lauter_brix"))
-    batch.post_lauter_volume_l = _f(form.get("post_lauter_volume_l"))
-    batch.water_adjustment_l = _f(form.get("water_adjustment_l"))
-    batch.post_boil_brix = _f(form.get("post_boil_brix"))
-    batch.post_boil_volume_l = _f(form.get("post_boil_volume_l"))
+    # pre_lauter_brix/post_lauter_brix/post_lauter_volume_l/water_adjustment_l/
+    # post_boil_brix/post_boil_volume_l werden bewusst NICHT hier gesetzt -
+    # die werden über die eigenen Mess-Kacheln auf der Sud-Detailseite
+    # gepflegt (siehe /measurements/lautering und /measurements/boil unten),
+    # nicht über dieses Formular, damit ein Speichern hier ihre Werte nicht
+    # loescht.
     batch.updated_at = datetime.utcnow()
     session.add(batch)
     session.commit()
@@ -472,6 +485,64 @@ def batch_detail(batch_id: int, request: Request, session: Session = Depends(get
     )
 
 
+@router.get("/{batch_id}/measurements/lautering")
+def measurements_lautering_form(batch_id: int, request: Request, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    return templates.TemplateResponse(
+        "measurement_lautering_form.html",
+        {"request": request, "batch": batch},
+    )
+
+
+@router.post("/{batch_id}/measurements/lautering")
+async def measurements_lautering_update(batch_id: int, request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    batch = session.get(Batch, batch_id)
+    if batch:
+        batch.pre_lauter_brix = _f(form.get("pre_lauter_brix"))
+        batch.post_lauter_brix = _f(form.get("post_lauter_brix"))
+        batch.post_lauter_volume_l = _f(form.get("post_lauter_volume_l"))
+        session.add(batch)
+        session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
+
+
+@router.get("/{batch_id}/measurements/boil")
+def measurements_boil_form(batch_id: int, request: Request, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    return templates.TemplateResponse(
+        "measurement_boil_form.html",
+        {"request": request, "batch": batch},
+    )
+
+
+@router.post("/{batch_id}/measurements/boil")
+async def measurements_boil_update(batch_id: int, request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    batch = session.get(Batch, batch_id)
+    if batch:
+        batch.water_adjustment_l = _f(form.get("water_adjustment_l"))
+        batch.post_boil_brix = _f(form.get("post_boil_brix"))
+        batch.post_boil_volume_l = _f(form.get("post_boil_volume_l"))
+        session.add(batch)
+        session.commit()
+    return RedirectResponse(f"/batches/{batch_id}", status_code=303)
+
+
+@router.get("/{batch_id}/export/beerxml")
+def batch_export_beerxml(batch_id: int, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    settings = session.get(Settings, 1)
+    metrics = compute_metrics(batch, settings)
+    xml_str = build_recipe_xml(batch, settings, metrics)
+    filename = f"sud-{batch.batch_number}-{(batch.name or 'rezept').strip().replace(' ', '-')}.xml"
+    return Response(
+        content=xml_str,
+        media_type="application/xml",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @router.get("/{batch_id}/label")
 def batch_label(batch_id: int, request: Request, session: Session = Depends(get_session)):
     batch = session.get(Batch, batch_id)
@@ -550,6 +621,19 @@ def batch_label(batch_id: int, request: Request, session: Session = Depends(get_
 def batch_edit_form(batch_id: int, request: Request, session: Session = Depends(get_session)):
     batch = session.get(Batch, batch_id)
     beer_styles = session.exec(select(BeerStyle).order_by(BeerStyle.position)).all()
+    water_profiles = session.exec(select(WaterProfile).order_by(WaterProfile.name)).all()
+    # Nur ein Vorschlag fuers Formular, kein Automatismus in der DB: bei
+    # Suden mit altem Brautag, deren Lagerbuchung noch nicht gesperrt ist,
+    # ist die Checkbox beim Oeffnen des Formulars schon angehakt (siehe
+    # INVENTORY_LOCK_SUGGESTION_AGE_DAYS oben) - wirksam wird das erst,
+    # wenn tatsaechlich gespeichert wird, und laesst sich vorher jederzeit
+    # wieder abwaehlen.
+    suggest_inventory_lock = bool(
+        batch
+        and not batch.inventory_deduction_locked
+        and batch.brew_date
+        and batch.brew_date < date.today() - timedelta(days=INVENTORY_LOCK_SUGGESTION_AGE_DAYS)
+    )
     return templates.TemplateResponse(
         "batch_form.html",
         {
@@ -560,6 +644,8 @@ def batch_edit_form(batch_id: int, request: Request, session: Session = Depends(
             "inventory": _inventory_options(session),
             "hop_types": list(HopAdditionType),
             "beer_styles": beer_styles,
+            "water_profiles": water_profiles,
+            "suggest_inventory_lock": suggest_inventory_lock,
         },
     )
 
@@ -604,6 +690,7 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
         main_water_l=source.main_water_l,
         sparge_water_l=source.sparge_water_l,
         lactic_acid_80_ml=source.lactic_acid_80_ml,
+        water_profile_id=source.water_profile_id,
         boil_time_min=source.boil_time_min,
         target_og_plato=source.target_og_plato,
     )
@@ -682,16 +769,19 @@ def batch_copy(batch_id: int, session: Session = Depends(get_session)):
                 label=c.label,
             )
         )
-    # Zeitplan-Positionen werden übernommen, aber ohne Zeitwerte - die neuen
-    # Zeiten hängen vom tatsächlichen Ablauf des neuen Brautags ab.
-    for t in source.brew_day_tasks:
+    # Zeitplan wird nicht vom Quell-Sud uebernommen, sondern immer (wie bei
+    # "Neuer Sud") aus der Standard-Vorlage der Einstellungen neu befuellt -
+    # der individuelle Zeitplan eines Suds (Zeiten, Notizen) gehoert zu genau
+    # diesem Brautag und soll bei einer Kopie nicht mit uebernommen werden.
+    default_tasks = session.exec(select(DefaultBrewDayTask).order_by(DefaultBrewDayTask.position)).all()
+    for dt in default_tasks:
         session.add(
             BrewDayTask(
                 batch_id=copy.id,
-                position=t.position,
-                task_name=t.task_name,
-                planned_duration_min=None,
-                note=t.note,
+                position=dt.position,
+                task_name=dt.task_name,
+                planned_duration_min=dt.planned_duration_min,
+                note=dt.note,
             )
         )
     # Gärverlauf und Kommentare sind sud-spezifisch und werden bewusst nicht

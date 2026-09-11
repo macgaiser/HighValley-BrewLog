@@ -6,6 +6,7 @@
   <div class="actions">
     <a class="btn" href="/batches/{{ batch.id }}/edit">Bearbeiten</a>
     <a class="btn" href="/batches/{{ batch.id }}/label">Etikett drucken</a>
+    <a class="btn" href="/batches/{{ batch.id }}/export/beerxml">Als BeerXML exportieren</a>
     <form method="post" action="/batches/{{ batch.id }}/copy">
       <button class="btn" type="submit">Sud kopieren</button>
     </form>
@@ -46,6 +47,7 @@
       <tr><td>Hauptguss</td><td>{{ batch.main_water_l|fmt }} l</td></tr>
       <tr><td>Nachguss</td><td>{{ batch.sparge_water_l|fmt }} l</td></tr>
       <tr><td>Milchsäure 80%</td><td>{{ batch.lactic_acid_80_ml|fmt(0) }} ml</td></tr>
+      <tr><td>Wasserprofil</td><td>{{ batch.water_profile.name if batch.water_profile else "–" }}</td></tr>
     </table>
     </div>
   </section>
@@ -84,6 +86,23 @@
 </section>
 
 <section class="card">
+  <h2><span>Läuterung</span><img class="step-icon" src="/static/img/step-laeutern.png" alt=""></h2>
+  <div class="table-scroll">
+  <table class="mini-table">
+    <thead><tr><th>vor Läutern</th><th>nach Läutern</th><th>Menge nach Läutern</th></tr></thead>
+    <tbody>
+      <tr onclick="window.location='/batches/{{ batch.id }}/measurements/lautering'" class="clickable-row">
+        <td>{{ batch.pre_lauter_brix|fmt(1) }} °Brix</td>
+        <td>{{ batch.post_lauter_brix|fmt(1) }} °Brix</td>
+        <td>{{ batch.post_lauter_volume_l|fmt(1) }} l</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="hint">Auf die Zeile klicken, um die Werte zu bearbeiten.</p>
+</section>
+
+<section class="card">
   <h2><span>Würzekochen {% if batch.boil_time_min %}({{ batch.boil_time_min|fmt(0) }} min){% endif %}</span><img class="step-icon" src="/static/img/step-kochen.png" alt=""></h2>
   <div class="table-scroll">
   <table class="mini-table">
@@ -101,7 +120,31 @@
     <tr><td colspan="6">–</td></tr>
     {% endfor %}
   </table>
+  <table class="mini-table">
+    <tbody>
+      <tr onclick="window.location='/batches/{{ batch.id }}/measurements/boil'" class="clickable-row">
+        <td>Wasserausgleich</td><td>{{ batch.water_adjustment_l|fmt(1) }} l</td>
+      </tr>
+    </tbody>
+  </table>
   </div>
+  <p class="hint">Auf die Zeile klicken, um den Wert zu bearbeiten.</p>
+</section>
+
+<section class="card">
+  <h2>Stammdaten Erfassung</h2>
+  <div class="table-scroll">
+  <table class="mini-table">
+    <thead><tr><th>Stammwürze</th><th>Finale Menge</th></tr></thead>
+    <tbody>
+      <tr onclick="window.location='/batches/{{ batch.id }}/measurements/boil'" class="clickable-row">
+        <td>{{ batch.post_boil_brix|fmt(1) }} °Brix</td>
+        <td>{{ batch.post_boil_volume_l|fmt(1) }} l</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="hint">Auf die Zeile klicken, um die Werte zu bearbeiten. Die gemessene Stammwürze ersetzt die geplante Stammwürze für alle Berechnungen, sobald ein Wert eingetragen ist.</p>
 </section>
 
 <div class="grid-2">
