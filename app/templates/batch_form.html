@@ -6,7 +6,7 @@
 <select name="{{ row_name }}" {% if list_name=='malz' %}data-grain-select{% endif %}>
   <option value="">– kein Lagerartikel –</option>
   {% for opt in options %}
-  <option value="{{ opt.id }}" data-ebc="{{ opt.color_ebc if opt.color_ebc is not none else '' }}" {% if selected_id==opt.id %}selected{% endif %}>{{ opt.name }} ({{ opt.amount|round(2) }} {{ opt.unit }})</option>
+  <option value="{{ opt.id }}" data-ebc="{{ opt.color_ebc if opt.color_ebc is not none else '' }}" data-alpha="{{ opt.spec if opt.spec else '' }}" {% if selected_id==opt.id %}selected{% endif %}>{{ opt.name }} ({{ opt.amount|round(2) }} {{ opt.unit }})</option>
   {% endfor %}
   {% if misc_options %}
   <optgroup label="Sonstige Zutaten">

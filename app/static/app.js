@@ -9,6 +9,22 @@ document.addEventListener("click", (event) => {
   if (target) target.hidden = !target.hidden;
 });
 
+// Würzekochen: Alpha (%) wird beim Auswählen eines Lagerartikels einmalig
+// aus dessen hinterlegter Alphasäure übernommen - nur in dem Moment der
+// Auswahl, keine dauerhafte Bindung. Manuelle Änderungen danach bleiben
+// unangetastet, und spätere Änderungen am Lagerartikel wirken sich nicht
+// rückwirkend auf bereits gespeicherte Suden aus (der Wert landet als
+// eigenstaendiger Schnappschuss in HopAddition.alpha_acid_percent).
+document.addEventListener("change", (event) => {
+  const select = event.target.closest('select[name="hop_inventory_id"]');
+  if (!select) return;
+  const opt = select.options[select.selectedIndex];
+  const alpha = opt ? opt.dataset.alpha : "";
+  if (!alpha) return;
+  const alphaInput = select.closest("tr").querySelector('input[name="hop_alpha"]');
+  if (alphaInput) alphaInput.value = alpha;
+});
+
 // Generische Zeilen-Verwaltung für die dynamischen Tabellen im Sud-Formular.
 // Jede Sektion hat: ein <tbody data-rows="NAME">, ein <template data-row-template="NAME">
 // und einen Button [data-add-row="NAME"].

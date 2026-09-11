@@ -17,8 +17,8 @@
   <input type="text" name="brand" value="{{ item.brand if item else '' }}">
 
   <div id="inv-field-spec">
-    <label>Alphasäure</label>
-    <input type="text" name="spec" value="{{ item.spec if item else '' }}">
+    <label>Alphasäure (%)</label>
+    <input type="number" step="0.1" name="spec" value="{{ item.spec if item else '' }}">
   </div>
 
   <div id="inv-field-color-ebc">

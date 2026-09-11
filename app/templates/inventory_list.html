@@ -12,13 +12,13 @@
   <h2>{{ labels[cat] }}</h2>
   <div class="table-scroll">
   <table class="table">
-    <thead><tr><th>Name</th><th>Marke</th><th>{% if cat == "hopfen" %}Alphasäure{% elif cat == "malz" %}Farbe (EBC){% endif %}</th><th>Bestand</th><th>Zubuchen / Korrektur</th><th></th></tr></thead>
+    <thead><tr><th>Name</th><th>Marke</th><th>{% if cat == "hopfen" %}Alphasäure (%){% elif cat == "malz" %}Farbe (EBC){% endif %}</th><th>Bestand</th><th>Zubuchen / Korrektur</th><th></th></tr></thead>
     <tbody>
       {% for item in items %}
       <tr onclick="window.location='/inventory/{{ item.id }}'" class="clickable-row">
         <td>{{ item.name }}</td>
         <td>{{ item.brand }}</td>
-        <td>{% if cat == "hopfen" %}{{ item.spec }}{% endif %}{% if cat == "malz" and item.color_ebc %}{{ item.color_ebc|fmt(1) }} EBC{% endif %}</td>
+        <td>{% if cat == "hopfen" and item.spec %}{{ item.spec }} %{% endif %}{% if cat == "malz" and item.color_ebc %}{{ item.color_ebc|fmt(1) }} EBC{% endif %}</td>
         <td class="inv-amount {% if item.amount <= 0 %}inv-low{% endif %}">{{ item.amount|round(2) }} {{ item.unit }}</td>
         <td>
           <form class="inline-form" method="post" action="/inventory/{{ item.id }}/restock" onclick="event.stopPropagation()">
