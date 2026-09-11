@@ -99,6 +99,23 @@ class BackgroundImage(SQLModel, table=True):
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class WaterProfile(SQLModel, table=True):
+    """Ein Brauwasser-Mineralprofil (z.B. "Weiches Wasser"/"Hartes Wasser"),
+    unter Einstellungen verwaltet und pro Sud auswählbar. Rein informativ -
+    fließt aktuell in keine Berechnung ein, dient aber als Dokumentation der
+    Wasseraufbereitung (u.a. für den BeerXML-Export)."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    calcium_ppm: Optional[float] = None
+    magnesium_ppm: Optional[float] = None
+    sodium_ppm: Optional[float] = None
+    sulfate_ppm: Optional[float] = None
+    chloride_ppm: Optional[float] = None
+    bicarbonate_ppm: Optional[float] = None
+    ph: Optional[float] = None
+
+
 class DefaultBrewDayTask(SQLModel, table=True):
     """Vorlage-Position für den Brautag-Zeitplan, die bei einem neuen Sud
     automatisch vorbelegt wird (editierbar unter Einstellungen)."""
@@ -142,6 +159,7 @@ class Batch(SQLModel, table=True):
     main_water_l: Optional[float] = None
     sparge_water_l: Optional[float] = None
     lactic_acid_80_ml: Optional[float] = None
+    water_profile_id: Optional[int] = Field(default=None, foreign_key="waterprofile.id")
 
     boil_time_min: Optional[float] = None
 
@@ -197,6 +215,7 @@ class Batch(SQLModel, table=True):
         back_populates="batch", sa_relationship_kwargs={"cascade": "all, delete-orphan", "order_by": "BatchComment.position"}
     )
     inventory_transactions: List["InventoryTransaction"] = Relationship(back_populates="batch")
+    water_profile: Optional["WaterProfile"] = Relationship()
 
 
 class GrainAddition(SQLModel, table=True):

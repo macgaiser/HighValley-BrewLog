@@ -206,6 +206,18 @@
   </section>
 </form>
 
+<section class="card">
+  <div class="section-title-row"><h2>Wasserprofile</h2><a class="btn btn-small" href="/settings/water-profiles/new">+ Neues Profil</a></div>
+  <p class="hint">Brauwasser-Mineralprofile, beim Anlegen/Bearbeiten eines Suds auswählbar. Auf ein Profil klicken, um es anzusehen oder zu bearbeiten.</p>
+  <div class="actions">
+    {% for wp in water_profiles %}
+    <a class="btn" href="/settings/water-profiles/{{ wp.id }}">{{ wp.name }}</a>
+    {% else %}
+    <p class="hint">Noch keine Wasserprofile angelegt.</p>
+    {% endfor %}
+  </div>
+</section>
+
 <form method="post" action="/settings/brew-day-tasks">
   <section class="card">
     <div class="section-title-row"><h2>Standard Brautag-Zeitplan</h2><button class="btn btn-small" data-add-row="task">+ Zeile</button></div>

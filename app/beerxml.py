@@ -123,6 +123,22 @@ def build_recipe_xml(batch: Batch, settings: Settings, metrics: BatchMetrics) ->
         if notes:
             _sub(el, "NOTES", notes)
 
+    if batch.water_profile:
+        wp = batch.water_profile
+        waters = ET.SubElement(recipe, "WATERS")
+        el = ET.SubElement(waters, "WATER")
+        _sub(el, "NAME", wp.name)
+        _sub(el, "VERSION", 1)
+        _sub(el, "AMOUNT", round((batch.main_water_l or 0) + (batch.sparge_water_l or 0), 2))
+        _sub(el, "CALCIUM", wp.calcium_ppm or 0)
+        _sub(el, "BICARBONATE", wp.bicarbonate_ppm or 0)
+        _sub(el, "SULFATE", wp.sulfate_ppm or 0)
+        _sub(el, "CHLORIDE", wp.chloride_ppm or 0)
+        _sub(el, "SODIUM", wp.sodium_ppm or 0)
+        _sub(el, "MAGNESIUM", wp.magnesium_ppm or 0)
+        if wp.ph:
+            _sub(el, "PH", wp.ph)
+
     mash = ET.SubElement(recipe, "MASH")
     _sub(mash, "NAME", "Maischplan")
     _sub(mash, "VERSION", 1)

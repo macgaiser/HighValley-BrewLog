@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
 
 from app.database import BACKGROUND_IMAGE_DIR, BORDER_GRAPHIC_DIR, LOGO_DIR, get_session
-from app.models import BackgroundImage, BeerStyle, BorderGraphic, DefaultBrewDayTask, Logo, Settings
+from app.models import Batch, BackgroundImage, BeerStyle, BorderGraphic, DefaultBrewDayTask, Logo, Settings, WaterProfile
 from app.templating import templates
 
 router = APIRouter(prefix="/settings", tags=["settings"])
@@ -39,6 +39,7 @@ def settings_form(request: Request, session: Session = Depends(get_session)):
     beer_styles = session.exec(select(BeerStyle).order_by(BeerStyle.position)).all()
     border_graphics = session.exec(select(BorderGraphic).order_by(BorderGraphic.uploaded_at.desc())).all()
     background_images = session.exec(select(BackgroundImage).order_by(BackgroundImage.uploaded_at.desc())).all()
+    water_profiles = session.exec(select(WaterProfile).order_by(WaterProfile.name)).all()
     return templates.TemplateResponse(
         "settings.html",
         {
@@ -49,6 +50,7 @@ def settings_form(request: Request, session: Session = Depends(get_session)):
             "beer_styles": beer_styles,
             "border_graphics": border_graphics,
             "background_images": background_images,
+            "water_profiles": water_profiles,
         },
     )
 
@@ -257,6 +259,69 @@ def settings_background_image_reset(session: Session = Depends(get_session)):
     session.add(s)
     session.commit()
     return RedirectResponse("/settings", status_code=303)
+
+
+@router.get("/water-profiles/new")
+def water_profile_new_form(request: Request):
+    return templates.TemplateResponse(
+        "water_profile_form.html",
+        {"request": request, "profile": None},
+    )
+
+
+@router.post("/water-profiles/new")
+async def water_profile_create(request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    profile = WaterProfile(name=form.get("name", "").strip() or "Neues Profil")
+    _apply_water_profile_form(profile, form)
+    session.add(profile)
+    session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.get("/water-profiles/{profile_id}")
+def water_profile_edit_form(profile_id: int, request: Request, session: Session = Depends(get_session)):
+    profile = session.get(WaterProfile, profile_id)
+    return templates.TemplateResponse(
+        "water_profile_form.html",
+        {"request": request, "profile": profile},
+    )
+
+
+@router.post("/water-profiles/{profile_id}")
+async def water_profile_update(profile_id: int, request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    profile = session.get(WaterProfile, profile_id)
+    if profile:
+        profile.name = form.get("name", "").strip() or profile.name
+        _apply_water_profile_form(profile, form)
+        session.add(profile)
+        session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+@router.post("/water-profiles/{profile_id}/delete")
+def water_profile_delete(profile_id: int, session: Session = Depends(get_session)):
+    profile = session.get(WaterProfile, profile_id)
+    if profile:
+        # Sude, die dieses Profil verwenden, verlieren nur die Zuordnung -
+        # ihre sonstigen Daten bleiben unangetastet.
+        for batch in session.exec(select(Batch).where(Batch.water_profile_id == profile_id)).all():
+            batch.water_profile_id = None
+            session.add(batch)
+        session.delete(profile)
+        session.commit()
+    return RedirectResponse("/settings", status_code=303)
+
+
+def _apply_water_profile_form(profile: WaterProfile, form) -> None:
+    profile.calcium_ppm = _f(form.get("calcium_ppm"))
+    profile.magnesium_ppm = _f(form.get("magnesium_ppm"))
+    profile.sodium_ppm = _f(form.get("sodium_ppm"))
+    profile.sulfate_ppm = _f(form.get("sulfate_ppm"))
+    profile.chloride_ppm = _f(form.get("chloride_ppm"))
+    profile.bicarbonate_ppm = _f(form.get("bicarbonate_ppm"))
+    profile.ph = _f(form.get("ph"))
 
 
 @router.post("/brew-day-tasks")
