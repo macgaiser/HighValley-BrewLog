@@ -1,10 +1,11 @@
 from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from sqlmodel import Session, select
 
 from app.batch_calc import compute_metrics, resolve_color_hex
+from app.beerxml import build_recipe_xml
 from app.database import get_session
 from app.inventory import sync_batch_deductions
 from app.models import (
@@ -475,6 +476,20 @@ def batch_detail(batch_id: int, request: Request, session: Session = Depends(get
     return templates.TemplateResponse(
         "batch_detail.html",
         {"request": request, "batch": batch, "m": metrics, "today": date.today().isoformat()},
+    )
+
+
+@router.get("/{batch_id}/export/beerxml")
+def batch_export_beerxml(batch_id: int, session: Session = Depends(get_session)):
+    batch = session.get(Batch, batch_id)
+    settings = session.get(Settings, 1)
+    metrics = compute_metrics(batch, settings)
+    xml_str = build_recipe_xml(batch, settings, metrics)
+    filename = f"sud-{batch.batch_number}-{(batch.name or 'rezept').strip().replace(' ', '-')}.xml"
+    return Response(
+        content=xml_str,
+        media_type="application/xml",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
