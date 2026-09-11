@@ -167,6 +167,7 @@ def batch_list(
     color_hex: dict[int, str] = {}
     ibu_display: dict[int, float] = {}
     abv_display: dict[int, str] = {}
+    abv_percent: dict[int, float] = {}
     for b in batches:
         if b.post_boil_brix:
             og_display[b.id] = round(b.post_boil_brix / settings.wort_correction_factor, 1)
@@ -180,6 +181,8 @@ def batch_list(
             ibu_display[b.id] = metrics.ibu_total
         if metrics.abv_display:
             abv_display[b.id] = metrics.abv_display
+        if metrics.abv_percent is not None:
+            abv_percent[b.id] = metrics.abv_percent
 
     return templates.TemplateResponse(
         "batch_list.html",
@@ -194,6 +197,7 @@ def batch_list(
             "color_hex": color_hex,
             "ibu_display": ibu_display,
             "abv_display": abv_display,
+            "abv_percent": abv_percent,
         },
     )
 

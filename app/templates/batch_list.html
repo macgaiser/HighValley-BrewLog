@@ -81,7 +81,7 @@
       <td>{{ og_display.get(b.id, "–") }} °P</td>
       <td>{{ ibu_display.get(b.id)|fmt(0) if ibu_display.get(b.id) is not none else "–" }}</td>
       <td>{% if color_hex.get(b.id) %}<svg class="beer-color-icon" viewBox="0 0 28 28" style="--icon-2: {{ color_hex.get(b.id) }}"><use href="#icon-stein"/></svg>{% endif %}</td>
-      <td>{{ abv_display.get(b.id, "–") }}</td>
+      <td>{% if b.id in abv_percent %}{{ abv_percent[b.id]|fmt(1) }}<br>Vol.-%{% else %}{{ abv_display.get(b.id, "–") }}{% endif %}</td>
       <td class="compare-select-cell" onclick="event.stopPropagation()"><input type="checkbox" name="ids" value="{{ b.id }}" form="compare-form" data-compare-checkbox aria-label="Sud #{{ b.batch_number }} zum Vergleich auswählen"></td>
       <td class="col-actions"><a class="btn btn-small btn-icon" href="/batches/{{ b.id }}/edit" onclick="event.stopPropagation()" title="Bearbeiten" aria-label="Sud #{{ b.batch_number }} bearbeiten"><svg viewBox="0 0 28 28"><use href="#icon-edit"/></svg></a></td>
     </tr>
