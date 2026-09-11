@@ -3,10 +3,10 @@
 {% block content %}
 
 {% macro inv_select(list_name, options, selected_id, row_name, misc_options=None) %}
-<select name="{{ row_name }}">
+<select name="{{ row_name }}" {% if list_name=='malz' %}data-grain-select{% endif %}>
   <option value="">– kein Lagerartikel –</option>
   {% for opt in options %}
-  <option value="{{ opt.id }}" {% if selected_id==opt.id %}selected{% endif %}>{{ opt.name }} ({{ opt.amount|round(2) }} {{ opt.unit }})</option>
+  <option value="{{ opt.id }}" data-ebc="{{ opt.color_ebc if opt.color_ebc is not none else '' }}" {% if selected_id==opt.id %}selected{% endif %}>{{ opt.name }} ({{ opt.amount|round(2) }} {{ opt.unit }})</option>
   {% endfor %}
   {% if misc_options %}
   <optgroup label="Sonstige Zutaten">
@@ -53,7 +53,11 @@
     </div>
     <div class="field-row" style="margin-top: 0.8rem;">
       <div><label>Ausschlagwürze (l)</label><input type="number" step="0.1" name="target_volume_l" value="{{ batch.target_volume_l if batch else '' }}"></div>
-      <div><label>Farbe (EBC)</label><input type="number" step="0.1" name="color_ebc" value="{{ batch.color_ebc if batch else '' }}"></div>
+      <div>
+        <label>Farbe (EBC)</label>
+        <input type="number" step="0.1" name="color_ebc" id="color-ebc-input" value="{{ batch.color_ebc if batch else '' }}">
+        <p class="hint" id="color-ebc-auto-hint" hidden>Wird automatisch aus der Schüttung berechnet (alle Positionen sind mit einem Malz-Lagerartikel mit hinterlegter Eigenfarbe verknüpft) - diese manuelle Eingabe wird dafür nicht verwendet.</p>
+      </div>
       <div><label>Kochzeit (min)</label><input type="number" step="1" name="boil_time_min" value="{{ batch.boil_time_min if batch else '' }}"></div>
       <div><label>Geplante Stammwürze (°Plato)</label><input type="number" step="0.1" name="target_og_plato" value="{{ batch.target_og_plato if batch else '' }}"></div>
     </div>

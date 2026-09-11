@@ -13,6 +13,7 @@ document.addEventListener("click", (event) => {
       const clone = template.content.cloneNode(true);
       tbody.appendChild(clone);
     }
+    updateColorEbcAutoState();
     return;
   }
 
@@ -20,6 +21,7 @@ document.addEventListener("click", (event) => {
   if (removeBtn) {
     event.preventDefault();
     removeBtn.closest("tr").remove();
+    updateColorEbcAutoState();
     return;
   }
 
@@ -78,6 +80,30 @@ document.addEventListener("change", (event) => {
   updateCompareButton();
 });
 updateCompareButton();
+
+// Farbe (EBC) in Stammdaten: wird ausgegraut/schreibgeschuetzt, sobald die
+// automatische Berechnung aus der Schüttung greift (jede Position mit einem
+// Malz-Lagerartikel mit hinterlegter Eigenfarbe verknuepft - siehe dieselbe
+// Bedingung in batch_calc.compute_metrics()). Verhindert, dass man aus
+// Gewohnheit schon vor dem Ausfuellen der Schüttung (weiter unten im
+// Formular) einen EBC-Wert eintraegt, der dann ungenutzt bleibt.
+function updateColorEbcAutoState() {
+  const input = document.getElementById("color-ebc-input");
+  const hint = document.getElementById("color-ebc-auto-hint");
+  if (!input || !hint) return;
+  const linked = Array.from(document.querySelectorAll("[data-grain-select]")).map((select) => {
+    if (!select.value) return false;
+    const opt = select.options[select.selectedIndex];
+    return !!(opt && opt.dataset.ebc);
+  });
+  const auto = linked.length > 0 && linked.every(Boolean);
+  input.readOnly = auto;
+  hint.hidden = !auto;
+}
+document.addEventListener("change", (event) => {
+  if (event.target.closest("[data-grain-select]")) updateColorEbcAutoState();
+});
+updateColorEbcAutoState();
 
 // Datumsfelder zeigen ihr Format sonst je nach Browser-/Systemsprache an
 // (z.B. mm/dd/yyyy) statt einheitlich dd.mm.yyyy - flatpickr übernimmt die
