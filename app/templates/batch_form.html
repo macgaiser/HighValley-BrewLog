@@ -56,7 +56,7 @@
       <div>
         <label>Farbe (EBC) <button type="button" class="info-btn" id="color-ebc-info-btn" data-info-toggle="color-ebc-auto-hint" hidden title="Info anzeigen" aria-label="Info anzeigen">i</button></label>
         <input type="number" step="0.1" name="color_ebc" id="color-ebc-input" value="{{ batch.color_ebc if batch else '' }}">
-        <p class="hint" id="color-ebc-auto-hint" hidden>Wird automatisch aus der Schüttung berechnet (alle Positionen sind mit einem Malz-Lagerartikel mit hinterlegter Eigenfarbe verknüpft) - diese manuelle Eingabe wird dafür nicht verwendet.</p>
+        <p class="hint info-popover" id="color-ebc-auto-hint" hidden>Wird automatisch aus der Schüttung berechnet (alle Positionen sind mit einem Malz-Lagerartikel mit hinterlegter Eigenfarbe verknüpft) - diese manuelle Eingabe wird dafür nicht verwendet.</p>
       </div>
       <div><label>Kochzeit (min)</label><input type="number" step="1" name="boil_time_min" value="{{ batch.boil_time_min if batch else '' }}"></div>
       <div>
@@ -64,7 +64,7 @@
         <input type="number" step="0.1" name="target_og_plato" value="{{ batch.target_og_plato if batch else '' }}">
       </div>
     </div>
-    <p class="hint" id="target-og-hint" hidden>Die geplante Stammwürze gilt als "Stammwürze" in der Sud-Übersicht, bis auf der Sud-Seite unter "Nach dem Kochen" ein gemessener Wert eingetragen ist - der ersetzt sie dann automatisch.</p>
+    <p class="hint info-popover" id="target-og-hint" hidden>Die geplante Stammwürze gilt als "Stammwürze" in der Sud-Übersicht, bis auf der Sud-Seite unter "Nach dem Kochen" ein gemessener Wert eingetragen ist - der ersetzt sie dann automatisch.</p>
     <label class="field-checkbox">
       <input type="checkbox" name="inventory_deduction_locked" {% if batch and (batch.inventory_deduction_locked or suggest_inventory_lock) %}checked{% endif %}>
       Lagerbuchung für diesen Sud sperren (keine automatische Ab-/Rückbuchung beim Speichern – für historische, bereits abgeschlossene Sude)

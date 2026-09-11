@@ -1,12 +1,42 @@
 // Generische Info-Buttons: ein <button class="info-btn" data-info-toggle="ID">i</button>
-// blendet den Hinweistext im Element mit dieser ID ein/aus, statt ihn
-// dauerhaft anzuzeigen - fuer laengere Erklaerungen, die nicht staendig im
-// Weg stehen sollen, aber bei Bedarf griffbereit sind.
+// oeffnet den Hinweistext mit dieser ID als schwebendes Popup in der Naehe
+// des Buttons (position:fixed, ueber getBoundingClientRect platziert), statt
+// ihn im Fliesstext einzublenden - fuer laengere Erklaerungen, die nicht
+// staendig im Weg stehen sollen, aber bei Bedarf griffbereit sind. Es ist
+// immer nur ein Popup gleichzeitig offen; Klick auf einen anderen Info-
+// Button, in ein Feld oder sonst irgendwohin schliesst das offene wieder.
+function closeInfoPopovers() {
+  document.querySelectorAll(".info-popover:not([hidden])").forEach((el) => {
+    el.hidden = true;
+  });
+}
+function positionInfoPopover(btn, popover) {
+  const rect = btn.getBoundingClientRect();
+  popover.style.left = "0px";
+  popover.style.top = "0px";
+  popover.hidden = false;
+  const popRect = popover.getBoundingClientRect();
+  let left = rect.left;
+  const maxLeft = window.innerWidth - popRect.width - 8;
+  if (left > maxLeft) left = Math.max(8, maxLeft);
+  let top = rect.bottom + 6;
+  const maxTop = window.innerHeight - popRect.height - 8;
+  if (top > maxTop) top = Math.max(8, rect.top - popRect.height - 6);
+  popover.style.left = `${left}px`;
+  popover.style.top = `${top}px`;
+}
 document.addEventListener("click", (event) => {
   const infoBtn = event.target.closest("[data-info-toggle]");
-  if (!infoBtn) return;
-  const target = document.getElementById(infoBtn.getAttribute("data-info-toggle"));
-  if (target) target.hidden = !target.hidden;
+  if (infoBtn) {
+    const target = document.getElementById(infoBtn.getAttribute("data-info-toggle"));
+    if (!target) return;
+    const wasOpen = !target.hidden;
+    closeInfoPopovers();
+    if (!wasOpen) positionInfoPopover(infoBtn, target);
+    event.stopPropagation();
+    return;
+  }
+  if (!event.target.closest(".info-popover")) closeInfoPopovers();
 });
 
 // Würzekochen: Alpha (%) wird beim Auswählen eines Lagerartikels einmalig

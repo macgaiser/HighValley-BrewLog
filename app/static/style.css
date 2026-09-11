@@ -84,6 +84,17 @@ input[readonly] {
 .info-btn:hover {
   background: var(--border);
 }
+.info-popover {
+  position: fixed;
+  z-index: 80;
+  max-width: min(280px, calc(100vw - 16px));
+  margin: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  padding: 0.6rem 0.8rem;
+}
 body::before {
   content: "";
   position: fixed;
